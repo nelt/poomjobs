@@ -15,7 +15,9 @@
     <modules>
         <module>poomjobs-parent</module>
         <module>poomjobs-apis</module>
+        <module>poomjobs-api-tests</module>
         <module>poomjobs-test-utils</module>
+        <module>poomjobs-in-memory</module>
     </modules>
 
     <build>

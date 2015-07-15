@@ -12,6 +12,13 @@
         <relativePath>../poomjobs-parent</relativePath>
     </parent>
 
-    <artifactId>poomjobs-apis</artifactId>
+    <artifactId>poomjobs-in-memory</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.codingmatters.poomjobs</groupId>
+            <artifactId>poomjobs-apis</artifactId>
+        </dependency>
+    </dependencies>
     
 </project>
