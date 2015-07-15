@@ -1,16 +1,15 @@
 package org.codingmatters.poomjobs.apis.queue;
 
+import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
+import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
-import org.codingmatters.poomjobs.apis.queue.JobQueueService;
-import org.codingmatters.poomjobs.apis.queue.JobSubmission;
-import org.codingmatters.poomjobs.engine.EngineConfiguration;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 
 import static java.time.LocalDateTime.now;
-import static org.codingmatters.poomjobs.apis.Configuration.defaults;
 import static org.codingmatters.poomjobs.test.utils.Helpers.array;
 import static org.codingmatters.poomjobs.test.utils.TimeMatchers.near;
 import static org.hamcrest.Matchers.is;
@@ -18,15 +17,18 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 /**
- * Created by nel on 09/07/15.
+ * Created by nel on 15/07/15.
  */
-public class JobQueueServiceSubmissionTest {
+public abstract class JobQueueServiceSubmissionAcceptanceTest {
+
+    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
+    protected abstract Long getExpectedDefaultRetentionDelay();
 
     private JobQueueService service;
 
     @Before
     public void setUp() throws Exception {
-        this.service = PoorMansJob.queue(defaults("test").config());
+        this.service = PoorMansJob.queue(getQueueServiceConfig());
     }
 
     @Test
@@ -54,7 +56,8 @@ public class JobQueueServiceSubmissionTest {
                         .submission()
         );
 
-        assertThat(job.getRetentionDelay(), is(EngineConfiguration.defaults().config().getDefaultRetentionDelay()));
+        assertThat(job.getRetentionDelay(), is(this.getExpectedDefaultRetentionDelay()));
     }
+
 
 }

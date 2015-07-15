@@ -1,6 +1,8 @@
 package org.codingmatters.poomjobs.apis.list;
 
+import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
+import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 import org.codingmatters.poomjobs.apis.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.queue.JobSubmission;
 import org.junit.Before;
@@ -8,23 +10,25 @@ import org.junit.Test;
 
 import java.util.UUID;
 
-import static org.codingmatters.poomjobs.apis.Configuration.defaults;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 /**
- * Created by nel on 06/07/15.
+ * Created by nel on 15/07/15.
  */
-public class JobListServiceTest {
+public abstract class JobListServiceAcceptanceTest {
+    protected abstract Configuration getListServiceConfig() throws ServiceFactoryException;
+    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
+
 
     private JobQueueService queue;
     private JobListService service;
 
     @Before
     public void setUp() throws Exception {
-        this.queue = PoorMansJob.queue(defaults("test").config());
-        this.service = PoorMansJob.list(defaults("test").config());
+        this.queue = PoorMansJob.queue(getQueueServiceConfig());
+        this.service = PoorMansJob.list(getListServiceConfig());
     }
 
 
