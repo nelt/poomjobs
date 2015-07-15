@@ -1,9 +1,9 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.inmemory.jobs;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
-import org.codingmatters.poomjobs.apis.list.JobList;
-import org.codingmatters.poomjobs.apis.list.exception.JobListException;
+import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.jobs.exception.JobListException;
 
 import java.util.Collection;
 import java.util.LinkedList;

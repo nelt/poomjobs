@@ -1,20 +1,41 @@
 package org.codingmatters.poomjobs.engine.inmemory;
 
-import org.codingmatters.poomjobs.apis.jobs.*;
-import org.codingmatters.poomjobs.apis.list.*;
 import org.codingmatters.poomjobs.apis.Configuration;
+import org.codingmatters.poomjobs.apis.jobs.Job;
+import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
+import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.jobs.JobOperation;
+import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.list.JobListService;
+import org.codingmatters.poomjobs.apis.queue.JobQueueService;
+import org.codingmatters.poomjobs.apis.queue.JobSubmission;
+import org.codingmatters.poomjobs.apis.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
+import org.codingmatters.poomjobs.engine.inmemory.store.InMemoryJobStore;
 
+import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.UUID;
 
 import static org.codingmatters.poomjobs.apis.jobs.JobBuilders.from;
-import static org.codingmatters.poomjobs.apis.jobs.JobStatus.*;
+import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobListService {
+public class InMemoryEngine implements JobQueueService, JobListService {
+
+    static final HashMap<String, WeakReference<InMemoryEngine>> engines = new HashMap<>();
+
+    public static InMemoryEngine getEngine(Configuration config) {
+        synchronized (engines) {
+            if (!engines.containsKey(config.getUrl()) || engines.get(config.getUrl()).get() == null) {
+                engines.put(config.getUrl(), new WeakReference<>(new InMemoryEngine(config)));
+            }
+            return engines.get(config.getUrl()).get();
+        }
+    }
 
     public interface Options {
         String ENGINE_CONFIGURATION = "enngine.configuration";

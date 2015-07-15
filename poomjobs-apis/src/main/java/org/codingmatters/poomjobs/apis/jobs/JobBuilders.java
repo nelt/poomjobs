@@ -1,10 +1,9 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.list.JobSubmission;
+import org.codingmatters.poomjobs.apis.queue.JobSubmission;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.UUID;
 
 /**

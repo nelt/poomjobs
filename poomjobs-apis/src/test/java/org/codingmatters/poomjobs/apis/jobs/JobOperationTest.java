@@ -1,6 +1,6 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.list.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
 import org.junit.Test;
 
 import static java.time.LocalDateTime.now;

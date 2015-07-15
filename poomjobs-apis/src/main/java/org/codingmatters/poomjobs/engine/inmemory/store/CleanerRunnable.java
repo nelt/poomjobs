@@ -1,9 +1,6 @@
-package org.codingmatters.poomjobs.engine.inmemory.thread;
-
-import org.codingmatters.poomjobs.engine.inmemory.InMemoryJobStore;
+package org.codingmatters.poomjobs.engine.inmemory.store;
 
 import java.lang.ref.WeakReference;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by nel on 12/07/15.

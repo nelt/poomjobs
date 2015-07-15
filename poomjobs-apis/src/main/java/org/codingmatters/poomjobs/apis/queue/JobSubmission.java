@@ -1,6 +1,4 @@
-package org.codingmatters.poomjobs.apis.list;
-
-import java.util.UUID;
+package org.codingmatters.poomjobs.apis.queue;
 
 /**
  * Created by nel on 06/07/15.

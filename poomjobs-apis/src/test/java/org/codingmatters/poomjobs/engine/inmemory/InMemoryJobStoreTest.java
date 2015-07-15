@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.inmemory;
 
+import org.codingmatters.poomjobs.engine.inmemory.store.InMemoryJobStore;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
@@ -14,7 +15,7 @@ import static org.junit.Assert.*;
 public class InMemoryJobStoreTest {
 
     @Test
-    public void testRunningThreads() throws Exception {
+    public void testInMemoryJobStoreCleanerRemovedOnGC() throws Exception {
         InMemoryJobStore store = new InMemoryJobStore();
         String cleanerThreadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.startCleanerThread();
@@ -26,6 +27,7 @@ public class InMemoryJobStoreTest {
         assertThat(this.namedThreadIsRunning(cleanerThreadName), is(false));
     }
 
+
     private boolean namedThreadIsRunning(String name) {
         ThreadInfo[] tis = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
         for (ThreadInfo ti : tis) {
@@ -36,10 +38,4 @@ public class InMemoryJobStoreTest {
         return false;
     }
 
-    private void printThreadNames() {
-        ThreadInfo[] tis = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
-        for (ThreadInfo ti : tis) {
-            System.out.println(ti.getThreadName());
-        }
-    }
 }

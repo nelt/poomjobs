@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.apis.list.exception;
+package org.codingmatters.poomjobs.apis.jobs.exception;
 
 /**
  * Created by nel on 09/07/15.

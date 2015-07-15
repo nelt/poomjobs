@@ -1,8 +1,7 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.list.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 

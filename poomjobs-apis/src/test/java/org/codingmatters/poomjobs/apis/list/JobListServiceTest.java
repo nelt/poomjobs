@@ -1,6 +1,8 @@
 package org.codingmatters.poomjobs.apis.list;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
+import org.codingmatters.poomjobs.apis.queue.JobQueueService;
+import org.codingmatters.poomjobs.apis.queue.JobSubmission;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -16,11 +18,13 @@ import static org.junit.Assert.assertThat;
  */
 public class JobListServiceTest {
 
+    private JobQueueService queue;
     private JobListService service;
 
     @Before
     public void setUp() throws Exception {
-        this.service = PoorMansJob.list(defaults().config());
+        this.queue = PoorMansJob.queue(defaults("test").config());
+        this.service = PoorMansJob.list(defaults("test").config());
     }
 
 
@@ -31,7 +35,7 @@ public class JobListServiceTest {
 
     @Test
     public void testOneElementJobList() throws Exception {
-        this.service.submit(JobSubmission.job("job").submission());
+        this.queue.submit(JobSubmission.job("job").submission());
 
         assertThat(this.service.list().size(), is(1));
     }
@@ -39,12 +43,12 @@ public class JobListServiceTest {
 
     @Test
     public void testRetentionDelay() throws Exception {
-        UUID uuid = this.service.submit(JobSubmission.job("job")
+        UUID uuid = this.queue.submit(JobSubmission.job("job")
                 .withRetentionDelay(100L)
                 .submission()).getUuid();
 
-        this.service.start(uuid);
-        this.service.done(uuid);
+        this.queue.start(uuid);
+        this.queue.done(uuid);
 
         assertThat(this.service.list().contains(uuid), is(true));
         Thread.sleep(500L);

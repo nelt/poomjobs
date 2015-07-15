@@ -1,8 +1,10 @@
-package org.codingmatters.poomjobs.apis.list;
+package org.codingmatters.poomjobs.apis.queue;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
+import org.codingmatters.poomjobs.apis.queue.JobQueueService;
+import org.codingmatters.poomjobs.apis.queue.JobSubmission;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,13 +20,13 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by nel on 09/07/15.
  */
-public class JobListServiceSubmissionTest {
+public class JobQueueServiceSubmissionTest {
 
-    private JobListService service;
+    private JobQueueService service;
 
     @Before
     public void setUp() throws Exception {
-        this.service = PoorMansJob.list(defaults().config());
+        this.service = PoorMansJob.queue(defaults("test").config());
     }
 
     @Test
