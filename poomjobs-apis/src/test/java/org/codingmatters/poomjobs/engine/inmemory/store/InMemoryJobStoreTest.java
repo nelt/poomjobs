@@ -1,13 +1,12 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.inmemory.store;
 
-import org.codingmatters.poomjobs.engine.inmemory.store.InMemoryJobStore;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by nel on 12/07/15.
