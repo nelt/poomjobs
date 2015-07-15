@@ -12,7 +12,7 @@
         <relativePath>../poomjobs-parent</relativePath>
     </parent>
 
-    <artifactId>poomjobs-api-tests</artifactId>
+    <artifactId>poomjobs-apis-tests</artifactId>
 
     <dependencies>
         <dependency>
