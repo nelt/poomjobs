@@ -1,10 +1,11 @@
-package org.codingmatters.poomjobs.engine.inmemory.acceptance.list;
+package org.codingmatters.poomjobs.apis.list;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobQueueService;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobSubmission;
+import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
+import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -1,8 +1,8 @@
-package org.codingmatters.poomjobs.engine.inmemory.store;
+package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
-import org.codingmatters.poomjobs.engine.inmemory.jobs.InMemoryJobList;
+import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;

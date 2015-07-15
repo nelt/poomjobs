@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.acceptance.list;
+package org.codingmatters.poomjobs.apis.services.list;
 
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 

@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.store;
+package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
 import org.junit.Test;
 

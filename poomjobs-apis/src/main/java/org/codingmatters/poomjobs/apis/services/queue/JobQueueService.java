@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
+package org.codingmatters.poomjobs.apis.services.queue;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;

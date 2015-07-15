@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
+package org.codingmatters.poomjobs.apis.services.queue;
 
 /**
  * Created by nel on 06/07/15.

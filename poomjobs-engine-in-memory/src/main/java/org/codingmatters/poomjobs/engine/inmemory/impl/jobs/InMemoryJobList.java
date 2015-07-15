@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.jobs;
+package org.codingmatters.poomjobs.engine.inmemory.impl.jobs;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobBuilders;

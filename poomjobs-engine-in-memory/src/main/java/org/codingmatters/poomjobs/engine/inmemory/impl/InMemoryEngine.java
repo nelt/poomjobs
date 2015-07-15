@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.inmemory.impl;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.jobs.Job;
@@ -6,12 +6,13 @@ import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.jobs.JobOperation;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.list.JobListService;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobQueueService;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobSubmission;
-import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
+import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
+import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
-import org.codingmatters.poomjobs.engine.inmemory.store.InMemoryJobStore;
+import org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory;
+import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
@@ -30,10 +31,11 @@ public class InMemoryEngine implements JobQueueService, JobListService {
 
     public static InMemoryEngine getEngine(Configuration config) {
         synchronized (engines) {
-            if (!engines.containsKey(config.getUrl()) || engines.get(config.getUrl()).get() == null) {
-                engines.put(config.getUrl(), new WeakReference<>(new InMemoryEngine(config)));
+            String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
+            if (!engines.containsKey(name) || engines.get(name).get() == null) {
+                engines.put(name, new WeakReference<>(new InMemoryEngine(config)));
             }
-            return engines.get(config.getUrl()).get();
+            return engines.get(name).get();
         }
     }
 
