@@ -22,7 +22,7 @@
         </dependency>
         <dependency>
             <groupId>org.codingmatters.poomjobs</groupId>
-            <artifactId>poomjobs-in-memory</artifactId>
+            <artifactId>poomjobs-engine-in-memory</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>

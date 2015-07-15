@@ -12,7 +12,7 @@
         <relativePath>../poomjobs-parent</relativePath>
     </parent>
 
-    <artifactId>poomjobs-in-memory</artifactId>
+    <artifactId>poomjobs-engine-in-memory</artifactId>
 
     <dependencies>
         <dependency>

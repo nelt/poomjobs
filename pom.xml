@@ -17,7 +17,7 @@
         <module>poomjobs-apis</module>
         <module>poomjobs-api-tests</module>
         <module>poomjobs-test-utils</module>
-        <module>poomjobs-in-memory</module>
+        <module>poomjobs-engine-in-memory</module>
     </modules>
 
     <build>
