@@ -1,6 +1,6 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.queue.JobSubmission;
+import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobSubmission;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;

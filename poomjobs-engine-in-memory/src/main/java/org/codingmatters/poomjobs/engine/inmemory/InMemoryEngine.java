@@ -6,10 +6,10 @@ import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.jobs.JobOperation;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
-import org.codingmatters.poomjobs.apis.list.JobListService;
-import org.codingmatters.poomjobs.apis.queue.JobQueueService;
-import org.codingmatters.poomjobs.apis.queue.JobSubmission;
-import org.codingmatters.poomjobs.apis.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.engine.inmemory.acceptance.list.JobListService;
+import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobQueueService;
+import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.JobSubmission;
+import org.codingmatters.poomjobs.engine.inmemory.acceptance.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.inmemory.store.InMemoryJobStore;
 

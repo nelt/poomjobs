@@ -1,11 +1,10 @@
-package org.codingmatters.poomjobs.apis.queue;
+package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
 

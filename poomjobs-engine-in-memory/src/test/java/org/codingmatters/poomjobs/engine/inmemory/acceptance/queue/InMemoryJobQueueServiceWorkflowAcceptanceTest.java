@@ -1,18 +1,16 @@
-package org.codingmatters.poomjobs.apis.list;
+package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 
 import static org.codingmatters.poomjobs.apis.Configuration.defaults;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
- * Created by nel on 06/07/15.
+ * Created by nel on 08/07/15.
  */
-public class InMemoryJobListServiceAcceptanceTest extends JobListServiceAcceptanceTest {
-    @Override
-    protected Configuration getListServiceConfig() throws ServiceFactoryException {
-        return defaults("test").config();
-    }
+public class InMemoryJobQueueServiceWorkflowAcceptanceTest extends JobQueueServiceWorkflowAcceptanceTest {
 
     @Override
     protected Configuration getQueueServiceConfig() throws ServiceFactoryException {

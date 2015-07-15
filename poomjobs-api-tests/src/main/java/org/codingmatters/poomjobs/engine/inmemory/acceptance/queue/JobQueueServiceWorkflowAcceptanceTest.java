@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.apis.queue;
+package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
