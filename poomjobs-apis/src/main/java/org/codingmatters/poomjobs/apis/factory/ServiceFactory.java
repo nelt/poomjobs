@@ -1,6 +1,7 @@
 package org.codingmatters.poomjobs.apis.factory;
 
 import org.codingmatters.poomjobs.apis.Configuration;
+import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -12,4 +13,5 @@ public interface ServiceFactory {
     JobQueueService queueService(Configuration config);
     JobListService listService(Configuration config);
     JobMonitoringService monitoringService(Configuration config);
+    JobDispatcherService dispatcherService(Configuration config);
 }

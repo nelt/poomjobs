@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.engine.inmemory;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactory;
+import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -32,6 +33,11 @@ public class InMemoryServiceFactory implements ServiceFactory {
 
     @Override
     public JobMonitoringService monitoringService(Configuration config) {
+        return InMemoryEngine.getEngine(config);
+    }
+
+    @Override
+    public JobDispatcherService dispatcherService(Configuration config) {
         return InMemoryEngine.getEngine(config);
     }
 

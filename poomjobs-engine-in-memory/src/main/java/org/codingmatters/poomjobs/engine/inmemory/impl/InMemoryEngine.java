@@ -3,6 +3,8 @@ package org.codingmatters.poomjobs.engine.inmemory.impl;
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.jobs.*;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
+import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
@@ -11,6 +13,7 @@ import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory;
+import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
@@ -24,7 +27,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService {
+public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService {
 
     static final HashMap<String, WeakReference<InMemoryEngine>> engines = new HashMap<>();
 
@@ -39,6 +42,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     }
 
 
+
     public interface Options {
         String ENGINE_CONFIGURATION = "enngine.configuration";
     }
@@ -48,6 +52,8 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
 
     private final InMemoryJobStore store = new InMemoryJobStore();
 
+    private final InMemoryDispatcher dispatcher;
+
     public InMemoryEngine(Configuration config) {
         this.config = config;
         if(config.hasOption(Options.ENGINE_CONFIGURATION)) {
@@ -56,7 +62,11 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
         this.store.startCleanerThread();
+
+        this.dispatcher = new InMemoryDispatcher(this.store, this);
+        this.dispatcher.start();
     }
+
 
     public Job submit(JobSubmission jobSubmission) {
         JobBuilders.Builder builder = from(jobSubmission)
@@ -131,4 +141,12 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         this.statusMonitorGroup.monitor(uuid, monitor);
         return result;
     }
+
+    @Override
+    public void register(JobRunner runner, String... forJobs) {
+        if(forJobs == null) return;
+        this.dispatcher.register(runner, forJobs);
+    }
+
+
 }

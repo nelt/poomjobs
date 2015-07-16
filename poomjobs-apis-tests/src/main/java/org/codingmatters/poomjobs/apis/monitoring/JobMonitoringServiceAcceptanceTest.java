@@ -32,7 +32,7 @@ public abstract class JobMonitoringServiceAcceptanceTest {
     @Before
     public void setUp() throws Exception {
         this.queue = PoorMansJob.queue(this.getQueueServiceConfig());
-        this.service = PoorMansJob.monitoring(this.getMonitoringServiceConfig());
+        this.service = PoorMansJob.monitor(this.getMonitoringServiceConfig());
         this.jobUuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 

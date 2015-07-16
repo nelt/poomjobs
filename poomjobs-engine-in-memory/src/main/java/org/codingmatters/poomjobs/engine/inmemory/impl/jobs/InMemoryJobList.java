@@ -14,6 +14,9 @@ import java.util.UUID;
  */
 public class InMemoryJobList extends LinkedList<Job> implements JobList {
 
+    public InMemoryJobList() {
+    }
+
     public InMemoryJobList(Collection<? extends Job> c) {
         super(c);
     }

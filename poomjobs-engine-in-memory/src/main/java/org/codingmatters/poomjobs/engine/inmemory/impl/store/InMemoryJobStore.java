@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,16 @@ public class InMemoryJobStore {
 
     public synchronized JobList currentList() {
         return new InMemoryJobList(this.jobs);
+    }
+
+    public synchronized JobList pendingJobs() {
+        JobList result = new InMemoryJobList();
+        for (Job job : this.jobs) {
+            if(job.getStatus() == JobStatus.PENDING) {
+                result.add(job);
+            }
+        }
+        return result;
     }
 
     public synchronized void clean() {

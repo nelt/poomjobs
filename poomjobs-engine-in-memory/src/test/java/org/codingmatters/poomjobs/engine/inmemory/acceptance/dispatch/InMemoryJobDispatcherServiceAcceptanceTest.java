@@ -1,17 +1,15 @@
-package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
+package org.codingmatters.poomjobs.engine.inmemory.acceptance.dispatch;
 
 import org.codingmatters.poomjobs.apis.Configuration;
+import org.codingmatters.poomjobs.apis.dispatch.JobDispatcherServiceAcceptanceTest;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
-import org.codingmatters.poomjobs.apis.queue.JobQueueServiceWorkflowAcceptanceTest;
 import org.codingmatters.poomjobs.engine.inmemory.acceptance.InMemoryConfigurationProvider;
 import org.junit.Before;
 
-import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
-
 /**
- * Created by nel on 08/07/15.
+ * Created by nel on 16/07/15.
  */
-public class InMemoryJobQueueServiceWorkflowAcceptanceTest extends JobQueueServiceWorkflowAcceptanceTest {
+public class InMemoryJobDispatcherServiceAcceptanceTest extends JobDispatcherServiceAcceptanceTest {
 
     private InMemoryConfigurationProvider configurationProvider = new InMemoryConfigurationProvider();
 
@@ -25,6 +23,11 @@ public class InMemoryJobQueueServiceWorkflowAcceptanceTest extends JobQueueServi
     @Override
     protected Configuration getQueueServiceConfig() throws ServiceFactoryException {
         return this.configurationProvider.getQueueConfig();
+    }
+
+    @Override
+    protected Configuration getDispatcherServiceConfig() throws ServiceFactoryException {
+        return this.configurationProvider.getDispatcherConfig();
     }
 
 }
