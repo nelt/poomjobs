@@ -1,23 +1,22 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl;
 
 import org.codingmatters.poomjobs.apis.Configuration;
-import org.codingmatters.poomjobs.apis.jobs.Job;
-import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
-import org.codingmatters.poomjobs.apis.jobs.JobList;
-import org.codingmatters.poomjobs.apis.jobs.JobOperation;
+import org.codingmatters.poomjobs.apis.jobs.*;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
+import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory;
+import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import static org.codingmatters.poomjobs.apis.jobs.JobBuilders.from;
 import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
@@ -25,7 +24,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobQueueService, JobListService {
+public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService {
 
     static final HashMap<String, WeakReference<InMemoryEngine>> engines = new HashMap<>();
 
@@ -38,6 +37,7 @@ public class InMemoryEngine implements JobQueueService, JobListService {
             return engines.get(name).get();
         }
     }
+
 
     public interface Options {
         String ENGINE_CONFIGURATION = "enngine.configuration";
@@ -109,12 +109,26 @@ public class InMemoryEngine implements JobQueueService, JobListService {
     }
     private void mutateJob(UUID uuid, JobOperation operation, Mutator mutator) throws NoSuchJobException, InconsistentJobStatusException {
         Job job = this.get(uuid);
+        JobStatus old = job.getStatus();
         job = mutator.mutate(job);
         job = operation.operate(job);
         this.store.store(job);
+
+        if(! old.equals(job.getStatus())) {
+            this.statusMonitorGroup.changed(job, old);
+        }
     }
 
     private interface Mutator {
         Job mutate(Job job);
+    }
+
+    private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
+
+    @Override
+    public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
+        JobStatus result = this.get(uuid).getStatus();
+        this.statusMonitorGroup.monitor(uuid, monitor);
+        return result;
     }
 }

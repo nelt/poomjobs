@@ -1,6 +1,7 @@
 package org.codingmatters.poomjobs.apis;
 
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 
 /**
@@ -9,15 +10,15 @@ import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 public class PoorMansJob {
 
     static public JobQueueService queue(Configuration config) {
-        return config.getServiceFactory().queueServiceueueService(config);
+        return config.getServiceFactory().queueService(config);
     }
 
     static public JobListService list(Configuration config) {
         return config.getServiceFactory().listService(config);
     }
 
-//    static public JobMonitoringService monitor(Configuration config) {
-//        return null;
-//    }
+    static public JobMonitoringService monitoring(Configuration config) {
+        return config.getServiceFactory().monitoringService(config);
+    }
 
 }
