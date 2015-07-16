@@ -21,40 +21,40 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 16/07/15.
  */
 public abstract class JobMonitoringServiceAcceptanceTest {
+
     protected abstract Configuration getMonitoringServiceConfig() throws ServiceFactoryException;
     protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
 
-
     private JobQueueService queue;
     private JobMonitoringService service;
+    private UUID jobUuid;
 
     @Before
     public void setUp() throws Exception {
         this.queue = PoorMansJob.queue(this.getQueueServiceConfig());
         this.service = PoorMansJob.monitoring(this.getMonitoringServiceConfig());
+        this.jobUuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 
     @Test
-    public void testStatusMonitoring() throws Exception {
-        UUID uuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
+    public void testInitialStatus() throws Exception {
+        assertThat(this.service.monitorStatus(this.jobUuid, (job, old) -> {}), is(JobStatus.PENDING));
+    }
 
+    @Test
+    public void testMonitor() throws Exception {
         final HashMap<String, JobStatus> change = new HashMap<>();
 
-        JobStatus startStatus = this.service.monitorStatus(uuid, ((job, old) -> {
+        this.service.monitorStatus(this.jobUuid, ((job, old) -> {
             change.put("from", old);
             change.put("to", job.getStatus());
         }));
 
-        assertThat(startStatus, is(JobStatus.PENDING));
         assertThat(change.get("from"), is(nullValue()));
         assertThat(change.get("to"), is(nullValue()));
 
-        this.queue.start(uuid);
+        this.queue.start(this.jobUuid);
         assertThat(change.get("from"), is(JobStatus.PENDING));
         assertThat(change.get("to"), is(JobStatus.RUNNING));
-
-        this.queue.done(uuid);
-        assertThat(change.get("from"), is(JobStatus.RUNNING));
-        assertThat(change.get("to"), is(JobStatus.DONE));
     }
 }
