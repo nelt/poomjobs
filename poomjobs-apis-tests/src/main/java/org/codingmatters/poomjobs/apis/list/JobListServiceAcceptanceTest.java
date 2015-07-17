@@ -56,7 +56,7 @@ public abstract class JobListServiceAcceptanceTest {
         this.queue.done(uuid);
 
         assertThat(this.service.list().contains(uuid), is(true));
-        Thread.sleep(1000L);
+        Thread.sleep(2000L);
         assertThat(this.service.list().contains(uuid), is(false));
     }
 }
