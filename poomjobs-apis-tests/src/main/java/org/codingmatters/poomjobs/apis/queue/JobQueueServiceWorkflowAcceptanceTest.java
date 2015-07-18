@@ -1,8 +1,7 @@
 package org.codingmatters.poomjobs.apis.queue;
 
-import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
-import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
@@ -19,14 +18,18 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 15/07/15.
  */
 public abstract class JobQueueServiceWorkflowAcceptanceTest {
-    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
+
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService service;
     private UUID uuid;
 
     @Before
     public void setUp() throws Exception {
-        this.service = PoorMansJob.queue(this.getQueueServiceConfig());
+        TestConfigurationProvider config = this.getConfigurationProvider();
+        config.initialize();
+
+        this.service = PoorMansJob.queue(config.getQueueConfig());
         this.uuid = this.service.submit(JobSubmission.job("job").submission()).getUuid();
     }
 

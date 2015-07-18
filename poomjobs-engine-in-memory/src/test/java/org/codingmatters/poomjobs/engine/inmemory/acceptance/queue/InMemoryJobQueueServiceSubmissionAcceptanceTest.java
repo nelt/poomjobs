@@ -1,6 +1,7 @@
 package org.codingmatters.poomjobs.engine.inmemory.acceptance.queue;
 
 import org.codingmatters.poomjobs.apis.Configuration;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 import org.codingmatters.poomjobs.apis.queue.JobQueueServiceSubmissionAcceptanceTest;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
@@ -17,21 +18,8 @@ public class InMemoryJobQueueServiceSubmissionAcceptanceTest extends JobQueueSer
     private InMemoryConfigurationProvider configurationProvider = new InMemoryConfigurationProvider();
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        this.configurationProvider.initialize();
-        super.setUp();
+    protected TestConfigurationProvider getConfigurationProvider() {
+        return this.configurationProvider;
     }
-
-    @Override
-    protected Configuration getQueueServiceConfig() throws ServiceFactoryException {
-        return this.configurationProvider.getQueueConfig();
-    }
-
-    @Override
-    protected Long getExpectedDefaultRetentionDelay() {
-        return EngineConfiguration.defaults().config().getDefaultRetentionDelay();
-    }
-
 
 }

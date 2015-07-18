@@ -1,8 +1,7 @@
 package org.codingmatters.poomjobs.apis.queue;
 
-import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
-import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -22,14 +21,16 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobQueueServiceSubmissionAcceptanceTest {
 
-    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
-    protected abstract Long getExpectedDefaultRetentionDelay();
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService service;
 
     @Before
     public void setUp() throws Exception {
-        this.service = PoorMansJob.queue(getQueueServiceConfig());
+        TestConfigurationProvider config = this.getConfigurationProvider();
+        config.initialize();
+
+        this.service = PoorMansJob.queue(config.getQueueConfig());
     }
 
     @Test
@@ -47,18 +48,5 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
         assertThat(job.getStatus(), is(JobStatus.PENDING));
         assertThat(job.getStartTime(), is(nullValue()));
         assertThat(job.getEndTime(), is(nullValue()));
-
     }
-
-    @Test
-    public void testSubmitWithDefaultRetentionDelay() throws Exception {
-        Job job = this.service.submit(JobSubmission.job("job")
-                        .withArguments("arg1", "arg2")
-                        .submission()
-        );
-
-        assertThat(job.getRetentionDelay(), is(this.getExpectedDefaultRetentionDelay()));
-    }
-
-
 }

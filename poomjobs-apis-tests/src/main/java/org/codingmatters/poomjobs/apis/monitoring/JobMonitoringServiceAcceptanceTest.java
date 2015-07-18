@@ -1,8 +1,7 @@
 package org.codingmatters.poomjobs.apis.monitoring;
 
-import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
-import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -22,8 +21,7 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobMonitoringServiceAcceptanceTest {
 
-    protected abstract Configuration getMonitoringServiceConfig() throws ServiceFactoryException;
-    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService queue;
     private JobMonitoringService service;
@@ -31,8 +29,12 @@ public abstract class JobMonitoringServiceAcceptanceTest {
 
     @Before
     public void setUp() throws Exception {
-        this.queue = PoorMansJob.queue(this.getQueueServiceConfig());
-        this.service = PoorMansJob.monitor(this.getMonitoringServiceConfig());
+        TestConfigurationProvider config = this.getConfigurationProvider();
+        config.initialize();
+
+        this.queue = PoorMansJob.queue(config.getQueueConfig());
+        this.service = PoorMansJob.monitor(config.getMonitorConfig());
+
         this.jobUuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 

@@ -9,9 +9,11 @@ import org.codingmatters.poomjobs.engine.inmemory.acceptance.InMemoryConfigurati
  */
 public class InMemoryJobListServiceAcceptanceTest extends JobListServiceAcceptanceTest {
 
+    private final InMemoryConfigurationProvider configurationProvider = new InMemoryConfigurationProvider();
+
     @Override
     protected TestConfigurationProvider getConfigurationProvider() {
-        return new InMemoryConfigurationProvider();
+        return this.configurationProvider;
     }
 
 }

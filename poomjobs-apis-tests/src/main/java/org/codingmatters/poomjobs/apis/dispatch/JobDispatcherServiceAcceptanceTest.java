@@ -2,16 +2,14 @@ package org.codingmatters.poomjobs.apis.dispatch;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
-import org.codingmatters.poomjobs.apis.jobs.Job;
-import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
-import org.codingmatters.poomjobs.test.utils.Helpers;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -31,8 +29,7 @@ import static org.hamcrest.Matchers.is;
  */
 public abstract class JobDispatcherServiceAcceptanceTest {
 
-    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
-    protected abstract Configuration getDispatcherServiceConfig() throws ServiceFactoryException;
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService queue;
     private JobDispatcherService dispatcher;
@@ -40,8 +37,11 @@ public abstract class JobDispatcherServiceAcceptanceTest {
 
     @Before
     public void setUp() throws Exception {
-        this.queue = PoorMansJob.queue(this.getQueueServiceConfig());
-        this.dispatcher = PoorMansJob.dispatcher(this.getDispatcherServiceConfig());
+        TestConfigurationProvider config = this.getConfigurationProvider();
+        config.initialize();
+
+        this.queue = PoorMansJob.queue(config.getQueueConfig());
+        this.dispatcher = PoorMansJob.dispatcher(config.getDispatcherConfig());
 
         this.executed = Collections.synchronizedList(new LinkedList<String>());
     }
@@ -87,9 +87,6 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         Thread.sleep(200);
         Assert.assertThat(this.executed, hasSize(20));
     }
-
-
-
 
 
 
