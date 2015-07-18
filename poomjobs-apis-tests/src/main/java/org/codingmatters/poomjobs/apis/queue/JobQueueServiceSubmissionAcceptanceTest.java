@@ -23,19 +23,19 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
 
     protected abstract TestConfigurationProvider getConfigurationProvider();
 
-    private JobQueueService service;
+    private JobQueueService queue;
 
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider config = this.getConfigurationProvider();
         config.initialize();
 
-        this.service = PoorMansJob.queue(config.getQueueConfig());
+        this.queue = PoorMansJob.queue(config.getQueueConfig());
     }
 
     @Test
     public void testSubmit() throws Exception {
-        Job job = this.service.submit(JobSubmission.job("job")
+        Job job = this.queue.submit(JobSubmission.job("job")
                         .withArguments("arg1", "arg2")
                         .withRetentionDelay(12L)
                         .submission()

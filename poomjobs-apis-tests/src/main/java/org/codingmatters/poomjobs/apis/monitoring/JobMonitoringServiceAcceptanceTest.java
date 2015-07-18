@@ -24,7 +24,7 @@ public abstract class JobMonitoringServiceAcceptanceTest {
     protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService queue;
-    private JobMonitoringService service;
+    private JobMonitoringService monitoring;
     private UUID jobUuid;
 
     @Before
@@ -33,21 +33,21 @@ public abstract class JobMonitoringServiceAcceptanceTest {
         config.initialize();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
-        this.service = PoorMansJob.monitor(config.getMonitorConfig());
+        this.monitoring = PoorMansJob.monitor(config.getMonitorConfig());
 
         this.jobUuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 
     @Test
     public void testInitialStatus() throws Exception {
-        assertThat(this.service.monitorStatus(this.jobUuid, (job, old) -> {}), is(JobStatus.PENDING));
+        assertThat(this.monitoring.monitorStatus(this.jobUuid, (job, old) -> {}), is(JobStatus.PENDING));
     }
 
     @Test
     public void testMonitor() throws Exception {
         final HashMap<String, JobStatus> change = new HashMap<>();
 
-        this.service.monitorStatus(this.jobUuid, ((job, old) -> {
+        this.monitoring.monitorStatus(this.jobUuid, ((job, old) -> {
             change.put("from", old);
             change.put("to", job.getStatus());
         }));

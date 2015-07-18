@@ -21,7 +21,7 @@ public abstract class JobQueueServiceWorkflowAcceptanceTest {
 
     protected abstract TestConfigurationProvider getConfigurationProvider();
 
-    private JobQueueService service;
+    private JobQueueService queue;
     private UUID uuid;
 
     @Before
@@ -29,50 +29,50 @@ public abstract class JobQueueServiceWorkflowAcceptanceTest {
         TestConfigurationProvider config = this.getConfigurationProvider();
         config.initialize();
 
-        this.service = PoorMansJob.queue(config.getQueueConfig());
-        this.uuid = this.service.submit(JobSubmission.job("job").submission()).getUuid();
+        this.queue = PoorMansJob.queue(config.getQueueConfig());
+        this.uuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 
     @Test
     public void testSubmitStartDoneWorkflow() throws Exception {
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.PENDING));
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.PENDING));
 
-        this.service.start(uuid);
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.RUNNING));
+        this.queue.start(uuid);
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.RUNNING));
 
-        this.service.done(uuid, "r", "e", "s");
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.DONE));
-        assertThat(this.service.get(uuid).getResults(), is(array("r", "e", "s")));
+        this.queue.done(uuid, "r", "e", "s");
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.DONE));
+        assertThat(this.queue.get(uuid).getResults(), is(array("r", "e", "s")));
     }
 
     @Test
     public void testSubmitStartFailWorkflow() throws Exception {
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.PENDING));
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.PENDING));
 
-        this.service.start(uuid);
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.RUNNING));
+        this.queue.start(uuid);
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.RUNNING));
 
-        this.service.fail(uuid, "e", "r", "r");
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.FAILED));
-        assertThat(this.service.get(uuid).getErrors(), is(array("e", "r", "r")));
+        this.queue.fail(uuid, "e", "r", "r");
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.FAILED));
+        assertThat(this.queue.get(uuid).getErrors(), is(array("e", "r", "r")));
     }
 
     @Test
     public void testSubmitStartCancelWorkflow() throws Exception {
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.PENDING));
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.PENDING));
 
-        this.service.start(uuid);
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.RUNNING));
+        this.queue.start(uuid);
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.RUNNING));
 
-        this.service.cancel(uuid);
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.CANCELED));
+        this.queue.cancel(uuid);
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.CANCELED));
     }
 
     @Test
     public void testSubmitCancelWorkflow() throws Exception {
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.PENDING));
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.PENDING));
 
-        this.service.cancel(uuid);
-        assertThat(this.service.get(uuid).getStatus(), is(JobStatus.CANCELED));
+        this.queue.cancel(uuid);
+        assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.CANCELED));
     }
 }
