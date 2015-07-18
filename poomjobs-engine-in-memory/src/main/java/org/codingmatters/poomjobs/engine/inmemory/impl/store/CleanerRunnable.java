@@ -17,9 +17,7 @@ public class CleanerRunnable implements Runnable {
     public void run() {
         while(true) {
             InMemoryJobStore store = this.storeWeakReference.get();
-            if(store == null) {
-                return ;
-            }
+            if(store == null) {return ;}
 
             if(! store.isRunning()) {
                 return;
@@ -29,7 +27,9 @@ public class CleanerRunnable implements Runnable {
             store = null;
 
             try {
-                Thread.sleep(100L);
+                synchronized (this) {
+                    this.wait(100L);
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 return;

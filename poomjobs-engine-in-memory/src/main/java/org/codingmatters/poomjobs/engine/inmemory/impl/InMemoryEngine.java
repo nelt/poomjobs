@@ -61,7 +61,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         } else {
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
-        this.store.startCleanerThread();
+        this.store.start();
 
         this.dispatcher = new InMemoryDispatcher(this.store, this);
         this.dispatcher.start();

@@ -13,6 +13,7 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by nel on 16/07/15.
@@ -23,10 +24,18 @@ public class InMemoryDispatcher {
 
     private final WeakReference<InMemoryJobStore> storeReference;
     private final WeakReference<JobQueueService> queueServiceReference;
+    private final DispatcherRunnable dispatcherRunnable;
+
+    private AtomicBoolean run = new AtomicBoolean(false);
+    private Thread dispatcherThread;
 
     public InMemoryDispatcher(InMemoryJobStore store, JobQueueService queueService) {
         this.storeReference = new WeakReference<>(store);
         this.queueServiceReference = new WeakReference<>(queueService);
+
+        this.dispatcherRunnable = new DispatcherRunnable(this);
+        this.dispatcherThread = new Thread(this.dispatcherRunnable);
+        this.dispatcherThread.setName("in-memory-dispatcher@" + this.hashCode());
     }
 
 
@@ -55,32 +64,53 @@ public class InMemoryDispatcher {
     }
 
     public void start() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    synchronized (InMemoryDispatcher.this.runners) {
-                        for (Job job : InMemoryDispatcher.this.pendingJobs()) {
-                            if (InMemoryDispatcher.this.runners.containsKey(job.getJob()) && !InMemoryDispatcher.this.runners.get(job.getJob()).isEmpty()) {
-                                JobRunner runner = InMemoryDispatcher.this.runners.get(job.getJob()).pop();
-                                try {
-                                    InMemoryDispatcher.this.start(job.getUuid());
-                                    runner.run(job);
-                                } catch (NoSuchJobException | InconsistentJobStatusException e) {
-                                    e.printStackTrace();
-                                } finally {
-                                    InMemoryDispatcher.this.runners.get(job.getJob()).push(runner);
-                                }
-                            }
-                        }
-                        try {
-                            InMemoryDispatcher.this.runners.wait(100L);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+        synchronized (this.run) {
+            if(! this.run.get()) {
+                this.run.set(true);
+            }
+        }
+        if(! this.dispatcherThread.isAlive()) {
+            this.dispatcherThread.start();
+        }
+    }
+
+    public boolean isRunning() {
+        return this.run.get();
+    }
+
+    public void stop() {
+        this.run.set(false);
+        synchronized (this.dispatcherRunnable) {
+            this.dispatcherRunnable.notifyAll();
+        }
+        try {
+            this.dispatcherThread.join(10 * 1000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void dispatch() {
+        synchronized (this.runners) {
+            for (Job job : this.pendingJobs()) {
+                if (this.runners.containsKey(job.getJob()) && !this.runners.get(job.getJob()).isEmpty()) {
+                    JobRunner runner = this.runners.get(job.getJob()).pop();
+                    try {
+                        this.start(job.getUuid());
+                        runner.run(job);
+                    } catch (NoSuchJobException | InconsistentJobStatusException e) {
+                        e.printStackTrace();
+                    } finally {
+                        this.runners.get(job.getJob()).push(runner);
                     }
                 }
             }
-        }).start();
+        }
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        this.stop();
+        super.finalize();
     }
 }

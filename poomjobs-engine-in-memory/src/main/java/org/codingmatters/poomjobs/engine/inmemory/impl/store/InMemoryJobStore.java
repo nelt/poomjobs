@@ -74,7 +74,7 @@ public class InMemoryJobStore {
                 .isBefore(LocalDateTime.now());
     }
 
-    public void startCleanerThread() {
+    public void start() {
         synchronized (this.run) {
             if(! this.run.get()) {
                 this.run.set(true);
@@ -85,8 +85,20 @@ public class InMemoryJobStore {
         }
     }
 
-    public void stopCleanerThread() {
+    public boolean isRunning() {
+        return this.run.get();
+    }
+
+    public void stop() {
         this.run.set(false);
+        synchronized (this.cleaner) {
+            this.cleaner.notifyAll();
+        }
+        try {
+            this.cleanerThread.join(10 * 1000L);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -97,11 +109,7 @@ public class InMemoryJobStore {
 
     @Override
     protected void finalize() throws Throwable {
-        this.stopCleanerThread();
+        this.stop();
         super.finalize();
-    }
-
-    public boolean isRunning() {
-        return this.run.get();
     }
 }

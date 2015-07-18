@@ -28,4 +28,17 @@ public class Helpers {
         }
         return Thread.State.TERMINATED;
     }
+
+    public static void waitUntil(Condition condition, long timeout) throws Exception {
+        long delay = 10L;
+        long waited = 0L;
+        while(waited < timeout && ! condition.is()) {
+            Thread.sleep(delay);
+            waited += delay;
+        }
+    }
+
+    public interface Condition {
+        boolean is();
+    }
 }
