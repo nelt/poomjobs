@@ -59,14 +59,19 @@ public class InMemoryJobStore {
     public synchronized void clean() {
         LinkedList<Job> expired = new LinkedList<>();
         for (Job finishedJob : this.finishedJobs) {
-            if(finishedJob.getEndTime().plus(finishedJob.getRetentionDelay(), ChronoUnit.MILLIS).isAfter(LocalDateTime.now())) {
+            if(this.isRetentionDelayExpired(finishedJob)) {
                 expired.add(finishedJob);
             }
         }
         if(! expired.isEmpty()) {
             this.jobs.removeAll(expired);
-            this.finishedJobs.removeAll(finishedJobs);
+            this.finishedJobs.removeAll(expired);
         }
+    }
+
+    protected boolean isRetentionDelayExpired(Job finishedJob) {
+        return finishedJob.getEndTime().plus(finishedJob.getRetentionDelay(), ChronoUnit.MILLIS)
+                .isBefore(LocalDateTime.now());
     }
 
     public void startCleanerThread() {
