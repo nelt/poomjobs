@@ -1,11 +1,16 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
+import org.codingmatters.poomjobs.test.utils.Helpers;
+import org.hamcrest.Matchers;
 import org.junit.Test;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 
+import static java.lang.Thread.State.TERMINATED;
+import static org.codingmatters.poomjobs.test.utils.Helpers.namedThreadState;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -19,22 +24,11 @@ public class InMemoryJobStoreTest {
         String cleanerThreadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.startCleanerThread();
 
-        assertThat(this.namedThreadIsRunning(cleanerThreadName), is(true));
+        assertThat(namedThreadState(cleanerThreadName), is(not(TERMINATED)));
         store = null;
         System.gc();
         Thread.sleep(500L);
-        assertThat(this.namedThreadIsRunning(cleanerThreadName), is(false));
-    }
-
-
-    private boolean namedThreadIsRunning(String name) {
-        ThreadInfo[] tis = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
-        for (ThreadInfo ti : tis) {
-            if(name.equals(ti.getThreadName())) {
-                return true;
-            }
-        }
-        return false;
+        assertThat(namedThreadState(cleanerThreadName), is(TERMINATED));
     }
 
 }

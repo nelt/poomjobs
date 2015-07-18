@@ -1,14 +1,14 @@
 package org.codingmatters.poomjobs.apis.list;
 
-import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
-import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
+import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.empty;
@@ -19,17 +19,19 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 15/07/15.
  */
 public abstract class JobListServiceAcceptanceTest {
-    protected abstract Configuration getListServiceConfig() throws ServiceFactoryException;
-    protected abstract Configuration getQueueServiceConfig() throws ServiceFactoryException;
 
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     private JobQueueService queue;
     private JobListService service;
 
     @Before
     public void setUp() throws Exception {
-        this.queue = PoorMansJob.queue(getQueueServiceConfig());
-        this.service = PoorMansJob.list(getListServiceConfig());
+        TestConfigurationProvider conf = this.getConfigurationProvider();
+        conf.initialize();
+
+        this.queue = PoorMansJob.queue(conf.getQueueConfig());
+        this.service = PoorMansJob.list(conf.getListConfig());
     }
 
 
@@ -53,10 +55,15 @@ public abstract class JobListServiceAcceptanceTest {
                 .submission()).getUuid();
 
         this.queue.start(uuid);
-        this.queue.done(uuid);
 
+        this.queue.done(uuid);
         assertThat(this.service.list().contains(uuid), is(true));
-        Thread.sleep(2000L);
+
+        long waited = 0L;
+        while(waited < 10 * 1000 && this.service.list().contains(uuid)) {
+            Thread.sleep(100L);
+            waited += 100L;
+        }
         assertThat(this.service.list().contains(uuid), is(false));
     }
 }

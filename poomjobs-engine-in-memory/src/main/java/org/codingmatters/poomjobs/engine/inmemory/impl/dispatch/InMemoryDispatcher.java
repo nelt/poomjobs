@@ -10,7 +10,6 @@ import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.UUID;
@@ -56,26 +55,29 @@ public class InMemoryDispatcher {
     }
 
     public void start() {
-        new Thread(() -> {
-            while(true) {
-                synchronized (this.runners) {
-                    for (Job job : this.pendingJobs()) {
-                        if(this.runners.containsKey(job.getJob()) && ! this.runners.get(job.getJob()).isEmpty()) {
-                            JobRunner runner = this.runners.get(job.getJob()).pop();
-                            try {
-                                this.start(job.getUuid());
-                                runner.run(job);
-                            } catch (NoSuchJobException | InconsistentJobStatusException e) {
-                                e.printStackTrace();
-                            } finally {
-                                this.runners.get(job.getJob()).push(runner);
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true) {
+                    synchronized (InMemoryDispatcher.this.runners) {
+                        for (Job job : InMemoryDispatcher.this.pendingJobs()) {
+                            if (InMemoryDispatcher.this.runners.containsKey(job.getJob()) && !InMemoryDispatcher.this.runners.get(job.getJob()).isEmpty()) {
+                                JobRunner runner = InMemoryDispatcher.this.runners.get(job.getJob()).pop();
+                                try {
+                                    InMemoryDispatcher.this.start(job.getUuid());
+                                    runner.run(job);
+                                } catch (NoSuchJobException | InconsistentJobStatusException e) {
+                                    e.printStackTrace();
+                                } finally {
+                                    InMemoryDispatcher.this.runners.get(job.getJob()).push(runner);
+                                }
                             }
                         }
-                    }
-                    try {
-                        this.runners.wait(100L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        try {
+                            InMemoryDispatcher.this.runners.wait(100L);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
