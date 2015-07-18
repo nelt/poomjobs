@@ -1,35 +1,26 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.dispatch;
 
+import org.codingmatters.poomjobs.engine.inmemory.impl.utils.StoppableRunnable;
+
 import java.lang.ref.WeakReference;
 
 /**
  * Created by nel on 18/07/15.
  */
-public class DispatcherRunnable implements Runnable {
+public class DispatcherRunnable extends StoppableRunnable {
     private final WeakReference<InMemoryDispatcher> dispatcherReference;
 
     public DispatcherRunnable(InMemoryDispatcher dispatcher) {
-        this.dispatcherReference = new WeakReference<InMemoryDispatcher>(dispatcher);
+        this.dispatcherReference = new WeakReference<>(dispatcher);
     }
 
     @Override
-    public void run() {
-        while(true) {
-            InMemoryDispatcher dispatcher = this.dispatcherReference.get();
-            if(dispatcher == null) return;
-            if(! dispatcher.isRunning()) return;
-
+    public void step() {
+        InMemoryDispatcher dispatcher = this.dispatcherReference.get();
+        if(dispatcher != null) {
             dispatcher.dispatch();
-            dispatcher = null;
-
-            try {
-                synchronized (this) {
-                    this.wait(100L);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-                return;
-            }
+        } else {
+            this.requestStop();
         }
     }
 }

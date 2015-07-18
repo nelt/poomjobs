@@ -22,8 +22,6 @@ public class InMemoryJobStore {
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
 
-    private AtomicBoolean run = new AtomicBoolean(false);
-
     public InMemoryJobStore() {
         this.cleaner = new CleanerRunnable(this);
         this.cleanerThread = new Thread(this.cleaner);
@@ -75,25 +73,14 @@ public class InMemoryJobStore {
     }
 
     public void start() {
-        synchronized (this.run) {
-            if(! this.run.get()) {
-                this.run.set(true);
-            }
-        }
+        this.cleaner.requestStart();
         if(! this.cleanerThread.isAlive()) {
             this.cleanerThread.start();
         }
     }
 
-    public boolean isRunning() {
-        return this.run.get();
-    }
-
     public void stop() {
-        this.run.set(false);
-        synchronized (this.cleaner) {
-            this.cleaner.notifyAll();
-        }
+        this.cleaner.requestStop();
         try {
             this.cleanerThread.join(10 * 1000L);
         } catch (InterruptedException e) {

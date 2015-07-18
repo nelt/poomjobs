@@ -26,7 +26,6 @@ public class InMemoryDispatcher {
     private final WeakReference<JobQueueService> queueServiceReference;
     private final DispatcherRunnable dispatcherRunnable;
 
-    private AtomicBoolean run = new AtomicBoolean(false);
     private Thread dispatcherThread;
 
     public InMemoryDispatcher(InMemoryJobStore store, JobQueueService queueService) {
@@ -64,25 +63,14 @@ public class InMemoryDispatcher {
     }
 
     public void start() {
-        synchronized (this.run) {
-            if(! this.run.get()) {
-                this.run.set(true);
-            }
-        }
+        this.dispatcherRunnable.requestStart();
         if(! this.dispatcherThread.isAlive()) {
             this.dispatcherThread.start();
         }
     }
 
-    public boolean isRunning() {
-        return this.run.get();
-    }
-
     public void stop() {
-        this.run.set(false);
-        synchronized (this.dispatcherRunnable) {
-            this.dispatcherRunnable.notifyAll();
-        }
+        this.dispatcherRunnable.requestStop();
         try {
             this.dispatcherThread.join(10 * 1000L);
         } catch (InterruptedException e) {
