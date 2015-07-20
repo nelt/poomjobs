@@ -105,7 +105,7 @@ public class InMemoryDispatcher {
                 if(! this.lockedRunners.contains(runner)) {
                     this.lockedRunners.add(runner);
                     this.runners.get(job.getJob()).remove(runner);
-                    this.runners.get(job.getJob()).push(runner);
+                    this.runners.get(job.getJob()).add(runner);
                     return runner;
                 }
             }
