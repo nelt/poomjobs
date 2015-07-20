@@ -28,6 +28,7 @@ public class InMemoryDispatcherTest {
 
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
+        Thread.sleep(200L);
 
         assertThat(namedThreadState(threadName), is(not(TERMINATED)));
 

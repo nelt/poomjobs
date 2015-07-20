@@ -24,6 +24,7 @@ public class InMemoryJobStoreTest {
 
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
+        Thread.sleep(200L);
 
         assertThat(namedThreadState(threadName), is(not(TERMINATED)));
         store = null;
@@ -34,6 +35,13 @@ public class InMemoryJobStoreTest {
 
         waitUntil(() -> namedThreadState(toString()).equals(TERMINATED), 10 * 1000L);
         assertThat("cleaner thread not stopped", namedThreadState(threadName), is(TERMINATED));
+    }
+
+    @Test
+    public void testGCTenTimes() throws Exception {
+        for(int i = 0 ; i < 10 ; i++) {
+            this.testInMemoryJobStoreCleanerRemovedOnGC();
+        }
     }
 
 }
