@@ -28,12 +28,14 @@ public class InMemoryDispatcherTest {
 
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
-        Thread.sleep(200L);
 
         assertThat(namedThreadState(threadName), is(not(TERMINATED)));
 
         dispatcher = null;
+
+        Thread.sleep(200L);
         System.gc();
+        System.runFinalization();
 
         waitUntil(() -> dispatcherRef.get() == null, 10 * 1000L);
         assertThat("dispatcher not garbage collected", dispatcherRef.get(), is(nullValue()));

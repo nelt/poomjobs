@@ -24,11 +24,14 @@ public class InMemoryJobStoreTest {
 
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
-        Thread.sleep(200L);
 
         assertThat(namedThreadState(threadName), is(not(TERMINATED)));
         store = null;
+
+        Thread.sleep(200L);
+
         System.gc();
+        System.runFinalization();
 
         waitUntil(() -> storeRef.get() == null, 10 * 1000L);
         assertThat("store not garbage collected", storeRef.get(), is(nullValue()));
