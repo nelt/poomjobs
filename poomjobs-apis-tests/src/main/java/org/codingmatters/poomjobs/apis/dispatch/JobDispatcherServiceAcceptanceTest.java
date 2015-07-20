@@ -10,6 +10,7 @@ import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.test.utils.Helpers;
 import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.codingmatters.poomjobs.test.utils.Helpers.list;
+import static org.codingmatters.poomjobs.test.utils.Helpers.waitUntil;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
@@ -57,7 +59,7 @@ public abstract class JobDispatcherServiceAcceptanceTest {
     }
 
     @Test
-    public void testRegisterThanSubmission() throws Exception {
+    public void testRegisterThenSubmission() throws Exception {
         this.dispatcher.register(this.jobRunner("runner"), "job");
 
         UUID uuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
@@ -79,12 +81,12 @@ public abstract class JobDispatcherServiceAcceptanceTest {
 
 
     @Test
-    public void testRegisterThanSubmitManyJobs() throws Exception {
+    public void testRegisterThenSubmitManyJobs() throws Exception {
         this.dispatcher.register(this.jobRunner("runner"), "job");
         for(int i = 0 ; i < 20 ; i++) {
             this.queue.submit(JobSubmission.job("job").submission()).getUuid();
         }
-        Thread.sleep(200);
+        waitUntil(() -> this.executed.size() == 20, 10 * 1000L);
         Assert.assertThat(this.executed, hasSize(20));
     }
 

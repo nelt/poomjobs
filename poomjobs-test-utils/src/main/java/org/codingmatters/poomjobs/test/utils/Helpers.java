@@ -29,6 +29,14 @@ public class Helpers {
         return Thread.State.TERMINATED;
     }
 
+    static public void printThreads() {
+        ThreadInfo[] tis = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
+        System.out.println(("threads :"));
+        for (ThreadInfo ti : tis) {
+            System.out.println("\t" + ti.getThreadName());
+        }
+    }
+
     public static void waitUntil(Condition condition, long timeout) throws Exception {
         long delay = 10L;
         long waited = 0L;

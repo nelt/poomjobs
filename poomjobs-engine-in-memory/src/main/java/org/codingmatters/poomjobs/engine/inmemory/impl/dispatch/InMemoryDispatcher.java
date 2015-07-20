@@ -10,10 +10,8 @@ import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by nel on 16/07/15.
@@ -24,9 +22,12 @@ public class InMemoryDispatcher {
 
     private final WeakReference<InMemoryJobStore> storeReference;
     private final WeakReference<JobQueueService> queueServiceReference;
-    private final DispatcherRunnable dispatcherRunnable;
 
+    private final DispatcherRunnable dispatcherRunnable;
     private Thread dispatcherThread;
+    private final HashMap<Future, JobRunner> runningRunners = new HashMap<>();
+
+    private final ExecutorService runnerPool;
 
     public InMemoryDispatcher(InMemoryJobStore store, JobQueueService queueService) {
         this.storeReference = new WeakReference<>(store);
@@ -35,6 +36,8 @@ public class InMemoryDispatcher {
         this.dispatcherRunnable = new DispatcherRunnable(this);
         this.dispatcherThread = new Thread(this.dispatcherRunnable);
         this.dispatcherThread.setName("in-memory-dispatcher@" + this.hashCode());
+
+        this.runnerPool = Executors.newCachedThreadPool();
     }
 
 
@@ -73,27 +76,56 @@ public class InMemoryDispatcher {
         this.dispatcherRunnable.requestStop();
         try {
             this.dispatcherThread.join(10 * 1000L);
+            this.runnerPool.shutdownNow();
+            this.runnerPool.awaitTermination(10 * 1000L, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    private final HashSet<JobRunner> lockedRunners = new HashSet<>();
+
     public void dispatch() {
-        synchronized (this.runners) {
-            for (Job job : this.pendingJobs()) {
-                if (this.runners.containsKey(job.getJob()) && !this.runners.get(job.getJob()).isEmpty()) {
-                    JobRunner runner = this.runners.get(job.getJob()).pop();
-                    try {
-                        this.start(job.getUuid());
-                        runner.run(job);
-                    } catch (NoSuchJobException | InconsistentJobStatusException e) {
-                        e.printStackTrace();
-                    } finally {
-                        this.runners.get(job.getJob()).push(runner);
-                    }
+        this.unlockTerminatedRunners();
+        this.pendingJobs().forEach(job -> {
+            JobRunner runner = this.lockRunnerForJob(job);
+            if(runner != null) {
+                try {
+                    this.startRunnerForJob(runner, job);
+                } catch (InconsistentJobStatusException | NoSuchJobException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    private synchronized JobRunner lockRunnerForJob(Job job) {
+        if (this.runners.containsKey(job.getJob()) && !this.runners.get(job.getJob()).isEmpty()) {
+            for (JobRunner runner : this.runners.get(job.getJob())) {
+                if(! this.lockedRunners.contains(runner)) {
+                    this.lockedRunners.add(runner);
+                    this.runners.get(job.getJob()).remove(runner);
+                    this.runners.get(job.getJob()).push(runner);
+                    return runner;
                 }
             }
         }
+        return null;
+    }
+
+    private synchronized void startRunnerForJob(JobRunner runner, Job job) throws InconsistentJobStatusException, NoSuchJobException {
+        this.start(job.getUuid());
+        Future<?> running = this.runnerPool.submit(new RunnerRunnable(job, runner));
+        this.runningRunners.put(running, runner);
+    }
+
+    private synchronized void unlockTerminatedRunners() {
+        new HashMap<>(this.runningRunners).forEach((future, runner) -> {
+            if(future.isDone()) {
+                this.lockedRunners.remove(runner);
+                this.runningRunners.remove(future);
+            }
+        });
     }
 
     @Override
