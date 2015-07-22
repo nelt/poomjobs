@@ -43,6 +43,7 @@ public class ListQuery {
         return "ListQuery{" +
                 "limit=" + limit +
                 ", offset=" + offset +
+                ", statuses=" + statuses +
                 '}';
     }
 
