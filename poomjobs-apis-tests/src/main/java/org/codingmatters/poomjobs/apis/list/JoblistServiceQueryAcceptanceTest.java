@@ -2,7 +2,9 @@ package org.codingmatters.poomjobs.apis.list;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
+import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.junit.Before;
@@ -72,7 +74,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
     }
 
     @Test
-    public void testExactlyOnePage() {
+    public void testExactlyOnePage() throws Exception {
         UUID[] all = this.submitRandomJobs(5);
 
         assertThat(
@@ -81,7 +83,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
     }
 
     @Test
-    public void testExactlyTwoPages() {
+    public void testExactlyTwoPages() throws Exception {
         UUID[] all = this.submitRandomJobs(10);
 
         assertThat(
@@ -110,17 +112,56 @@ public abstract class JoblistServiceQueryAcceptanceTest {
         assertThat(
                 this.list.list(limit(5).withOffset(5).query()),
                 exactlyUUIDS(range(all, 5, 8)));
+    }
 
+    @Test
+    public void testStatusQuery() throws Exception {
+        UUID [] all = this.submitRandomJobs(2, JobStatus.PENDING, JobStatus.DONE);
+
+        assertThat(
+                this.list.list(limit(10).status(JobStatus.PENDING).query()),
+                exactlyUUIDS(all[0]));
+        assertThat(
+                this.list.list(limit(10).status(JobStatus.DONE).query()),
+                exactlyUUIDS(all[1]));
+        assertThat(
+                this.list.list(limit(10).status(JobStatus.CANCELED).query()),
+                is(empty()));
     }
 
 
 
 
 
-    protected UUID[] submitRandomJobs(int count) {
+    protected UUID[] submitRandomJobs(int count, JobStatus ... statuses) throws Exception {
+        if(statuses == null || statuses.length == 0) {
+            statuses = JobStatus.values();
+        }
         ArrayList<UUID> results = new ArrayList<>(count);
         for(int i = 0 ; i < count ; i++) {
-            results.add(this.queue.submit(job("job").submission()).getUuid());
+            Job job = this.queue.submit(job("job").submission());
+            results.add(job.getUuid());
+
+            JobStatus status = statuses[i % statuses.length];
+            switch (status) {
+                case PENDING:
+                    break;
+                case RUNNING:
+                    this.queue.start(job.getUuid());
+                    break;
+                case CANCELED:
+                    this.queue.start(job.getUuid());
+                    this.queue.cancel(job.getUuid());
+                    break;
+                case DONE:
+                    this.queue.start(job.getUuid());
+                    this.queue.done(job.getUuid());
+                    break;
+                case FAILED:
+                    this.queue.start(job.getUuid());
+                    this.queue.fail(job.getUuid());
+                    break;
+            }
         }
         return results.toArray(new UUID[count]);
     }

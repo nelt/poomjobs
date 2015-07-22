@@ -47,9 +47,20 @@ public class InMemoryJobStore {
                 long i = query.getOffset() ;
                 results.size() < query.getLimit() && i < this.jobs.size();
                 i++) {
-            results.add(this.jobs.get((int) i));
+
+            Job job = this.jobs.get((int) i);
+            if(this.matches(job, query)) {
+                results.add(job);
+            }
         }
         return results;
+    }
+
+    private boolean matches(Job job, ListQuery query) {
+        if(! query.getStatuses().contains(job.getStatus())) {
+            return false;
+        }
+        return true;
     }
 
     public synchronized JobList pendingJobs() {
