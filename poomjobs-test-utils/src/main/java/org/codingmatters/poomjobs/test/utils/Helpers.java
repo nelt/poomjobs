@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.test.utils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -21,8 +22,9 @@ public class Helpers {
     }
 
     static public Thread.State namedThreadState(String name) {
-        ThreadInfo[] tis = ManagementFactory.getThreadMXBean().dumpAllThreads(true, true);
-        for (ThreadInfo ti : tis) {
+        ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
+        for (long tid : threadMXBean.getAllThreadIds()) {
+            ThreadInfo ti = threadMXBean.getThreadInfo(tid);
             if(name.equals(ti.getThreadName())) {
                 return ti.getThreadState();
             }
