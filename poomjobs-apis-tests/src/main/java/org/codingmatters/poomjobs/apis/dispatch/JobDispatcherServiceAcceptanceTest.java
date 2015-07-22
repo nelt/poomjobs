@@ -123,17 +123,54 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         assertThat(this.executed.get(1), startsWith("runner2/"));
     }
 
+    @Test
+    public void testOneJobAtATimeForRunner() throws Exception {
+        this.dispatcher.register(this.jobRunner("runner1", 500L), "job");
+        this.dispatcher.register(this.jobRunner("runner2"), "job");
+
+        this.queue.submit(job("job").submission());
+        this.queue.submit(job("job").submission());
+        this.queue.submit(job("job").submission());
+        this.queue.submit(job("job").submission());
+        this.queue.submit(job("job").submission());
+
+        waitUntil(() -> this.executed.size() == 5, 1000L);
+
+        assertThat(this.executedByRunner("runner1"), hasSize(1));
+        assertThat(this.executedByRunner("runner2"), hasSize(4));
+    }
+
 
 
     protected JobRunner jobRunner(String name) {
+        return jobRunner(name, null);
+    }
+
+    protected JobRunner jobRunner(String name, Long delay) {
         return (job) -> {
             try {
+                if(delay != null) {
+                    Thread.sleep(delay);
+                }
                 this.queue.done(job.getUuid());
                 this.executed.add(name + "/" + job.getUuid().toString());
-            } catch (NoSuchJobException | InconsistentJobStatusException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         };
+    }
+
+    protected List<UUID> executedByRunner(String name) {
+        List<UUID> result = new LinkedList<>();
+        for (String exec : this.executed) {
+            String runner = exec.substring(0, exec.indexOf('/'));
+            String uuid = exec.substring(exec.indexOf('/') + 1);
+            if(runner.equals(name)) {
+                result.add(UUID.fromString(uuid));
+            }
+        }
+
+        return result;
     }
 
 }
