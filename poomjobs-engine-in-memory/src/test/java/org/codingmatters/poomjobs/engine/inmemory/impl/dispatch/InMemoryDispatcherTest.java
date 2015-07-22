@@ -1,19 +1,14 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.dispatch;
 
-import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
-import org.codingmatters.poomjobs.test.utils.Helpers;
 import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 
 import static java.lang.Thread.State.TERMINATED;
 import static org.codingmatters.poomjobs.test.utils.Helpers.namedThreadState;
-import static org.codingmatters.poomjobs.test.utils.Helpers.printThreads;
 import static org.codingmatters.poomjobs.test.utils.Helpers.waitUntil;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -33,11 +28,12 @@ public class InMemoryDispatcherTest {
 
         dispatcher = null;
 
-        Thread.sleep(200L);
-        System.gc();
-        System.runFinalization();
+        waitUntil(() -> {
+            System.gc();
+            System.runFinalization();
+            return dispatcherRef.get() == null;
+        }, 10 * 1000L);
 
-        waitUntil(() -> dispatcherRef.get() == null, 10 * 1000L);
         assertThat("dispatcher not garbage collected", dispatcherRef.get(), is(nullValue()));
 
         waitUntil(() -> namedThreadState(toString()).equals(TERMINATED), 10 * 1000L);

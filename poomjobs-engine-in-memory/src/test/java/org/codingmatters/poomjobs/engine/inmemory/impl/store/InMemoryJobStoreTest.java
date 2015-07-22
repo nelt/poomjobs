@@ -32,8 +32,12 @@ public class InMemoryJobStoreTest {
 
         System.gc();
         System.runFinalization();
+        waitUntil(() -> {
+            System.gc();
+            System.runFinalization();
+            return storeRef.get() == null;
+        }, 10 * 1000L);
 
-        waitUntil(() -> storeRef.get() == null, 10 * 1000L);
         assertThat("store not garbage collected", storeRef.get(), is(nullValue()));
 
         waitUntil(() -> namedThreadState(toString()).equals(TERMINATED), 10 * 1000L);
