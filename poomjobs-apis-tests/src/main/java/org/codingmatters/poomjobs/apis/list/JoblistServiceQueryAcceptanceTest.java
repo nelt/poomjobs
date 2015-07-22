@@ -129,6 +129,38 @@ public abstract class JoblistServiceQueryAcceptanceTest {
                 is(empty()));
     }
 
+    @Test
+    public void testStatusQueryReducesToOnePage() throws Exception {
+        UUID [] all = this.submitRandomJobs(8, JobStatus.PENDING, JobStatus.DONE);
+
+        assertThat(
+                this.list.list(limit(5).status(JobStatus.PENDING).query()),
+                hasSize(4));
+        assertThat(
+                this.list.list(limit(5).status(JobStatus.DONE).query()),
+                hasSize(4));
+        assertThat(
+                this.list.list(limit(5).status(JobStatus.CANCELED).query()),
+                is(empty()));
+    }
+
+    @Test
+    public void testStatusQuerySpreadsOnTwoPages() throws Exception {
+        UUID [] all = this.submitRandomJobs(14, JobStatus.PENDING, JobStatus.DONE);
+
+        assertThat(
+                this.list.list(limit(5).withOffset(5).status(JobStatus.PENDING).query()),
+                hasSize(2));
+        assertThat(
+                this.list.list(limit(5).withOffset(5).status(JobStatus.DONE).query()),
+                hasSize(2));
+        assertThat(
+                this.list.list(limit(5).status(JobStatus.CANCELED).query()),
+                is(empty()));
+    }
+
+
+
 
 
 

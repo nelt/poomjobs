@@ -8,8 +8,7 @@ import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -44,13 +43,15 @@ public class InMemoryJobStore {
     public synchronized JobList list(ListQuery query) {
         JobList results = new InMemoryJobList();
         for(
-                long i = query.getOffset() ;
+                long i = 0, scroll = 0 ;
                 results.size() < query.getLimit() && i < this.jobs.size();
                 i++) {
-
             Job job = this.jobs.get((int) i);
             if(this.matches(job, query)) {
-                results.add(job);
+                scroll++;
+                if(scroll > query.getOffset()) {
+                    results.add(job);
+                }
             }
         }
         return results;
