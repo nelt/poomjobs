@@ -43,7 +43,10 @@ public class InMemoryJobStore {
 
     public synchronized JobList list(ListQuery query) {
         JobList results = new InMemoryJobList();
-        for(long i = query.getOffset() ; i < query.getOffset() + query.getLimit() && i < this.jobs.size(); i++) {
+        for(
+                long i = query.getOffset() ;
+                results.size() < query.getLimit() && i < this.jobs.size();
+                i++) {
             results.add(this.jobs.get((int) i));
         }
         return results;
