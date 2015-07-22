@@ -33,7 +33,6 @@ public abstract class JoblistServiceQueryAcceptanceTest {
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider conf = this.getConfigurationProvider();
-        conf.initialize();
 
         this.queue = PoorMansJob.queue(conf.getQueueConfig());
         this.list = PoorMansJob.list(conf.getListConfig());

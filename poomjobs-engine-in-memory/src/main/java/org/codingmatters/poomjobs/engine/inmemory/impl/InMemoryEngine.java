@@ -18,6 +18,8 @@ import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatch
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -28,9 +30,9 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService {
+public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService, Closeable {
 
-    static final HashMap<String, WeakReference<InMemoryEngine>> engines = new HashMap<>();
+    static final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
     private final InMemoryJobStore store = new InMemoryJobStore();
@@ -44,19 +46,28 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         } else {
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
-        this.store.start();
-
         this.dispatcher = new InMemoryDispatcher(this.store, this);
+
+        this.store.start();
         this.dispatcher.start();
     }
 
     public static InMemoryEngine getEngine(Configuration config) {
         synchronized (engines) {
             String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
-            if (!engines.containsKey(name) || engines.get(name).get() == null) {
-                engines.put(name, new WeakReference<>(new InMemoryEngine(config)));
+            if (!engines.containsKey(name)) {
+                engines.put(name, new InMemoryEngine(config));
             }
-            return engines.get(name).get();
+            return engines.get(name);
+        }
+    }
+
+    public static void removeEngine(Configuration config) {
+        synchronized (engines) {
+            String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
+            if (engines.containsKey(name)) {
+                engines.remove(name);
+            }
         }
     }
 
@@ -132,6 +143,12 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     public void register(JobRunner runner, String... forJobs) {
         if(forJobs == null) return;
         this.dispatcher.register(runner, forJobs);
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.dispatcher.stop();
+        this.store.stop();
     }
 
     public interface Options {

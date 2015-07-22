@@ -21,16 +21,15 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobMonitoringServiceAcceptanceTest {
 
-    protected abstract TestConfigurationProvider getConfigurationProvider();
-
     private JobQueueService queue;
     private JobMonitoringService monitoring;
     private UUID jobUuid;
 
+    protected abstract TestConfigurationProvider getConfigurationProvider();
+
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider config = this.getConfigurationProvider();
-        config.initialize();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
         this.monitoring = PoorMansJob.monitor(config.getMonitorConfig());

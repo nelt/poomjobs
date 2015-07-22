@@ -34,16 +34,15 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobDispatcherServiceAcceptanceTest {
 
-    protected abstract TestConfigurationProvider getConfigurationProvider();
-
     private JobQueueService queue;
     private JobDispatcherService dispatcher;
     private List<String> executed;
 
+    protected abstract TestConfigurationProvider getConfigurationProvider();
+
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider config = this.getConfigurationProvider();
-        config.initialize();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
         this.dispatcher = PoorMansJob.dispatcher(config.getDispatcherConfig());

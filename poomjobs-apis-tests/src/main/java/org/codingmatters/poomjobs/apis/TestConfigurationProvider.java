@@ -6,8 +6,6 @@ import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
  * Created by nel on 18/07/15.
  */
 public interface TestConfigurationProvider {
-    void initialize();
-
     Configuration getListConfig() throws ServiceFactoryException;
 
     Configuration getQueueConfig() throws ServiceFactoryException;

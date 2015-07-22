@@ -19,15 +19,14 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobQueueServiceWorkflowAcceptanceTest {
 
-    protected abstract TestConfigurationProvider getConfigurationProvider();
-
     private JobQueueService queue;
     private UUID uuid;
+
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider config = this.getConfigurationProvider();
-        config.initialize();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
         this.uuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();

@@ -35,6 +35,14 @@ public class InMemoryEngineTest {
 
         engine = null;
         System.gc();
+        System.runFinalization();
+
+        assertThat(weakReference.get(), is(not(nullValue())));
+
+        InMemoryEngine.removeEngine(defaults("test").config());
+
+        System.gc();
+        System.runFinalization();
 
         assertThat(weakReference.get(), is(nullValue()));
     }

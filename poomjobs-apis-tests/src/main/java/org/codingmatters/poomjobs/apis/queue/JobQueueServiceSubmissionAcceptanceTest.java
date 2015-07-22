@@ -21,14 +21,13 @@ import static org.junit.Assert.assertThat;
  */
 public abstract class JobQueueServiceSubmissionAcceptanceTest {
 
-    protected abstract TestConfigurationProvider getConfigurationProvider();
-
     private JobQueueService queue;
+
+    protected abstract TestConfigurationProvider getConfigurationProvider();
 
     @Before
     public void setUp() throws Exception {
         TestConfigurationProvider config = this.getConfigurationProvider();
-        config.initialize();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
     }

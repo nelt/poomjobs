@@ -15,15 +15,29 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 17/07/15.
  */
 public class InMemoryDispatcherTest {
+
+    @Test
+    public void testExplicitStop() throws Exception {
+        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(), new MockedJobQueueService());
+        String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
+        dispatcher.start();
+
+        assertThat(namedThreadState(threadName), is(not(TERMINATED)));
+
+        dispatcher.stop();
+
+        assertThat("dispatcher thread not stopped", namedThreadState(threadName), is(TERMINATED));
+    }
+
     @Test
     public void testDispatcherThreadStoppedWhenDispatcherGarbageCollected() throws Exception {
-
         InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(), new MockedJobQueueService());
         WeakReference<InMemoryDispatcher> dispatcherRef = new WeakReference<>(dispatcher);
 
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
 
+        waitUntil(() -> namedThreadState(threadName) != TERMINATED, 10 * 1000L);
         assertThat(namedThreadState(threadName), is(not(TERMINATED)));
 
         dispatcher = null;
