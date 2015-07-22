@@ -12,7 +12,7 @@ import java.util.UUID;
  */
 public class JobListMatchers {
 
-    static public Matcher<JobList> hasUUIDS(final UUID ... uuids) {
+    static public Matcher<JobList> exactlyUUIDS(final UUID... uuids) {
         return  new BaseMatcher<JobList>() {
             @Override
             public void describeTo(Description description) {

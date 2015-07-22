@@ -77,7 +77,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     }
 
     public JobList list(ListQuery query) {
-        return this.store.currentList();
+        return this.store.list(query);
     }
 
     public Job get(UUID uuid) throws NoSuchJobException {

@@ -11,7 +11,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.UUID;
 
-import static org.codingmatters.poomjobs.apis.list.JobListMatchers.hasUUIDS;
+import static org.codingmatters.poomjobs.apis.list.JobListMatchers.exactlyUUIDS;
 import static org.codingmatters.poomjobs.apis.services.list.ListQuery.limit;
 import static org.codingmatters.poomjobs.apis.services.queue.JobSubmission.job;
 import static org.codingmatters.poomjobs.test.utils.Helpers.range;
@@ -59,7 +59,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
 
         JobList result = this.list.list(limit(5).query());
 
-        assertThat(result, hasUUIDS(all[0]));
+        assertThat(result, exactlyUUIDS(all[0]));
     }
 
     @Test
@@ -77,7 +77,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
 
         assertThat(
                 this.list.list(limit(5).withOffset(0).query()),
-                hasUUIDS(all));
+                exactlyUUIDS(all));
     }
 
     @Test
@@ -86,11 +86,11 @@ public abstract class JoblistServiceQueryAcceptanceTest {
 
         assertThat(
                 this.list.list(limit(5).withOffset(0).query()),
-                hasUUIDS(range(all, 0, 5)));
+                exactlyUUIDS(range(all, 0, 5)));
 
         assertThat(
                 this.list.list(limit(5).withOffset(5).query()),
-                hasUUIDS(range(all, 5, 10)));
+                exactlyUUIDS(range(all, 5, 10)));
     }
 
     @Test
@@ -99,7 +99,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
 
         assertThat(
                 this.list.list(limit(5).withOffset(0).query()),
-                hasUUIDS(range(all, 0, 3)));
+                exactlyUUIDS(range(all, 0, 3)));
 
     }
 
@@ -109,7 +109,7 @@ public abstract class JoblistServiceQueryAcceptanceTest {
 
         assertThat(
                 this.list.list(limit(5).withOffset(5).query()),
-                hasUUIDS(range(all, 5, 8)));
+                exactlyUUIDS(range(all, 5, 8)));
 
     }
 

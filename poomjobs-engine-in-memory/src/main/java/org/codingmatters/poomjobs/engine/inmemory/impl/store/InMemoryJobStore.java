@@ -3,6 +3,7 @@ package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
+import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
@@ -40,8 +41,12 @@ public class InMemoryJobStore {
         }
     }
 
-    public synchronized JobList currentList() {
-        return new InMemoryJobList(this.jobs);
+    public synchronized JobList list(ListQuery query) {
+        JobList results = new InMemoryJobList();
+        for(long i = query.getOffset() ; i < query.getOffset() + query.getLimit() && i < this.jobs.size(); i++) {
+            results.add(this.jobs.get((int) i));
+        }
+        return results;
     }
 
     public synchronized JobList pendingJobs() {
