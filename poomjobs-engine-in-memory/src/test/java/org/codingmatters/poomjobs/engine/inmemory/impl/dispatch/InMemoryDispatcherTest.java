@@ -50,7 +50,7 @@ public class InMemoryDispatcherTest {
 
         assertThat("dispatcher not garbage collected", dispatcherRef.get(), is(nullValue()));
 
-        waitUntil(() -> namedThreadState(toString()).equals(TERMINATED), 10 * 1000L);
+        waitUntil(() -> namedThreadState(threadName).equals(TERMINATED), 10 * 1000L);
         assertThat("dispatcher thread not stopped", namedThreadState(threadName), is(TERMINATED));
     }
 

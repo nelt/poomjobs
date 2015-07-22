@@ -51,7 +51,7 @@ public class InMemoryJobStoreTest {
 
         assertThat("store not garbage collected", storeRef.get(), is(nullValue()));
 
-        waitUntil(() -> namedThreadState(toString()).equals(TERMINATED), 10 * 1000L);
+        waitUntil(() -> namedThreadState(threadName).equals(TERMINATED), 10 * 1000L);
         assertThat("cleaner thread not stopped", namedThreadState(threadName), isOneOf(TERMINATED, RUNNABLE));
     }
 
