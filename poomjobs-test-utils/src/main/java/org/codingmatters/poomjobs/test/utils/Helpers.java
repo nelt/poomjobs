@@ -5,6 +5,7 @@ import java.lang.management.ThreadInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by nel on 08/07/15.
@@ -44,6 +45,10 @@ public class Helpers {
             Thread.sleep(delay);
             waited += delay;
         }
+    }
+
+    public static <T> T[] range(T[] all, int from, int to) {
+        return Arrays.copyOfRange(all, from, to);
     }
 
     public interface Condition {

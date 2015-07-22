@@ -6,6 +6,7 @@ import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusExcep
 import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -30,29 +31,11 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService {
 
     static final HashMap<String, WeakReference<InMemoryEngine>> engines = new HashMap<>();
-
-    public static InMemoryEngine getEngine(Configuration config) {
-        synchronized (engines) {
-            String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
-            if (!engines.containsKey(name) || engines.get(name).get() == null) {
-                engines.put(name, new WeakReference<>(new InMemoryEngine(config)));
-            }
-            return engines.get(name).get();
-        }
-    }
-
-
-
-    public interface Options {
-        String ENGINE_CONFIGURATION = "enngine.configuration";
-    }
-
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
-
     private final InMemoryJobStore store = new InMemoryJobStore();
-
     private final InMemoryDispatcher dispatcher;
+    private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
 
     public InMemoryEngine(Configuration config) {
         this.config = config;
@@ -67,6 +50,15 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         this.dispatcher.start();
     }
 
+    public static InMemoryEngine getEngine(Configuration config) {
+        synchronized (engines) {
+            String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
+            if (!engines.containsKey(name) || engines.get(name).get() == null) {
+                engines.put(name, new WeakReference<>(new InMemoryEngine(config)));
+            }
+            return engines.get(name).get();
+        }
+    }
 
     public Job submit(JobSubmission jobSubmission) {
         JobBuilders.Builder builder = from(jobSubmission)
@@ -84,7 +76,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         return job;
     }
 
-    public JobList list() {
+    public JobList list(ListQuery query) {
         return this.store.currentList();
     }
 
@@ -129,12 +121,6 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         }
     }
 
-    private interface Mutator {
-        Job mutate(Job job);
-    }
-
-    private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
-
     @Override
     public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
         JobStatus result = this.get(uuid).getStatus();
@@ -146,6 +132,14 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     public void register(JobRunner runner, String... forJobs) {
         if(forJobs == null) return;
         this.dispatcher.register(runner, forJobs);
+    }
+
+    public interface Options {
+        String ENGINE_CONFIGURATION = "enngine.configuration";
+    }
+
+    private interface Mutator {
+        Job mutate(Job job);
     }
 
 
