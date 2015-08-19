@@ -43,6 +43,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         } else {
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
+
         this.store = new InMemoryJobStore(this);
         this.store.start();
     }
@@ -120,6 +121,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         JobStatus old = job.getStatus();
         job = mutator.mutate(job);
         job = operation.operate(job);
+
         this.store.store(job);
 
         if(! old.equals(job.getStatus())) {
@@ -131,6 +133,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
         JobStatus result = this.get(uuid).getStatus();
         this.statusMonitorGroup.monitor(uuid, monitor);
+
         return result;
     }
 
