@@ -24,10 +24,11 @@ public class InMemoryDispatcher {
     private final WeakReference<JobQueueService> queueServiceReference;
 
     private final DispatcherRunnable dispatcherRunnable;
-    private Thread dispatcherThread;
     private final HashMap<Future, JobRunner> runningRunners = new HashMap<>();
-
     private final ExecutorService runnerPool;
+    private final HashSet<JobRunner> lockedRunners = new HashSet<>();
+    private Thread dispatcherThread;
+
 
     public InMemoryDispatcher(InMemoryJobStore store, JobQueueService queueService) {
         this.storeReference = new WeakReference<>(store);
@@ -40,7 +41,6 @@ public class InMemoryDispatcher {
         this.runnerPool = Executors.newCachedThreadPool();
     }
 
-
     public void register(JobRunner runner, String... forJobs) {
         synchronized (this.runners) {
             for (String jobName : forJobs) {
@@ -51,11 +51,6 @@ public class InMemoryDispatcher {
             }
             this.runners.notifyAll();
         }
-    }
-
-    private JobList pendingJobs() {
-        InMemoryJobStore store = this.storeReference.get();
-        return store != null ? store.pendingJobs() : new InMemoryJobList();
     }
 
     private void start(UUID uuid) throws InconsistentJobStatusException, NoSuchJobException {
@@ -83,21 +78,45 @@ public class InMemoryDispatcher {
         }
     }
 
-    private final HashSet<JobRunner> lockedRunners = new HashSet<>();
-
     public void dispatch() {
         this.unlockTerminatedRunners();
-        this.pendingJobs().forEach(job -> {
-            JobRunner runner = this.lockRunnerForJob(job);
-            if(runner != null) {
-                try {
-                    this.startRunnerForJob(runner, job);
-                } catch (InconsistentJobStatusException | NoSuchJobException e) {
-                    e.printStackTrace();
+
+        for(String jobSpec : this.runners.keySet()) {
+            Job pending = this.getPendingJob(jobSpec);
+            if(pending != null) {
+                JobRunner runner = this.lockRunnerForJob(pending);
+                if(runner != null) {
+                    try {
+                        this.startRunnerForJob(runner, pending);
+                    } catch (InconsistentJobStatusException | NoSuchJobException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        });
+        }
+
+//        this.pendingJobs().forEach(job -> {
+//            JobRunner runner = this.lockRunnerForJob(job);
+//            if(runner != null) {
+//                try {
+//                    this.startRunnerForJob(runner, job);
+//                } catch (InconsistentJobStatusException | NoSuchJobException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
     }
+
+    private Job getPendingJob(String jobSpec) {
+        InMemoryJobStore store = this.storeReference.get();
+        return store != null ? store.pendingJob(jobSpec) : null;
+    }
+
+
+//    private JobList pendingJobs() {
+//        InMemoryJobStore store = this.storeReference.get();
+//        return store != null ? store.pendingJobs() : new InMemoryJobList();
+//    }
 
     private synchronized JobRunner lockRunnerForJob(Job job) {
         if (this.runners.containsKey(job.getJob()) && !this.runners.get(job.getJob()).isEmpty()) {

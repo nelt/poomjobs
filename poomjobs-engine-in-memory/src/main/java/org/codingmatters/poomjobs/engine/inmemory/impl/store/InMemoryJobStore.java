@@ -81,17 +81,35 @@ public class InMemoryJobStore {
         return result;
     }
 
+    public synchronized Job pendingJob(String jobSpec) {
+        for (Job job : this.jobs) {
+            if(job.getStatus() == JobStatus.PENDING && jobSpec.equals(job.getJob())) {
+                return job;
+            }
+        }
+        return null;
+    }
+
     public synchronized void clean() {
+        LinkedList<Job> expired = this.getExpiredJobs();
+        if(! expired.isEmpty()) {
+            this.remove(expired);
+        }
+    }
+
+    private LinkedList<Job> getExpiredJobs() {
         LinkedList<Job> expired = new LinkedList<>();
         for (Job finishedJob : this.finishedJobs) {
             if(this.isRetentionDelayExpired(finishedJob)) {
                 expired.add(finishedJob);
             }
         }
-        if(! expired.isEmpty()) {
-            this.jobs.removeAll(expired);
-            this.finishedJobs.removeAll(expired);
-        }
+        return expired;
+    }
+
+    private void remove(LinkedList<Job> jobs) {
+        this.jobs.removeAll(jobs);
+        this.finishedJobs.removeAll(jobs);
     }
 
     protected boolean isRetentionDelayExpired(Job finishedJob) {
@@ -134,4 +152,5 @@ public class InMemoryJobStore {
         if(forJobs == null) return;
         this.dispatcher.register(runner, forJobs);
     }
+
 }
