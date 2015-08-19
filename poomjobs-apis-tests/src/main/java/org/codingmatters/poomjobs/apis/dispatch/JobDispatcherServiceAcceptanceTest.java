@@ -24,9 +24,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 import static org.codingmatters.poomjobs.apis.services.queue.JobSubmission.job;
 import static org.codingmatters.poomjobs.test.utils.Helpers.list;
 import static org.codingmatters.poomjobs.test.utils.Helpers.waitUntil;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 /**
@@ -112,11 +110,12 @@ public abstract class JobDispatcherServiceAcceptanceTest {
 
         this.queue.submit(job("job").submission());
         waitUntil(() -> this.executed.size() == 1, 500L);
-        assertThat(this.executed.get(0), startsWith("runner1/"));
+        assertThat(this.executed.get(0), anyOf(startsWith("runner1/"), startsWith("runner2/")));
 
         this.queue.submit(job("job").submission());
         waitUntil(() -> this.executed.size() == 2, 500L);
-        assertThat(this.executed.get(1), startsWith("runner2/"));
+        assertThat(this.executed.get(1), anyOf(startsWith("runner1/"), startsWith("runner2/")));
+        assertThat(this.executed.get(1), not(startsWith(this.executed.get(0).substring(0, "runnerX/".length()))));
     }
 
     @Test
