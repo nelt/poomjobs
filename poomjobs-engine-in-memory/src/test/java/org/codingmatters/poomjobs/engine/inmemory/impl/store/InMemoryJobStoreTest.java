@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
+import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.MockedJobQueueService;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class InMemoryJobStoreTest {
 
     @Test
     public void testExplicitStop() throws Exception {
-        InMemoryJobStore store = new InMemoryJobStore(new MockedJobQueueService());
+        JobStore store = new InMemoryJobStore(new MockedJobQueueService());
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
 
@@ -32,8 +33,8 @@ public class InMemoryJobStoreTest {
 
     @Test
     public void testInMemoryJobStoreCleanerRemovedOnGC() throws Exception {
-        InMemoryJobStore store = new InMemoryJobStore(new MockedJobQueueService());
-        WeakReference<InMemoryJobStore> storeRef = new WeakReference<InMemoryJobStore>(store);
+        JobStore store = new InMemoryJobStore(new MockedJobQueueService());
+        WeakReference<JobStore> storeRef = new WeakReference<JobStore>(store);
 
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();

@@ -6,7 +6,7 @@ import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.JobDispatcher;
-import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
+import org.codingmatters.poomjobs.engine.JobStore;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -18,7 +18,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class InMemoryDispatcher implements JobDispatcher {
 
-    private final WeakReference<InMemoryJobStore> storeReference;
+    private final WeakReference<JobStore> storeReference;
     private final WeakReference<JobQueueService> queueServiceReference;
 
     private final DispatcherRunnable dispatcherRunnable;
@@ -26,7 +26,7 @@ public class InMemoryDispatcher implements JobDispatcher {
     private final RunnerStore runnerStore = new RunnerStore();
     private Thread dispatcherThread;
 
-    public InMemoryDispatcher(InMemoryJobStore store, JobQueueService queueService) {
+    public InMemoryDispatcher(JobStore store, JobQueueService queueService) {
         this.storeReference = new WeakReference<>(store);
         this.queueServiceReference = new WeakReference<>(queueService);
 
@@ -90,7 +90,7 @@ public class InMemoryDispatcher implements JobDispatcher {
     }
 
     private Job getPendingJob(String jobSpec) {
-        InMemoryJobStore store = this.storeReference.get();
+        JobStore store = this.storeReference.get();
         return store != null ? store.pendingJob(jobSpec) : null;
     }
 

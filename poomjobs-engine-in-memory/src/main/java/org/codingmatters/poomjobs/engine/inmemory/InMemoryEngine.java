@@ -13,6 +13,7 @@ import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
+import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
@@ -32,7 +33,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     static final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
-    private final InMemoryJobStore store;
+    private final JobStore store;
 
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
 

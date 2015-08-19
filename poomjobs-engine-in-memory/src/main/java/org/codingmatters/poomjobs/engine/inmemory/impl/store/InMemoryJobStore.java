@@ -7,6 +7,7 @@ import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.engine.JobDispatcher;
+import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
@@ -17,7 +18,7 @@ import java.util.*;
 /**
  * Created by nel on 09/07/15.
  */
-public class InMemoryJobStore {
+public class InMemoryJobStore implements JobStore {
 
     private final LinkedList<Job> jobs = new LinkedList<>();
     private final HashSet<Job> finishedJobs = new HashSet<>();
@@ -36,6 +37,7 @@ public class InMemoryJobStore {
         this.dispatcher = new InMemoryDispatcher(this, service);
     }
 
+    @Override
     public synchronized void store(Job job) {
         int index = this.jobs.indexOf(job);
         if(index != -1) {
@@ -58,6 +60,7 @@ public class InMemoryJobStore {
         }
     }
 
+    @Override
     public synchronized JobList list(ListQuery query) {
         JobList results = new InMemoryJobList();
         for(
@@ -82,6 +85,7 @@ public class InMemoryJobStore {
         return true;
     }
 
+    @Override
     public synchronized Job pendingJob(String jobSpec) {
         if(this.pendingJobs.containsKey(jobSpec) && ! this.pendingJobs.get(jobSpec).isEmpty()) {
             return this.pendingJobs.get(jobSpec).get(0);
@@ -90,6 +94,7 @@ public class InMemoryJobStore {
         }
     }
 
+    @Override
     public synchronized void clean() {
         LinkedList<Job> expired = this.getExpiredJobs();
         if(! expired.isEmpty()) {
@@ -125,6 +130,7 @@ public class InMemoryJobStore {
                 .isBefore(LocalDateTime.now());
     }
 
+    @Override
     public void start() {
         this.cleaner.requestStart();
         if(! this.cleanerThread.isAlive()) {
@@ -133,6 +139,7 @@ public class InMemoryJobStore {
         this.dispatcher.start();
     }
 
+    @Override
     public void stop() {
         this.dispatcher.stop();
 
@@ -145,6 +152,7 @@ public class InMemoryJobStore {
     }
 
 
+    @Override
     public Job get(Job job) {
         int index = this.jobs.indexOf(job);
         return index != -1 ? this.jobs.get(index) : null;
@@ -156,6 +164,7 @@ public class InMemoryJobStore {
         super.finalize();
     }
 
+    @Override
     public void register(JobRunner runner, String forJob) {
         if(forJob == null) return;
         this.dispatcher.register(runner, forJob);

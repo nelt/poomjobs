@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 
+import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.utils.StoppableRunnable;
 
 import java.lang.ref.WeakReference;
@@ -9,15 +10,15 @@ import java.lang.ref.WeakReference;
  */
 public class CleanerRunnable extends StoppableRunnable {
 
-    private final WeakReference<InMemoryJobStore> storeWeakReference;
+    private final WeakReference<JobStore> storeWeakReference;
 
-    public CleanerRunnable(InMemoryJobStore store) {
+    public CleanerRunnable(JobStore store) {
         this.storeWeakReference = new WeakReference<>(store);
     }
 
     @Override
     public void step() {
-        InMemoryJobStore store = this.storeWeakReference.get();
+        JobStore store = this.storeWeakReference.get();
         if(store != null) {
             store.clean();
         } else {
