@@ -1,11 +1,10 @@
 package org.codingmatters.poomjobs.engine.inmemory;
 
-import org.codingmatters.poomjobs.engine.inmemory.impl.InMemoryEngine;
 import org.junit.Test;
 
 import java.lang.ref.WeakReference;
 
-import static org.codingmatters.poomjobs.engine.inmemory.impl.InMemoryEngine.getEngine;
+import static org.codingmatters.poomjobs.engine.inmemory.InMemoryEngine.getEngine;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;

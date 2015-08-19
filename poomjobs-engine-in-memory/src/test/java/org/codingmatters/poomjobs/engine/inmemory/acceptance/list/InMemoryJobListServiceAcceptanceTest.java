@@ -3,8 +3,7 @@ package org.codingmatters.poomjobs.engine.inmemory.acceptance.list;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.list.JobListServiceAcceptanceTest;
 import org.codingmatters.poomjobs.engine.inmemory.acceptance.InMemoryConfigurationProvider;
-import org.codingmatters.poomjobs.engine.inmemory.impl.InMemoryEngine;
-import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
+import org.codingmatters.poomjobs.engine.inmemory.InMemoryEngine;
 import org.junit.After;
 import org.junit.Rule;
 

@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.impl;
+package org.codingmatters.poomjobs.engine.inmemory;
 
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.jobs.*;
@@ -13,14 +13,12 @@ import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
-import org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.time.LocalDateTime;
 import java.util.*;
 

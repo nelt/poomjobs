@@ -3,7 +3,7 @@ package org.codingmatters.poomjobs.engine.inmemory.acceptance;
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
-import org.codingmatters.poomjobs.engine.inmemory.impl.InMemoryEngine;
+import org.codingmatters.poomjobs.engine.inmemory.InMemoryEngine;
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
