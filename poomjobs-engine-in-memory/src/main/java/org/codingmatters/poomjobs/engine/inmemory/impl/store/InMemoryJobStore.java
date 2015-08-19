@@ -21,6 +21,7 @@ public class InMemoryJobStore {
 
     private final LinkedList<Job> jobs = new LinkedList<>();
     private final HashSet<Job> finishedJobs = new HashSet<>();
+    private final HashMap<String, List<Job>> pendingJobs = new HashMap<>();
 
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
@@ -42,6 +43,16 @@ public class InMemoryJobStore {
         } else {
             this.jobs.add(job);
         }
+
+        if(job.getStatus().equals(JobStatus.PENDING)) {
+            if(! this.pendingJobs.containsKey(job.getJob())) {
+                this.pendingJobs.put(job.getJob(), new LinkedList<>());
+            }
+            this.pendingJobs.get(job.getJob()).add(job);
+        } else if(this.pendingJobs.get(job.getJob()) != null && this.pendingJobs.get(job.getJob()).contains(job)){
+            this.pendingJobs.get(job.getJob()).remove(job);
+        }
+
         if(job.getEndTime() != null) {
             this.finishedJobs.add(job);
         }
@@ -71,23 +82,12 @@ public class InMemoryJobStore {
         return true;
     }
 
-    public synchronized JobList pendingJobs() {
-        JobList result = new InMemoryJobList();
-        for (Job job : this.jobs) {
-            if(job.getStatus() == JobStatus.PENDING) {
-                result.add(job);
-            }
-        }
-        return result;
-    }
-
     public synchronized Job pendingJob(String jobSpec) {
-        for (Job job : this.jobs) {
-            if(job.getStatus() == JobStatus.PENDING && jobSpec.equals(job.getJob())) {
-                return job;
-            }
+        if(this.pendingJobs.containsKey(jobSpec) && ! this.pendingJobs.get(jobSpec).isEmpty()) {
+            return this.pendingJobs.get(jobSpec).get(0);
+        } else {
+            return null;
         }
-        return null;
     }
 
     public synchronized void clean() {
@@ -107,7 +107,15 @@ public class InMemoryJobStore {
         return expired;
     }
 
-    private void remove(LinkedList<Job> jobs) {
+    private synchronized void remove(LinkedList<Job> jobs) {
+        for (Job job : jobs) {
+            if(job.getStatus().equals(JobStatus.PENDING)) {
+                if(this.pendingJobs.containsKey(job.getJob())) {
+                    this.pendingJobs.get(job.getJob()).remove(job);
+                }
+            }
+        }
+
         this.jobs.removeAll(jobs);
         this.finishedJobs.removeAll(jobs);
     }
