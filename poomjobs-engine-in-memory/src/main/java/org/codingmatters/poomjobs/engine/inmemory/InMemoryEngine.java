@@ -13,7 +13,6 @@ import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
-import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
@@ -33,8 +32,8 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     static final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
-    private final InMemoryJobStore store = new InMemoryJobStore();
-    private final InMemoryDispatcher dispatcher;
+    private final InMemoryJobStore store;
+
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
 
     public InMemoryEngine(Configuration config) {
@@ -44,10 +43,8 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         } else {
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
-        this.dispatcher = new InMemoryDispatcher(this.store, this);
-
+        this.store = new InMemoryJobStore(this);
         this.store.start();
-        this.dispatcher.start();
     }
 
     public static InMemoryEngine getEngine(Configuration config) {
@@ -139,13 +136,11 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
 
     @Override
     public void register(JobRunner runner, String... forJobs) {
-        if(forJobs == null) return;
-        this.dispatcher.register(runner, forJobs);
+        this.store.register(runner, forJobs);
     }
 
     @Override
     public void close() throws IOException {
-        this.dispatcher.stop();
         this.store.stop();
     }
 

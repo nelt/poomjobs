@@ -3,7 +3,10 @@ package org.codingmatters.poomjobs.engine.inmemory.impl.store;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
+import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.list.ListQuery;
+import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
+import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
@@ -22,10 +25,14 @@ public class InMemoryJobStore {
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
 
-    public InMemoryJobStore() {
+    private final InMemoryDispatcher dispatcher;
+
+    public InMemoryJobStore(JobQueueService service) {
         this.cleaner = new CleanerRunnable(this);
         this.cleanerThread = new Thread(this.cleaner);
         this.cleanerThread.setName("in-memory-job-store-cleaner@" + this.hashCode());
+
+        this.dispatcher = new InMemoryDispatcher(this, service);
     }
 
     public synchronized void store(Job job) {
@@ -97,9 +104,12 @@ public class InMemoryJobStore {
         if(! this.cleanerThread.isAlive()) {
             this.cleanerThread.start();
         }
+        this.dispatcher.start();
     }
 
     public void stop() {
+        this.dispatcher.stop();
+
         this.cleaner.requestStop();
         try {
             this.cleanerThread.join(10 * 1000L);
@@ -118,5 +128,10 @@ public class InMemoryJobStore {
     protected void finalize() throws Throwable {
         this.stop();
         super.finalize();
+    }
+
+    public void register(JobRunner runner, String... forJobs) {
+        if(forJobs == null) return;
+        this.dispatcher.register(runner, forJobs);
     }
 }

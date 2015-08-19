@@ -18,7 +18,8 @@ public class InMemoryDispatcherTest {
 
     @Test
     public void testExplicitStop() throws Exception {
-        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(), new MockedJobQueueService());
+        MockedJobQueueService queueService = new MockedJobQueueService();
+        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
 
@@ -31,7 +32,8 @@ public class InMemoryDispatcherTest {
 
     @Test
     public void testDispatcherThreadStoppedWhenDispatcherGarbageCollected() throws Exception {
-        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(), new MockedJobQueueService());
+        MockedJobQueueService queueService = new MockedJobQueueService();
+        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
         WeakReference<InMemoryDispatcher> dispatcherRef = new WeakReference<>(dispatcher);
 
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
