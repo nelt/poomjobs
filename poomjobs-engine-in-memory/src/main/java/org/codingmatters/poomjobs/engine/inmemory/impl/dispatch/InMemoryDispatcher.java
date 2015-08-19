@@ -82,29 +82,20 @@ public class InMemoryDispatcher {
         this.unlockTerminatedRunners();
 
         for(String jobSpec : this.runners.keySet()) {
-            Job pending = this.getPendingJob(jobSpec);
-            if(pending != null) {
-                JobRunner runner = this.lockRunnerForJob(pending);
-                if(runner != null) {
+            JobRunner runner = this.lockRunnerForJobSpec(jobSpec);
+            if(runner != null) {
+                Job pending = this.getPendingJob(jobSpec);
+                if(pending != null) {
                     try {
                         this.startRunnerForJob(runner, pending);
                     } catch (InconsistentJobStatusException | NoSuchJobException e) {
                         e.printStackTrace();
                     }
+                } else {
+                    this.unlockRunner(runner);
                 }
             }
         }
-
-//        this.pendingJobs().forEach(job -> {
-//            JobRunner runner = this.lockRunnerForJob(job);
-//            if(runner != null) {
-//                try {
-//                    this.startRunnerForJob(runner, job);
-//                } catch (InconsistentJobStatusException | NoSuchJobException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
     }
 
     private Job getPendingJob(String jobSpec) {
@@ -112,19 +103,20 @@ public class InMemoryDispatcher {
         return store != null ? store.pendingJob(jobSpec) : null;
     }
 
-
-//    private JobList pendingJobs() {
-//        InMemoryJobStore store = this.storeReference.get();
-//        return store != null ? store.pendingJobs() : new InMemoryJobList();
-//    }
-
     private synchronized JobRunner lockRunnerForJob(Job job) {
-        if (this.runners.containsKey(job.getJob()) && !this.runners.get(job.getJob()).isEmpty()) {
-            for (JobRunner runner : this.runners.get(job.getJob())) {
+        String jobSpec = job.getJob();
+        JobRunner runner = this.lockRunnerForJobSpec(jobSpec);
+        if (runner != null) return runner;
+        return null;
+    }
+
+    private JobRunner lockRunnerForJobSpec(String jobSpec) {
+        if (this.runners.containsKey(jobSpec) && !this.runners.get(jobSpec).isEmpty()) {
+            for (JobRunner runner : this.runners.get(jobSpec)) {
                 if(! this.lockedRunners.contains(runner)) {
                     this.lockedRunners.add(runner);
-                    this.runners.get(job.getJob()).remove(runner);
-                    this.runners.get(job.getJob()).add(runner);
+                    this.runners.get(jobSpec).remove(runner);
+                    this.runners.get(jobSpec).add(runner);
                     return runner;
                 }
             }
@@ -140,11 +132,15 @@ public class InMemoryDispatcher {
 
     private synchronized void unlockTerminatedRunners() {
         new HashMap<>(this.runningRunners).forEach((future, runner) -> {
-            if(future.isDone()) {
-                this.lockedRunners.remove(runner);
+            if (future.isDone()) {
+                this.unlockRunner(runner);
                 this.runningRunners.remove(future);
             }
         });
+    }
+
+    private synchronized void unlockRunner(JobRunner runner) {
+        this.lockedRunners.remove(runner);
     }
 
     @Override
