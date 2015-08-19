@@ -25,7 +25,7 @@ public class Helpers {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
         for (long tid : threadMXBean.getAllThreadIds()) {
             ThreadInfo ti = threadMXBean.getThreadInfo(tid);
-            if(name.equals(ti.getThreadName())) {
+            if(ti != null && name.equals(ti.getThreadName())) {
                 return ti.getThreadState();
             }
         }
