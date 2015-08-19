@@ -5,6 +5,7 @@ import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusExcep
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
 import java.lang.ref.WeakReference;
@@ -15,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by nel on 16/07/15.
  */
-public class InMemoryDispatcher {
+public class InMemoryDispatcher implements JobDispatcher {
 
     private final WeakReference<InMemoryJobStore> storeReference;
     private final WeakReference<JobQueueService> queueServiceReference;
@@ -48,6 +49,7 @@ public class InMemoryDispatcher {
         };
     }
 
+    @Override
     public void register(JobRunner runner, String jobSpec) {
         this.runnerStore.register(runner, jobSpec);
     }
@@ -60,6 +62,7 @@ public class InMemoryDispatcher {
     }
 
 
+    @Override
     public void dispatch() {
         this.runnerStore.unlockTerminated();
 
@@ -92,6 +95,7 @@ public class InMemoryDispatcher {
     }
 
 
+    @Override
     public void start() {
         this.dispatcherRunnable.requestStart();
         if(! this.dispatcherThread.isAlive()) {
@@ -99,6 +103,7 @@ public class InMemoryDispatcher {
         }
     }
 
+    @Override
     public void stop() {
         this.dispatcherRunnable.requestStop();
         try {

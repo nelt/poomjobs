@@ -6,13 +6,13 @@ import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
+import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.jobs.InMemoryJobList;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by nel on 09/07/15.
@@ -26,7 +26,7 @@ public class InMemoryJobStore {
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
 
-    private final InMemoryDispatcher dispatcher;
+    private final JobDispatcher dispatcher;
 
     public InMemoryJobStore(JobQueueService service) {
         this.cleaner = new CleanerRunnable(this);

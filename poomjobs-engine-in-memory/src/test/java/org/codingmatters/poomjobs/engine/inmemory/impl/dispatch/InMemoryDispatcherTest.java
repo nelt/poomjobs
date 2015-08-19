@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.dispatch;
 
+import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 import org.junit.Test;
 
@@ -19,7 +20,7 @@ public class InMemoryDispatcherTest {
     @Test
     public void testExplicitStop() throws Exception {
         MockedJobQueueService queueService = new MockedJobQueueService();
-        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
+        JobDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
 
@@ -33,8 +34,8 @@ public class InMemoryDispatcherTest {
     @Test
     public void testDispatcherThreadStoppedWhenDispatcherGarbageCollected() throws Exception {
         MockedJobQueueService queueService = new MockedJobQueueService();
-        InMemoryDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
-        WeakReference<InMemoryDispatcher> dispatcherRef = new WeakReference<>(dispatcher);
+        JobDispatcher dispatcher = new InMemoryDispatcher(new InMemoryJobStore(queueService), queueService);
+        WeakReference<JobDispatcher> dispatcherRef = new WeakReference<>(dispatcher);
 
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
