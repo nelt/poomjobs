@@ -43,10 +43,10 @@ public class InMemoryDispatcher {
 
     public void register(JobRunner runner, String jobSpec) {
         synchronized (this.runners) {
-                if (!this.runners.containsKey(jobSpec)) {
-                    this.runners.put(jobSpec, new LinkedList<>());
-                }
-                this.runners.get(jobSpec).add(runner);
+            if (!this.runners.containsKey(jobSpec)) {
+                this.runners.put(jobSpec, new LinkedList<>());
+            }
+            this.runners.get(jobSpec).add(runner);
             this.runners.notifyAll();
         }
     }
