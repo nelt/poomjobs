@@ -24,28 +24,4 @@ public class CleanerRunnable extends StoppableRunnable {
             this.requestStop();
         }
     }
-
-//    @Override
-//    public void run() {
-//        while(true) {
-//            InMemoryJobStore store = this.storeWeakReference.get();
-//            if(store == null) {return ;}
-//
-//            if(! store.isRunning()) {
-//                return;
-//            }
-//
-//            store.clean();
-//            store = null;
-//
-//            try {
-//                synchronized (this) {
-//                    this.wait(100L);
-//                }
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//                return;
-//            }
-//        }
-//    }
 }
