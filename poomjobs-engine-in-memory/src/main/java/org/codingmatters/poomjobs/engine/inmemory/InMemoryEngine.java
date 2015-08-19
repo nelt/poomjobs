@@ -14,6 +14,7 @@ import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
+import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
 
