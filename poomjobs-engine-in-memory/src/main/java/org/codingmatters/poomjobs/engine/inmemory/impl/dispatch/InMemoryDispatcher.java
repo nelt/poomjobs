@@ -103,14 +103,7 @@ public class InMemoryDispatcher {
         return store != null ? store.pendingJob(jobSpec) : null;
     }
 
-    private synchronized JobRunner lockRunnerForJob(Job job) {
-        String jobSpec = job.getJob();
-        JobRunner runner = this.lockRunnerForJobSpec(jobSpec);
-        if (runner != null) return runner;
-        return null;
-    }
-
-    private JobRunner lockRunnerForJobSpec(String jobSpec) {
+    private synchronized JobRunner lockRunnerForJobSpec(String jobSpec) {
         if (this.runners.containsKey(jobSpec) && !this.runners.get(jobSpec).isEmpty()) {
             for (JobRunner runner : this.runners.get(jobSpec)) {
                 if(! this.lockedRunners.contains(runner)) {
