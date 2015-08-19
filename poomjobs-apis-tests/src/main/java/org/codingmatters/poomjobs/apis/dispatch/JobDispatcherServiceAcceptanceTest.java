@@ -94,14 +94,10 @@ public abstract class JobDispatcherServiceAcceptanceTest {
 
     @Test
     public void testExecuteOnlyRegisteredJobType() throws Exception {
-        this.dispatcher.register(this.jobRunner("runner"), "job1", "job2");
+        this.dispatcher.register(this.jobRunner("runner"), "job1");
 
         UUID uuid = this.queue.submit(job("job1").submission()).getUuid();
         waitUntil(() -> this.executed.size() == 1, 500L);
-        assertThat(this.queue.get(uuid).getStatus(), is(DONE));
-
-        uuid = this.queue.submit(job("job2").submission()).getUuid();
-        waitUntil(() -> this.executed.size() == 2, 500L);
         assertThat(this.queue.get(uuid).getStatus(), is(DONE));
 
         uuid = this.queue.submit(job("job3").submission()).getUuid();

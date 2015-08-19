@@ -138,8 +138,8 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     }
 
     @Override
-    public void register(JobRunner runner, String... forJobs) {
-        this.store.register(runner, forJobs);
+    public void register(JobRunner runner, String jobSpec) {
+        this.store.register(runner, jobSpec);
     }
 
     @Override

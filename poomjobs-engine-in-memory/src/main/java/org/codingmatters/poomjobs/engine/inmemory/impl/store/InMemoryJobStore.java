@@ -148,9 +148,9 @@ public class InMemoryJobStore {
         super.finalize();
     }
 
-    public void register(JobRunner runner, String... forJobs) {
-        if(forJobs == null) return;
-        this.dispatcher.register(runner, forJobs);
+    public void register(JobRunner runner, String forJob) {
+        if(forJob == null) return;
+        this.dispatcher.register(runner, forJob);
     }
 
 }

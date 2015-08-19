@@ -41,14 +41,12 @@ public class InMemoryDispatcher {
         this.runnerPool = Executors.newCachedThreadPool();
     }
 
-    public void register(JobRunner runner, String... forJobs) {
+    public void register(JobRunner runner, String jobSpec) {
         synchronized (this.runners) {
-            for (String jobName : forJobs) {
-                if (!this.runners.containsKey(jobName)) {
-                    this.runners.put(jobName, new LinkedList<>());
+                if (!this.runners.containsKey(jobSpec)) {
+                    this.runners.put(jobSpec, new LinkedList<>());
                 }
-                this.runners.get(jobName).add(runner);
-            }
+                this.runners.get(jobSpec).add(runner);
             this.runners.notifyAll();
         }
     }
