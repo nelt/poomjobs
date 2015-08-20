@@ -16,6 +16,7 @@
         <module>poomjobs-parent</module>
         <module>poomjobs-apis</module>
         <module>poomjobs-apis-tests</module>
+        <module>poomjobs-engine-commons</module>
         <module>poomjobs-engine-in-memory</module>
 
         <module>poomjobs-test-utils</module>
