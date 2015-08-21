@@ -29,7 +29,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobListService, JobMonitoringService, JobDispatcherService, Closeable {
+public class InMemoryEngine implements JobDispatcherService, Closeable {
 
     static private final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
@@ -38,6 +38,8 @@ public class InMemoryEngine implements JobListService, JobMonitoringService, Job
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
     private final InMemoryDispatcher dispatcher;
     private JobQueueService queueService;
+    private JobListService listService;
+    private JobMonitoringService monitoringService;
 
     public InMemoryEngine(Configuration config) {
         this.config = config;
@@ -48,7 +50,10 @@ public class InMemoryEngine implements JobListService, JobMonitoringService, Job
         }
 
         this.store = new InMemoryJobStore();
+
         this.queueService = new AbstractJobQueueService(this.store, this.engineConfiguration, this.statusMonitorGroup);
+        this.listService = new AbstractJobListService(this.store);
+        this.monitoringService = new AbstractJobMonitoringService(this.store, this.statusMonitorGroup);
 
         this.dispatcher = new InMemoryDispatcher(this.store, this.queueService);
         this.store.start();
@@ -78,23 +83,15 @@ public class InMemoryEngine implements JobListService, JobMonitoringService, Job
         return this.queueService;
     }
 
-    public JobListService getJobListService() {return this;}
-    public JobMonitoringService getJobMonitoringService() {return this;}
+    public JobListService getJobListService() {
+        return this.listService;
+    }
+    public JobMonitoringService getJobMonitoringService() {
+        return this.monitoringService;
+    }
     public JobDispatcherService getJobDispatcherService() {return this;}
 
 
-    @Override
-    public JobList list(ListQuery query) {
-        return this.store.list(query);
-    }
-
-    @Override
-    public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
-        JobStatus result = this.store.get(JobBuilders.uuid(uuid)).getStatus();
-        this.statusMonitorGroup.monitor(uuid, monitor);
-
-        return result;
-    }
 
     @Override
     public void register(JobRunner runner, String jobSpec) {
