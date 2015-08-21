@@ -20,7 +20,7 @@ public class InMemoryJobStoreTest {
 
     @Test
     public void testExplicitStop() throws Exception {
-        JobStore store = new InMemoryJobStore(new MockedJobQueueService());
+        JobStore store = new InMemoryJobStore();
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
 
@@ -33,7 +33,7 @@ public class InMemoryJobStoreTest {
 
     @Test
     public void testInMemoryJobStoreCleanerRemovedOnGC() throws Exception {
-        JobStore store = new InMemoryJobStore(new MockedJobQueueService());
+        JobStore store = new InMemoryJobStore();
         WeakReference<JobStore> storeRef = new WeakReference<JobStore>(store);
 
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();

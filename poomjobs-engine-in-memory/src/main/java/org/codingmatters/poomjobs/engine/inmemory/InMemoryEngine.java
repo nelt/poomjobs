@@ -29,7 +29,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService, Closeable {
+public class InMemoryEngine implements JobListService, JobMonitoringService, JobDispatcherService, Closeable {
 
     static private final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
@@ -37,6 +37,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     private final JobStore store;
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
     private final InMemoryDispatcher dispatcher;
+    private JobQueueService queueService;
 
     public InMemoryEngine(Configuration config) {
         this.config = config;
@@ -46,8 +47,10 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
             this.engineConfiguration = EngineConfiguration.defaults().config();
         }
 
-        this.store = new InMemoryJobStore(this);
-        this.dispatcher = new InMemoryDispatcher(this.store, this);
+        this.store = new InMemoryJobStore();
+        this.queueService = new AbstractJobQueueService(this.store, this.engineConfiguration, this.statusMonitorGroup);
+
+        this.dispatcher = new InMemoryDispatcher(this.store, this.queueService);
         this.store.start();
         this.dispatcher.start();
     }
@@ -71,27 +74,14 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         }
     }
 
-    public JobQueueService getJobQueueService() {return this;}
+    public JobQueueService getJobQueueService() {
+        return this.queueService;
+    }
+
     public JobListService getJobListService() {return this;}
     public JobMonitoringService getJobMonitoringService() {return this;}
     public JobDispatcherService getJobDispatcherService() {return this;}
 
-    @Override
-    public Job submit(JobSubmission jobSubmission) {
-        JobBuilders.Builder builder = from(jobSubmission)
-                .withUuid(UUID.randomUUID())
-                .withSubmissionTime(LocalDateTime.now())
-                .withRetentionDelay(
-                        jobSubmission.getRetentionDelay() != null ?
-                                jobSubmission.getRetentionDelay() : this.engineConfiguration.getDefaultRetentionDelay()
-                )
-                .withStatus(PENDING)
-                ;
-        Job job = builder.job();
-        this.store.store(job);
-
-        return job;
-    }
 
     @Override
     public JobList list(ListQuery query) {
@@ -99,53 +89,8 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     }
 
     @Override
-    public Job get(UUID uuid) throws NoSuchJobException {
-        Job result = this.store.get(JobBuilders.uuid(uuid));
-        if(result == null) {
-            throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
-        }
-        return result;
-    }
-
-    @Override
-    public void start(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.START);
-    }
-
-    @Override
-    public void done(UUID uuid, String ... results) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.STOP, job -> from(job).withResults(results).job());
-    }
-
-    @Override
-    public void cancel(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.CANCEL);
-    }
-
-    @Override
-    public void fail(UUID uuid, String... errors) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.FAIL, j -> from(j).withErrors(errors).job());
-    }
-
-    private void mutateJob(UUID uuid, JobOperation operation) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, operation, job -> job);
-    }
-    private void mutateJob(UUID uuid, JobOperation operation, Mutator mutator) throws NoSuchJobException, InconsistentJobStatusException {
-        Job job = this.get(uuid);
-        JobStatus old = job.getStatus();
-        job = mutator.mutate(job);
-        job = operation.operate(job);
-
-        this.store.store(job);
-
-        if(! old.equals(job.getStatus())) {
-            this.statusMonitorGroup.changed(job, old);
-        }
-    }
-
-    @Override
     public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
-        JobStatus result = this.get(uuid).getStatus();
+        JobStatus result = this.store.get(JobBuilders.uuid(uuid)).getStatus();
         this.statusMonitorGroup.monitor(uuid, monitor);
 
         return result;
@@ -165,10 +110,4 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     public interface Options {
         String ENGINE_CONFIGURATION = "enngine.configuration";
     }
-
-    private interface Mutator {
-        Job mutate(Job job);
-    }
-
-
 }

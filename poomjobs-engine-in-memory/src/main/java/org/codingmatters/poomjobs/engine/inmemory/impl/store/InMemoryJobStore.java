@@ -27,7 +27,7 @@ public class InMemoryJobStore implements JobStore {
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
 
-    public InMemoryJobStore(JobQueueService service) {
+    public InMemoryJobStore() {
         this.cleaner = new CleanerRunnable(this);
         this.cleanerThread = new Thread(this.cleaner);
         this.cleanerThread.setName("in-memory-job-store-cleaner@" + this.hashCode());
