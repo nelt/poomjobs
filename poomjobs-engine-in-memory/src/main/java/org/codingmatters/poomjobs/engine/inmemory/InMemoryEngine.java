@@ -13,6 +13,7 @@ import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
+import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
@@ -29,17 +30,19 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 07/07/15.
  */
-public class InMemoryEngine implements JobDispatcherService, Closeable {
+public class InMemoryEngine implements Closeable {
 
     static private final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
     private final JobStore store;
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
-    private final InMemoryDispatcher dispatcher;
-    private JobQueueService queueService;
-    private JobListService listService;
-    private JobMonitoringService monitoringService;
+    private final JobDispatcher dispatcher;
+
+    private final JobQueueService queueService;
+    private final JobListService listService;
+    private final JobMonitoringService monitoringService;
+    private final JobDispatcherService dispatcherService;
 
     public InMemoryEngine(Configuration config) {
         this.config = config;
@@ -56,6 +59,8 @@ public class InMemoryEngine implements JobDispatcherService, Closeable {
         this.monitoringService = new AbstractJobMonitoringService(this.store, this.statusMonitorGroup);
 
         this.dispatcher = new InMemoryDispatcher(this.store, this.queueService);
+        this.dispatcherService = new AbstractJobDispatcherService(this.dispatcher);
+
         this.store.start();
         this.dispatcher.start();
     }
@@ -82,20 +87,14 @@ public class InMemoryEngine implements JobDispatcherService, Closeable {
     public JobQueueService getJobQueueService() {
         return this.queueService;
     }
-
     public JobListService getJobListService() {
         return this.listService;
     }
     public JobMonitoringService getJobMonitoringService() {
         return this.monitoringService;
     }
-    public JobDispatcherService getJobDispatcherService() {return this;}
-
-
-
-    @Override
-    public void register(JobRunner runner, String jobSpec) {
-        this.dispatcher.register(runner, jobSpec);
+    public JobDispatcherService getJobDispatcherService() {
+        return this.dispatcherService;
     }
 
     @Override
