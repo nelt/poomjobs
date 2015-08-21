@@ -27,14 +27,10 @@ public class InMemoryJobStore implements JobStore {
     private final Thread cleanerThread;
     private final CleanerRunnable cleaner;
 
-    private final JobDispatcher dispatcher;
-
     public InMemoryJobStore(JobQueueService service) {
         this.cleaner = new CleanerRunnable(this);
         this.cleanerThread = new Thread(this.cleaner);
         this.cleanerThread.setName("in-memory-job-store-cleaner@" + this.hashCode());
-
-        this.dispatcher = new InMemoryDispatcher(this, service);
     }
 
     @Override
@@ -136,13 +132,10 @@ public class InMemoryJobStore implements JobStore {
         if(! this.cleanerThread.isAlive()) {
             this.cleanerThread.start();
         }
-        this.dispatcher.start();
     }
 
     @Override
     public void stop() {
-        this.dispatcher.stop();
-
         this.cleaner.requestStop();
         try {
             this.cleanerThread.join(10 * 1000L);
@@ -163,11 +156,4 @@ public class InMemoryJobStore implements JobStore {
         this.stop();
         super.finalize();
     }
-
-    @Override
-    public void register(JobRunner runner, String forJob) {
-        if(forJob == null) return;
-        this.dispatcher.register(runner, forJob);
-    }
-
 }

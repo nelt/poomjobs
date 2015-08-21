@@ -37,6 +37,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
     private final JobStore store;
 
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
+    private final InMemoryDispatcher dispatcher;
 
     public InMemoryEngine(Configuration config) {
         this.config = config;
@@ -47,7 +48,9 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         }
 
         this.store = new InMemoryJobStore(this);
+        this.dispatcher = new InMemoryDispatcher(this.store, this);
         this.store.start();
+        this.dispatcher.start();
     }
 
     public static InMemoryEngine getEngine(Configuration config) {
@@ -141,12 +144,13 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
 
     @Override
     public void register(JobRunner runner, String jobSpec) {
-        this.store.register(runner, jobSpec);
+        this.dispatcher.register(runner, jobSpec);
     }
 
     @Override
     public void close() throws IOException {
         this.store.stop();
+        this.dispatcher.stop();
     }
 
     public interface Options {
