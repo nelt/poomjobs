@@ -21,22 +21,22 @@ public class InMemoryServiceFactory implements ServiceFactory {
 
     @Override
     public JobQueueService queueService(Configuration config) {
-        return InMemoryEngine.getEngine(config);
+        return InMemoryEngine.getEngine(config).getJobQueueService();
     }
 
     @Override
     public JobListService listService(Configuration config) {
-        return InMemoryEngine.getEngine(config);
+        return InMemoryEngine.getEngine(config).getJobListService();
     }
 
     @Override
     public JobMonitoringService monitoringService(Configuration config) {
-        return InMemoryEngine.getEngine(config);
+        return InMemoryEngine.getEngine(config).getJobMonitoringService();
     }
 
     @Override
     public JobDispatcherService dispatcherService(Configuration config) {
-        return InMemoryEngine.getEngine(config);
+        return InMemoryEngine.getEngine(config).getJobDispatcherService();
     }
 
 }

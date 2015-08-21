@@ -31,11 +31,10 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
  */
 public class InMemoryEngine implements JobQueueService, JobListService, JobMonitoringService, JobDispatcherService, Closeable {
 
-    static final HashMap<String, InMemoryEngine> engines = new HashMap<>();
+    static private final HashMap<String, InMemoryEngine> engines = new HashMap<>();
     private final Configuration config;
     private final EngineConfiguration engineConfiguration;
     private final JobStore store;
-
     private final StatusMonitorGroup statusMonitorGroup = new StatusMonitorGroup();
     private final InMemoryDispatcher dispatcher;
 
@@ -53,7 +52,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         this.dispatcher.start();
     }
 
-    public static InMemoryEngine getEngine(Configuration config) {
+    static public InMemoryEngine getEngine(Configuration config) {
         synchronized (engines) {
             String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
             if (!engines.containsKey(name)) {
@@ -63,7 +62,7 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         }
     }
 
-    public static void removeEngine(Configuration config) {
+    static public void removeEngine(Configuration config) {
         synchronized (engines) {
             String name = (String) config.getOption(InMemoryServiceFactory.NAME_OPTION);
             if (engines.containsKey(name)) {
@@ -72,6 +71,12 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         }
     }
 
+    public JobQueueService getJobQueueService() {return this;}
+    public JobListService getJobListService() {return this;}
+    public JobMonitoringService getJobMonitoringService() {return this;}
+    public JobDispatcherService getJobDispatcherService() {return this;}
+
+    @Override
     public Job submit(JobSubmission jobSubmission) {
         JobBuilders.Builder builder = from(jobSubmission)
                 .withUuid(UUID.randomUUID())
@@ -88,10 +93,12 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         return job;
     }
 
+    @Override
     public JobList list(ListQuery query) {
         return this.store.list(query);
     }
 
+    @Override
     public Job get(UUID uuid) throws NoSuchJobException {
         Job result = this.store.get(JobBuilders.uuid(uuid));
         if(result == null) {
@@ -100,10 +107,12 @@ public class InMemoryEngine implements JobQueueService, JobListService, JobMonit
         return result;
     }
 
+    @Override
     public void start(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException {
         this.mutateJob(uuid, JobOperation.START);
     }
 
+    @Override
     public void done(UUID uuid, String ... results) throws NoSuchJobException, InconsistentJobStatusException {
         this.mutateJob(uuid, JobOperation.STOP, job -> from(job).withResults(results).job());
     }
