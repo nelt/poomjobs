@@ -8,6 +8,7 @@ import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.StatusMonitorer;
+import org.codingmatters.poomjobs.engine.logs.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,7 +37,7 @@ public class BaseJobQueueService implements JobQueueService {
 
     @Override
     public Job submit(JobSubmission jobSubmission) {
-        log.info("submission request {}", jobSubmission);
+        log.debug("job submitted {}", jobSubmission.getJob());
         JobBuilders.Builder builder = from(jobSubmission)
                 .withUuid(UUID.randomUUID())
                 .withSubmissionTime(LocalDateTime.now())
@@ -49,6 +50,7 @@ public class BaseJobQueueService implements JobQueueService {
         Job job = builder.job();
         this.store.store(job);
 
+        Audit.log("job submitted {}", job);
         return job;
     }
 
