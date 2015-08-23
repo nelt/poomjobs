@@ -5,6 +5,7 @@ import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor.Weak;
+import org.codingmatters.poomjobs.engine.StatusMonitorer;
 import org.junit.Before;
 import org.junit.Test;
 

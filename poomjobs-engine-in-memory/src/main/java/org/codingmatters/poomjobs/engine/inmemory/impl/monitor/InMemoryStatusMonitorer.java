@@ -3,6 +3,7 @@ package org.codingmatters.poomjobs.engine.inmemory.impl.monitor;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
+import org.codingmatters.poomjobs.engine.StatusMonitorer;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;

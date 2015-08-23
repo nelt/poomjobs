@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.services;
 
 import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
@@ -9,10 +9,10 @@ import java.lang.ref.WeakReference;
 /**
  * Created by nel on 21/08/15.
  */
-public class AbstractJobDispatcherService implements JobDispatcherService {
+public class BaseJobDispatcherService implements JobDispatcherService {
     private final JobDispatcher dispatcher;
 
-    public AbstractJobDispatcherService(JobDispatcher dispatcher) {
+    public BaseJobDispatcherService(JobDispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 

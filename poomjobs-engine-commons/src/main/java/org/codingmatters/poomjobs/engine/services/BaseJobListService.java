@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.services;
 
 import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
@@ -8,10 +8,10 @@ import org.codingmatters.poomjobs.engine.JobStore;
 /**
  * Created by nel on 21/08/15.
  */
-public class AbstractJobListService implements JobListService {
+public class BaseJobListService implements JobListService {
     private final JobStore store;
 
-    public AbstractJobListService(JobStore store) {
+    public BaseJobListService(JobStore store) {
         this.store = store;
     }
 

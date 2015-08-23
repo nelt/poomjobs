@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory;
+package org.codingmatters.poomjobs.engine.services;
 
 import org.codingmatters.poomjobs.apis.jobs.*;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
@@ -7,7 +7,7 @@ import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
-import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorer;
+import org.codingmatters.poomjobs.engine.StatusMonitorer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,13 +18,13 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 /**
  * Created by nel on 21/08/15.
  */
-public class AbstractJobQueueService implements JobQueueService {
+public class BaseJobQueueService implements JobQueueService {
 
     private final JobStore store;
     private final EngineConfiguration engineConfiguration;
     private final StatusMonitorer statusMonitorer;
 
-    public AbstractJobQueueService(JobStore store, EngineConfiguration engineConfiguration, StatusMonitorer statusMonitorer) {
+    public BaseJobQueueService(JobStore store, EngineConfiguration engineConfiguration, StatusMonitorer statusMonitorer) {
         this.store = store;
         this.engineConfiguration = engineConfiguration;
         this.statusMonitorer = statusMonitorer;

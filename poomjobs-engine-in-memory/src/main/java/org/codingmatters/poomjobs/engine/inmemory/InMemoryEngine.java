@@ -10,8 +10,12 @@ import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.inmemory.impl.dispatch.InMemoryDispatcher;
 import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.InMemoryStatusMonitorer;
-import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorer;
+import org.codingmatters.poomjobs.engine.StatusMonitorer;
 import org.codingmatters.poomjobs.engine.inmemory.impl.store.InMemoryJobStore;
+import org.codingmatters.poomjobs.engine.services.BaseJobDispatcherService;
+import org.codingmatters.poomjobs.engine.services.BaseJobListService;
+import org.codingmatters.poomjobs.engine.services.BaseJobMonitoringService;
+import org.codingmatters.poomjobs.engine.services.BaseJobQueueService;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -46,12 +50,12 @@ public class InMemoryEngine implements Closeable {
 
         this.store = new InMemoryJobStore();
 
-        this.queueService = new AbstractJobQueueService(this.store, this.engineConfiguration, this.statusMonitorer);
-        this.listService = new AbstractJobListService(this.store);
-        this.monitoringService = new AbstractJobMonitoringService(this.store, this.statusMonitorer);
+        this.queueService = new BaseJobQueueService(this.store, this.engineConfiguration, this.statusMonitorer);
+        this.listService = new BaseJobListService(this.store);
+        this.monitoringService = new BaseJobMonitoringService(this.store, this.statusMonitorer);
 
         this.dispatcher = new InMemoryDispatcher(this.store, this.queueService);
-        this.dispatcherService = new AbstractJobDispatcherService(this.dispatcher);
+        this.dispatcherService = new BaseJobDispatcherService(this.dispatcher);
 
         this.store.start();
         this.dispatcher.start();

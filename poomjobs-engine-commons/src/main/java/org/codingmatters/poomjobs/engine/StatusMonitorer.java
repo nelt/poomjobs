@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.engine.inmemory.impl.monitor;
+package org.codingmatters.poomjobs.engine;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
