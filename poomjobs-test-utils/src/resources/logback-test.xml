@@ -1,5 +1,4 @@
 <configuration scan="true" scanPeriod="30 seconds" debug="false">
-    <contextName>tradefnd</contextName>
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
@@ -9,7 +8,8 @@
             </pattern>
         </encoder>
     </appender>
-    <logger name="com.db.tradefinder.selenium" level="debug">
+
+    <root level="DEBUG">
         <appender-ref ref="STDOUT" />
-    </logger>
+    </root>
 </configuration>
