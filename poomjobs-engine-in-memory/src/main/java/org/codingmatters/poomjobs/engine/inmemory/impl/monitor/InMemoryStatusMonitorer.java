@@ -10,10 +10,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by nel on 16/07/15.
  */
-public class StatusMonitorGroup {
+public class InMemoryStatusMonitorer implements StatusMonitorer {
 
     private final HashMap<UUID, Set<StatusChangedMonitor>> statusMonitors = new HashMap<>();
 
+    @Override
     public synchronized void monitor(UUID uuid, StatusChangedMonitor monitor) {
         if(! this.statusMonitors.containsKey(uuid)) {
             this.statusMonitors.put(uuid, new HashSet<>());
@@ -21,6 +22,7 @@ public class StatusMonitorGroup {
         this.statusMonitors.get(uuid).add(monitor);
     }
 
+    @Override
     public synchronized void changed(Job job, JobStatus old) {
         if(this.statusMonitors.containsKey(job.getUuid())) {
             LinkedList<StatusChangedMonitor> invalidatedMonitors = new LinkedList<>();
@@ -39,6 +41,7 @@ public class StatusMonitorGroup {
         }
     }
 
+    @Override
     public synchronized int monitorCount() {
         AtomicInteger result = new AtomicInteger(0);
         this.statusMonitors.forEach((uuid, statusChangedMonitors) -> {

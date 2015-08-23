@@ -2,13 +2,12 @@ package org.codingmatters.poomjobs.engine.inmemory;
 
 import org.codingmatters.poomjobs.apis.jobs.*;
 import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
-import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
-import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
+import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorer;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -23,12 +22,12 @@ public class AbstractJobQueueService implements JobQueueService {
 
     private final JobStore store;
     private final EngineConfiguration engineConfiguration;
-    private final StatusMonitorGroup statusMonitorGroup;
+    private final StatusMonitorer statusMonitorer;
 
-    public AbstractJobQueueService(JobStore store, EngineConfiguration engineConfiguration, StatusMonitorGroup statusMonitorGroup) {
+    public AbstractJobQueueService(JobStore store, EngineConfiguration engineConfiguration, StatusMonitorer statusMonitorer) {
         this.store = store;
         this.engineConfiguration = engineConfiguration;
-        this.statusMonitorGroup = statusMonitorGroup;
+        this.statusMonitorer = statusMonitorer;
     }
 
     @Override
@@ -90,7 +89,7 @@ public class AbstractJobQueueService implements JobQueueService {
         this.store.store(job);
 
         if(! old.equals(job.getStatus())) {
-            this.statusMonitorGroup.changed(job, old);
+            this.statusMonitorer.changed(job, old);
         }
     }
 

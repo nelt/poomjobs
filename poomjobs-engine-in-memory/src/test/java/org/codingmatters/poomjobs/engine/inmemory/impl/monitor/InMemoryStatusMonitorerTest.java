@@ -17,15 +17,15 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by nel on 16/07/15.
  */
-public class StatusMonitorGroupTest {
+public class InMemoryStatusMonitorerTest {
 
-    private StatusMonitorGroup group;
+    private StatusMonitorer group;
     private Job job;
     private AtomicInteger counter;
 
     @Before
     public void setUp() throws Exception {
-        this.group = new StatusMonitorGroup();
+        this.group = new InMemoryStatusMonitorer();
         this.job = JobBuilders.build("job").withStatus(JobStatus.RUNNING).job();
 
         this.counter = new AtomicInteger(0);

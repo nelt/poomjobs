@@ -6,7 +6,7 @@ import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
 import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.JobStore;
-import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorGroup;
+import org.codingmatters.poomjobs.engine.inmemory.impl.monitor.StatusMonitorer;
 
 import java.util.UUID;
 
@@ -16,17 +16,17 @@ import java.util.UUID;
 public class AbstractJobMonitoringService implements JobMonitoringService {
 
     private final JobStore store;
-    private final StatusMonitorGroup statusMonitorGroup;
+    private final StatusMonitorer statusMonitorer;
 
-    public AbstractJobMonitoringService(JobStore store, StatusMonitorGroup statusMonitorGroup) {
+    public AbstractJobMonitoringService(JobStore store, StatusMonitorer statusMonitorer) {
         this.store = store;
-        this.statusMonitorGroup = statusMonitorGroup;
+        this.statusMonitorer = statusMonitorer;
     }
 
     @Override
     public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws NoSuchJobException {
         JobStatus result = this.store.get(JobBuilders.uuid(uuid)).getStatus();
-        this.statusMonitorGroup.monitor(uuid, monitor);
+        this.statusMonitorer.monitor(uuid, monitor);
 
         return result;
     }
