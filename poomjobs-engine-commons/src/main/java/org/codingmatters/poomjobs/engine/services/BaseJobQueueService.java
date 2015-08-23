@@ -8,6 +8,8 @@ import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.StatusMonitorer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -19,6 +21,8 @@ import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
  * Created by nel on 21/08/15.
  */
 public class BaseJobQueueService implements JobQueueService {
+
+    static private final Logger log = LoggerFactory.getLogger(BaseJobQueueService.class);
 
     private final JobStore store;
     private final EngineConfiguration engineConfiguration;
@@ -32,6 +36,7 @@ public class BaseJobQueueService implements JobQueueService {
 
     @Override
     public Job submit(JobSubmission jobSubmission) {
+        log.info("submission request {}", jobSubmission);
         JobBuilders.Builder builder = from(jobSubmission)
                 .withUuid(UUID.randomUUID())
                 .withSubmissionTime(LocalDateTime.now())

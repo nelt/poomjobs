@@ -15,53 +15,51 @@
     <packaging>pom</packaging>
 
     <properties>
-        <junit.version>4.12</junit.version>
-        <hamcrest.version>1.3</hamcrest.version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.codingmatters.poomjobs</groupId>
             <artifactId>poomjobs-test-utils</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
         </dependency>
     </dependencies>
 
     <dependencyManagement>
         <dependencies>
-            <!-- Internal -->
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-test-utils</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-apis</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-apis-tests</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-engine-commons</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-engine-in-memory</artifactId>
-                <version>0.0.1-SNAPSHOT</version>
+                <version>${project.version}</version>
             </dependency>
-            <!-- END Internal -->
-
-            <dependency>
-                <groupId>org.apache.zookeeper</groupId>
-                <artifactId>zookeeper</artifactId>
-                <version>3.4.6</version>
-            </dependency>
-
         </dependencies>
     </dependencyManagement>
     
