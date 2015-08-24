@@ -30,25 +30,25 @@ public class Audit {
 
     static public String logError(String msg) {
         String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.info(errorPrefix + msg);
+        log.error(errorPrefix + msg);
         return errorPrefix;
     }
 
     static public String logError(String format, Object arg) {
         String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.info(errorPrefix + format, arg);
+        log.error(errorPrefix + format, arg);
         return errorPrefix;
     }
 
     static public String logError(String format, Object arg1, Object arg2) {
         String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.info(errorPrefix + format, arg1, arg2);
+        log.error(errorPrefix + format, arg1, arg2);
         return errorPrefix;
     }
 
     static public String logError(String format, Object... arguments) {
         String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.info(errorPrefix + format, arguments);
+        log.error(errorPrefix + format, arguments);
         return errorPrefix;
     }
 
