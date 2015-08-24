@@ -1,10 +1,10 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.dispatch;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
-import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 
 import java.util.UUID;
 

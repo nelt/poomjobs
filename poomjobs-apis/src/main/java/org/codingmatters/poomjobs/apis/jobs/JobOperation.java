@@ -1,6 +1,6 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 
 import java.util.Arrays;
 import java.util.HashSet;

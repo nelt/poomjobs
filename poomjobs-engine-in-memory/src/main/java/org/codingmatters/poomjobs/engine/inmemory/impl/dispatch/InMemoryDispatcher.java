@@ -1,12 +1,16 @@
 package org.codingmatters.poomjobs.engine.inmemory.impl.dispatch;
 
+import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
-import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.JobDispatcher;
 import org.codingmatters.poomjobs.engine.JobStore;
+import org.codingmatters.poomjobs.engine.exception.StoreException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -17,6 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by nel on 16/07/15.
  */
 public class InMemoryDispatcher implements JobDispatcher {
+
+    static private Logger log = LoggerFactory.getLogger(InMemoryDispatcher.class);
 
     private final WeakReference<JobStore> storeReference;
     private final WeakReference<JobQueueService> queueServiceReference;
@@ -54,7 +60,7 @@ public class InMemoryDispatcher implements JobDispatcher {
         this.runnerStore.register(runner, jobSpec);
     }
 
-    private void start(UUID uuid) throws InconsistentJobStatusException, NoSuchJobException {
+    private void start(UUID uuid) throws ServiceException {
         JobQueueService queueService = this.queueServiceReference.get();
         if(queueService != null) {
             queueService.start(uuid);
@@ -73,8 +79,8 @@ public class InMemoryDispatcher implements JobDispatcher {
                 if(pending != null) {
                     try {
                         this.startRunnerForJob(runner, pending);
-                    } catch (InconsistentJobStatusException | NoSuchJobException e) {
-                        e.printStackTrace();
+                    } catch (ServiceException e) {
+                        log.error("error starting job " + pending.getUuid(), e);
                     }
                 } else {
                     this.runnerStore.unlock(runner);
@@ -83,7 +89,7 @@ public class InMemoryDispatcher implements JobDispatcher {
         }
     }
 
-    private void startRunnerForJob(JobRunner runner, Job job) throws InconsistentJobStatusException, NoSuchJobException {
+    private void startRunnerForJob(JobRunner runner, Job job) throws ServiceException {
         this.start(job.getUuid());
         Future<?> running = this.runnerPool.submit(new RunnerRunnable(job, runner));
         this.runnerStore.running(running, runner);
@@ -91,7 +97,12 @@ public class InMemoryDispatcher implements JobDispatcher {
 
     private Job getPendingJob(String jobSpec) {
         JobStore store = this.storeReference.get();
-        return store != null ? store.pendingJob(jobSpec) : null;
+        try {
+            return store != null ? store.pendingJob(jobSpec) : null;
+        } catch (StoreException e) {
+            log.error("error getting penging job", e);
+            return null;
+        }
     }
 
 

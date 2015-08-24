@@ -1,6 +1,6 @@
 package org.codingmatters.poomjobs.apis.jobs;
 
-import org.codingmatters.poomjobs.apis.jobs.exception.JobListException;
+import org.codingmatters.poomjobs.apis.exception.JobListException;
 
 import java.util.List;
 import java.util.UUID;

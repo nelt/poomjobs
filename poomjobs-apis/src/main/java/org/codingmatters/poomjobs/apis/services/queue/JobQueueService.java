@@ -1,7 +1,9 @@
 package org.codingmatters.poomjobs.apis.services.queue;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
+import org.codingmatters.poomjobs.apis.exception.ServiceException;
 
 import java.util.UUID;
 
@@ -9,15 +11,15 @@ import java.util.UUID;
  * Created by nel on 05/07/15.
  */
 public interface JobQueueService {
-    Job submit(JobSubmission jobSubmission);
+    Job submit(JobSubmission jobSubmission) throws ServiceException;
 
-    Job get(UUID uuid) throws NoSuchJobException;
+    Job get(UUID uuid) throws ServiceException;
 
-    void start(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException;
+    void start(UUID uuid) throws ServiceException;
 
-    void done(UUID uuid, String ... results) throws NoSuchJobException, InconsistentJobStatusException;
+    void done(UUID uuid, String ... results) throws ServiceException;
 
-    void cancel(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException;
+    void cancel(UUID uuid) throws ServiceException;
 
-    void fail(UUID uuid, String ... errors) throws NoSuchJobException, InconsistentJobStatusException;
+    void fail(UUID uuid, String ... errors) throws ServiceException;
 }

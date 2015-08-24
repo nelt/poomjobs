@@ -2,15 +2,9 @@ package org.codingmatters.poomjobs.apis.dispatch;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
-import org.codingmatters.poomjobs.apis.jobs.JobStatus;
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
-import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
-import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 

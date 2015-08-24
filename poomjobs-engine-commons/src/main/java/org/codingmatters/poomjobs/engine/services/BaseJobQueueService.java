@@ -1,13 +1,15 @@
 package org.codingmatters.poomjobs.engine.services;
 
+import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.*;
-import org.codingmatters.poomjobs.apis.jobs.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
-import org.codingmatters.poomjobs.apis.services.queue.NoSuchJobException;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.EngineConfiguration;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.StatusMonitorer;
+import org.codingmatters.poomjobs.engine.exception.StoreException;
 import org.codingmatters.poomjobs.engine.logs.Audit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +50,11 @@ public class BaseJobQueueService implements JobQueueService {
                 .withStatus(PENDING)
                 ;
         Job job = builder.job();
-        this.store.store(job);
+        try {
+            this.store.store(job);
+        } catch (StoreException e) {
+
+        }
 
         Audit.log("job submitted {}", job);
         return job;
@@ -56,38 +62,65 @@ public class BaseJobQueueService implements JobQueueService {
 
 
     @Override
-    public Job get(UUID uuid) throws NoSuchJobException {
-        Job result = this.store.get(JobBuilders.uuid(uuid));
+    public Job get(UUID uuid) throws ServiceException {
+        Job result = null;
+        try {
+            result = this.store.get(JobBuilders.uuid(uuid));
+        } catch (StoreException e) {
+            log.error("error getting job from store " + uuid, e);
+            throw new ServiceException(e);
+        }
         if(result == null) {
             throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
         }
+        Audit.log("get job {}", uuid);
         return result;
     }
 
     @Override
-    public void start(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.START);
+    public void start(UUID uuid) throws ServiceException {
+        try {
+            this.mutateJob(uuid, JobOperation.START);
+            Audit.log("started job {}", uuid);
+        } catch (StoreException e) {
+            throw new ServiceException(e);
+        }
     }
 
     @Override
-    public void done(UUID uuid, String ... results) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.STOP, job -> from(job).withResults(results).job());
+    public void done(UUID uuid, String ... results) throws ServiceException {
+        try {
+            this.mutateJob(uuid, JobOperation.STOP, job -> from(job).withResults(results).job());
+            Audit.log("stopped job {}", uuid);
+        } catch (StoreException e) {
+            throw new ServiceException(e);
+        }
     }
 
     @Override
-    public void cancel(UUID uuid) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.CANCEL);
+    public void cancel(UUID uuid) throws ServiceException {
+        try {
+            this.mutateJob(uuid, JobOperation.CANCEL);
+            Audit.log("canceled job {}", uuid);
+        } catch (StoreException e) {
+            throw new ServiceException(e);
+        }
     }
 
     @Override
-    public void fail(UUID uuid, String... errors) throws NoSuchJobException, InconsistentJobStatusException {
-        this.mutateJob(uuid, JobOperation.FAIL, j -> from(j).withErrors(errors).job());
+    public void fail(UUID uuid, String... errors) throws ServiceException {
+        try {
+            this.mutateJob(uuid, JobOperation.FAIL, j -> from(j).withErrors(errors).job());
+            Audit.log("failed job {}", uuid);
+        } catch (StoreException e) {
+            throw new ServiceException(e);
+        }
     }
 
-    private void mutateJob(UUID uuid, JobOperation operation) throws NoSuchJobException, InconsistentJobStatusException {
+    private void mutateJob(UUID uuid, JobOperation operation) throws StoreException, ServiceException {
         this.mutateJob(uuid, operation, job -> job);
     }
-    private void mutateJob(UUID uuid, JobOperation operation, Mutator mutator) throws NoSuchJobException, InconsistentJobStatusException {
+    private void mutateJob(UUID uuid, JobOperation operation, Mutator mutator) throws StoreException, ServiceException {
         Job job = this.get(uuid);
         JobStatus old = job.getStatus();
         job = mutator.mutate(job);
