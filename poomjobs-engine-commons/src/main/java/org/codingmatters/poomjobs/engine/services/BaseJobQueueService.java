@@ -38,8 +38,7 @@ public class BaseJobQueueService implements JobQueueService {
     }
 
     @Override
-    public Job submit(JobSubmission jobSubmission) {
-        log.debug("job submitted {}", jobSubmission.getJob());
+    public Job submit(JobSubmission jobSubmission) throws ServiceException {
         JobBuilders.Builder builder = from(jobSubmission)
                 .withUuid(UUID.randomUUID())
                 .withSubmissionTime(LocalDateTime.now())
@@ -53,10 +52,12 @@ public class BaseJobQueueService implements JobQueueService {
         try {
             this.store.store(job);
         } catch (StoreException e) {
-
+            String errorReference = Audit.logError("job submission failed {}", job.getUuid());
+            log.error(errorReference + "job submission failed " + job.getUuid(), e);
+            throw new ServiceException(e);
         }
 
-        Audit.log("job submitted {}", job);
+        Audit.log("job submitted {}", job.getUuid());
         return job;
     }
 
@@ -67,10 +68,13 @@ public class BaseJobQueueService implements JobQueueService {
         try {
             result = this.store.get(JobBuilders.uuid(uuid));
         } catch (StoreException e) {
-            log.error("error getting job from store " + uuid, e);
+            String errorReference = Audit.logError("error getting job {}", uuid);
+            log.error(errorReference + "error getting job from store " + uuid, e);
             throw new ServiceException(e);
         }
         if(result == null) {
+            String errorReference = Audit.logError("error getting job {}", uuid);
+            log.error(errorReference + "no such job with uuid=" + uuid.toString());
             throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
         }
         Audit.log("get job {}", uuid);
@@ -83,6 +87,8 @@ public class BaseJobQueueService implements JobQueueService {
             this.mutateJob(uuid, JobOperation.START);
             Audit.log("started job {}", uuid);
         } catch (StoreException e) {
+            String errorReference = Audit.logError("error starting job {}", uuid);
+            log.error(errorReference + "error starting job " + uuid.toString(), e);
             throw new ServiceException(e);
         }
     }
@@ -93,6 +99,8 @@ public class BaseJobQueueService implements JobQueueService {
             this.mutateJob(uuid, JobOperation.STOP, job -> from(job).withResults(results).job());
             Audit.log("stopped job {}", uuid);
         } catch (StoreException e) {
+            String errorReference = Audit.logError("error stopping job {}", uuid);
+            log.error(errorReference + "error stopping job " + uuid.toString(), e);
             throw new ServiceException(e);
         }
     }
@@ -103,6 +111,8 @@ public class BaseJobQueueService implements JobQueueService {
             this.mutateJob(uuid, JobOperation.CANCEL);
             Audit.log("canceled job {}", uuid);
         } catch (StoreException e) {
+            String errorReference = Audit.logError("error cancelling job {}", uuid);
+            log.error(errorReference + "error cancelling job " + uuid.toString(), e);
             throw new ServiceException(e);
         }
     }
@@ -113,6 +123,8 @@ public class BaseJobQueueService implements JobQueueService {
             this.mutateJob(uuid, JobOperation.FAIL, j -> from(j).withErrors(errors).job());
             Audit.log("failed job {}", uuid);
         } catch (StoreException e) {
+            String errorReference = Audit.logError("error failing job {}", uuid);
+            log.error(errorReference + "error failing job " + uuid.toString(), e);
             throw new ServiceException(e);
         }
     }

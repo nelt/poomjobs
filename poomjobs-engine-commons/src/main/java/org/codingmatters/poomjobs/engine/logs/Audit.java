@@ -3,6 +3,8 @@ package org.codingmatters.poomjobs.engine.logs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
+
 /**
  * Created by nel on 23/08/15.
  */
@@ -26,14 +28,28 @@ public class Audit {
         log.info(format, arguments);
     }
 
-    static public void log(String msg, Throwable t) {
-        log.info(msg, t);
+    static public String logError(String msg) {
+        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+        log.info(errorPrefix + msg);
+        return errorPrefix;
     }
-//
-//    void info(String var1, Object var2, Object var3);
-//
-//    void info(String var1, Object... var2);
-//
-//    void info(String var1, Throwable var2);
+
+    static public String logError(String format, Object arg) {
+        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+        log.info(errorPrefix + format, arg);
+        return errorPrefix;
+    }
+
+    static public String logError(String format, Object arg1, Object arg2) {
+        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+        log.info(errorPrefix + format, arg1, arg2);
+        return errorPrefix;
+    }
+
+    static public String logError(String format, Object... arguments) {
+        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+        log.info(errorPrefix + format, arguments);
+        return errorPrefix;
+    }
 
 }
