@@ -3,6 +3,7 @@ package org.codingmatters.poomjobs.engine.services;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobDispatcherService;
 import org.codingmatters.poomjobs.apis.services.dispatch.JobRunner;
 import org.codingmatters.poomjobs.engine.JobDispatcher;
+import org.codingmatters.poomjobs.engine.logs.Audit;
 
 import java.lang.ref.WeakReference;
 
@@ -19,6 +20,7 @@ public class BaseJobDispatcherService implements JobDispatcherService {
     @Override
     public void register(JobRunner runner, String jobSpec) {
         this.dispatcher.register(runner, jobSpec);
+        Audit.log("registered job runner for {}", jobSpec);
     }
 
 }
