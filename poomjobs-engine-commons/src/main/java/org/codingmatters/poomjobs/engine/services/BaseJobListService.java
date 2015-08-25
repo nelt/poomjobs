@@ -29,7 +29,7 @@ public class BaseJobListService implements JobListService {
         try {
             result = this.store.list(query);
         } catch (StoreException e) {
-            String errorReference = Audit.logError("error querying job list {}", query);
+            String errorReference = Audit.error().log("error querying job list {}", query);
             log.error(errorReference + "error querying job list " + query, e);
             throw new ServiceException(e);
         }

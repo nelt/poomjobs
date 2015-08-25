@@ -11,6 +11,36 @@ import java.util.UUID;
 public class Audit {
 
     static private final Logger log = LoggerFactory.getLogger("AUDIT");
+    static private ErrorAudit ERROR = new ErrorAudit() {
+
+        @Override
+        public String log(String msg) {
+            String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+            log.error(errorPrefix + msg);
+            return errorPrefix;
+        }
+
+        @Override
+        public String log(String format, Object arg) {
+            String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+            log.error(errorPrefix + format, arg);
+            return errorPrefix;
+        }
+
+        @Override
+        public String log(String format, Object arg1, Object arg2) {
+            String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+            log.error(errorPrefix + format, arg1, arg2);
+            return errorPrefix;
+        }
+
+        @Override
+        public String log(String format, Object... arguments) {
+            String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
+            log.error(errorPrefix + format, arguments);
+            return errorPrefix;
+        }
+    };
 
     static public void log(String msg) {
         log.info(msg);
@@ -28,28 +58,15 @@ public class Audit {
         log.info(format, arguments);
     }
 
-    static public String logError(String msg) {
-        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.error(errorPrefix + msg);
-        return errorPrefix;
+    static public ErrorAudit error() {
+        return ERROR;
     }
 
-    static public String logError(String format, Object arg) {
-        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.error(errorPrefix + format, arg);
-        return errorPrefix;
-    }
-
-    static public String logError(String format, Object arg1, Object arg2) {
-        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.error(errorPrefix + format, arg1, arg2);
-        return errorPrefix;
-    }
-
-    static public String logError(String format, Object... arguments) {
-        String errorPrefix = String.format("[errorId=%s] ", UUID.randomUUID().toString());
-        log.error(errorPrefix + format, arguments);
-        return errorPrefix;
+    public interface ErrorAudit {
+        String log(String msg);
+        String log(String format, Object arg);
+        String log(String format, Object arg1, Object arg2);
+        String log(String format, Object... arguments);
     }
 
 }

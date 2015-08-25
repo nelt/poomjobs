@@ -5,7 +5,6 @@ import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.monitoring.StatusChangedMonitor;
-import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.engine.JobStore;
 import org.codingmatters.poomjobs.engine.StatusMonitorer;
 import org.codingmatters.poomjobs.engine.exception.StoreException;
@@ -36,7 +35,7 @@ public class BaseJobMonitoringService implements JobMonitoringService {
         try {
             result = this.store.get(JobBuilders.uuid(uuid)).getStatus();
         } catch (StoreException e) {
-            String errorReference = Audit.logError("error monitoring job {}", uuid);
+            String errorReference = Audit.error().log("error monitoring job {}", uuid);
             log.error(errorReference + "error getting job from store " + uuid.toString(), e);
             throw new ServiceException(e);
         }
