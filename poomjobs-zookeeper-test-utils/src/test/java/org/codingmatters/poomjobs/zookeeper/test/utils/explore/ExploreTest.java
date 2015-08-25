@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 public class ExploreTest {
 
     public static final String PATH = "/tests";
+
     @ClassRule
     static public ZookeeperTestSupport zookeeperTestSupport = new ZookeeperTestSupport();
     private ZooKeeper zookeeper;
@@ -64,7 +65,7 @@ public class ExploreTest {
         ExecutorService executor = Executors.newFixedThreadPool(10);
         for(int i = 0 ; i < 10 ; i++) {
             executor.execute(() -> {
-                for (int j = 0; j < 1000; j++) {
+                for (int j = 0; j < 10; j++) {
                     try {
                         String n = this.zookeeper.create(PATH + "/" + UUID.randomUUID().toString(), new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                         Thread.sleep(10);

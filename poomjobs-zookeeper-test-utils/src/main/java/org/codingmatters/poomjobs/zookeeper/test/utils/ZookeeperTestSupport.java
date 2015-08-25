@@ -8,6 +8,7 @@ import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.server.ServerCnxnFactory;
 import org.apache.zookeeper.server.ZooKeeperServer;
+import org.codingmatters.poomjobs.zookeeper.test.utils.embedded.ZookeeperEmbeddedServer;
 import org.junit.rules.ExternalResource;
 
 import java.io.File;
@@ -22,6 +23,9 @@ public class ZookeeperTestSupport extends ExternalResource {
     private File serverDir;
     private ZooKeeperServer zookeeperServer;
     private int zkPort;
+
+//    private ZookeeperEmbeddedServer embeddedServer;
+
     private ZooKeeper client;
 
 
@@ -42,6 +46,7 @@ public class ZookeeperTestSupport extends ExternalResource {
         standaloneServerFactory.startup(zookeeperServer);
         System.out.printf("zookeeperServer started");
 
+//        this.embeddedServer
         this.client = this.createClient(3000, event -> {});
     }
 
