@@ -7,21 +7,26 @@ import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperTestSupport;
 import org.junit.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 /**
  * Created by nel on 22/07/15.
  */
-@Ignore
 public class ExploreTest {
 
     public static final String PATH = "/tests";
+    static private final Logger log = LoggerFactory.getLogger(ExploreTest.class);
+    @Rule
+    public ZookeeperTestSupport zookeeperTestSupport = new ZookeeperTestSupport();
 
-    @ClassRule
-    static public ZookeeperTestSupport zookeeperTestSupport = new ZookeeperTestSupport();
     private ZooKeeper zookeeper;
 
     @Before
@@ -47,7 +52,7 @@ public class ExploreTest {
                     break;
             }
 
-            System.out.println("seen : " + watchedEvent);
+            log.debug("seen : {}", watchedEvent);
         });
 
         zookeeperTestSupport.createPath(PATH, ZooDefs.Ids.OPEN_ACL_UNSAFE);
@@ -55,17 +60,18 @@ public class ExploreTest {
 
     @After
     public void tearDown() throws Exception {
-        zookeeperTestSupport.recursiveDelete(PATH);
         this.zookeeper.close();
     }
 
-
     @Test
     public void testHello() throws Exception {
+        int producerCount = 10;
+        int nodesPerProducer = 10;
+
         ExecutorService executor = Executors.newFixedThreadPool(10);
-        for(int i = 0 ; i < 10 ; i++) {
+        for(int i = 0 ; i < producerCount ; i++) {
             executor.execute(() -> {
-                for (int j = 0; j < 10; j++) {
+                for (int j = 0; j < nodesPerProducer; j++) {
                     try {
                         String n = this.zookeeper.create(PATH + "/" + UUID.randomUUID().toString(), new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
                         Thread.sleep(10);
@@ -76,14 +82,17 @@ public class ExploreTest {
             });
         }
 
-
         executor.shutdown();
         while (! executor.isTerminated()) {
             Stat stat = this.zookeeper.exists(PATH, false);
-            System.out.println(PATH + " has " + stat.getNumChildren() + " children");
+            log.debug("{} has {} children", PATH, stat.getNumChildren());
             Thread.sleep(1000);
         }
 
+        Stat stat = this.zookeeper.exists(PATH, false);
+        log.debug("{} has {} children", PATH, stat.getNumChildren());
+
+        assertThat(stat.getNumChildren(), is(producerCount * nodesPerProducer));
     }
 
 }

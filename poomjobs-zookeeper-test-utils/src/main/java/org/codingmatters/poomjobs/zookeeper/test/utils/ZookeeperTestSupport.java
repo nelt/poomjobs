@@ -20,57 +20,25 @@ import java.util.UUID;
  */
 public class ZookeeperTestSupport extends ExternalResource {
 
-    private File serverDir;
-    private ZooKeeperServer zookeeperServer;
-    private int zkPort;
-
-//    private ZookeeperEmbeddedServer embeddedServer;
-
+    private ZookeeperEmbeddedServer embeddedServer;
     private ZooKeeper client;
-
 
     @Override
     protected void before() throws Throwable {
-        int tickTime = 2000;
-        int numConnections = 5000;
-        String dataDirectory = System.getProperty("java.io.tmpdir");
+        this.embeddedServer = new ZookeeperEmbeddedServer();
+        this.embeddedServer.start();
 
-        do {
-            this.serverDir = this.getRandomTestDir(dataDirectory);
-        } while(this.serverDir.exists());
-
-        this.zookeeperServer = new ZooKeeperServer(serverDir, serverDir, tickTime);
-        ServerCnxnFactory standaloneServerFactory = ServerCnxnFactory.createFactory(0, numConnections);
-        this.zkPort = standaloneServerFactory.getLocalPort();
-
-        standaloneServerFactory.startup(zookeeperServer);
-        System.out.printf("zookeeperServer started");
-
-//        this.embeddedServer
         this.client = this.createClient(3000, event -> {});
-    }
-
-    private File getRandomTestDir(String dataDirectory) {
-        return new File(dataDirectory, "test-zookeeper-" + UUID.randomUUID()).getAbsoluteFile();
     }
 
     @Override
     protected void after() {
-        this.zookeeperServer.shutdown();
-        while(this.zookeeperServer.isRunning()) {
-            try {
-                Thread.sleep(100L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        System.out.println("zookeeper server stopped");
-
-        this.delete(this.serverDir);
+        this.embeddedServer.stop();
+        this.embeddedServer.cleanUp();
     }
 
     public String getUrl() {
-        return "127.0.0.1:" + this.zkPort;
+        return this.embeddedServer.getUrl();
     }
 
 
@@ -89,16 +57,6 @@ public class ZookeeperTestSupport extends ExternalResource {
         }
     }
 
-
-    private void delete(File file) {
-        if(file.isDirectory()) {
-            for (File child : file.listFiles()) {
-                this.delete(child);
-            }
-
-        }
-        file.delete();
-    }
 
     public ZooKeeper createClient(int sessionTimeout, Watcher watcher) throws Exception {
         return new ZooKeeper(this.getUrl(), sessionTimeout, watcher);
