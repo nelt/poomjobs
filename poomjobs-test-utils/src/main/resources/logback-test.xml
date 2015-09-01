@@ -3,7 +3,7 @@
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %relative %-5level %logger{5}.%method %line - %msg%n
+                %relative %-5level [%thread] %logger{5}.%method %line - %msg%n
             </pattern>
         </encoder>
     </appender>
@@ -12,5 +12,5 @@
         <appender-ref ref="STDOUT" />
     </root>
 
-    <logger name="org.apache.zookeeper" level="INFO"/>
+    <logger name="org.apache.zookeeper" level="ERROR"/>
 </configuration>

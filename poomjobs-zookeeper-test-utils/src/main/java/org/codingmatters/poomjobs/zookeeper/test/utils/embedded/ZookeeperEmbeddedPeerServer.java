@@ -53,6 +53,7 @@ public class ZookeeperEmbeddedPeerServer {
                 log.error("error running embedded quorum peer", e);
             }
         });
+        this.serverThread.setName("embedded-server-" + this.serverId + "-monitor");
         this.serverThread.start();
 
         log.debug("embedded zookeeper server launched [url={} ; data-dir={}]",
