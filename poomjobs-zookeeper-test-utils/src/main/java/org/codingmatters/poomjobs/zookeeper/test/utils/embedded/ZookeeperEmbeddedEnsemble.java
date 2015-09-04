@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.zookeeper.test.utils.embedded;
 
+import org.codingmatters.poomjobs.zookeeper.test.utils.JMXBug;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +12,10 @@ import static org.codingmatters.poomjobs.zookeeper.test.utils.embedded.ServerCon
  * Created by nel on 25/08/15.
  */
 public class ZookeeperEmbeddedEnsemble {
+
+    static {
+        JMXBug.fix();
+    }
 
     static private final Logger log = LoggerFactory.getLogger(ZookeeperEmbeddedEnsemble.class);
 
@@ -76,5 +81,9 @@ public class ZookeeperEmbeddedEnsemble {
 
     public void cleanServer(int i) throws Exception {
         this.servers[i].clean();
+    }
+
+    public String getSpec(int i) {
+        return this.servers[i].getSpec();
     }
 }

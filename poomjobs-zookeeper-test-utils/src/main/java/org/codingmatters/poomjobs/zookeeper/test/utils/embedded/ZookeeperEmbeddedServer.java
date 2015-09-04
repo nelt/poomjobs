@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.zookeeper.test.utils.embedded;
 
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.ZooKeeperServerMain;
+import org.codingmatters.poomjobs.zookeeper.test.utils.JMXBug;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZKUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,10 @@ import java.io.IOException;
  * Created by nel on 25/08/15.
  */
 public class ZookeeperEmbeddedServer {
+    static {
+        JMXBug.fix();
+    }
+
     static private final Logger log = LoggerFactory.getLogger(ZookeeperEmbeddedServer.class);
 
     private final File dataDir;

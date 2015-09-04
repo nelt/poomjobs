@@ -31,7 +31,6 @@ public class ZookeeperEmbeddedPeerServer {
     private EmbeddedQuorumPeerMain peerMain;
 
 
-
     public ZookeeperEmbeddedPeerServer(File dataDir, int clientPort, int serverId, String[] serversSpec) {
         this.dataDir = dataDir;
         this.clientPort = clientPort;
@@ -71,11 +70,11 @@ public class ZookeeperEmbeddedPeerServer {
         }
 
         ServerConfigBuilder configBuilder = new ServerConfigBuilder()
-                .withProperty("tickTime", "2000")
                 .withProperty("dataDir", this.dataDir.getAbsolutePath())
                 .withProperty("clientPort", "" + this.clientPort)
                 .withProperty("initLimit", "10")
                 .withProperty("syncLimit", "5")
+//                .withProperty("tickTime", "-1")
                 ;
         for(int x = 0 ; x < this.serversSpec.length ; x++) {
             configBuilder.withProperty("server." + x, this.serversSpec[x]);
@@ -113,6 +112,10 @@ public class ZookeeperEmbeddedPeerServer {
 
     public String getUrl() {
         return "localhost:" + this.clientPort;
+    }
+
+    public String getSpec() {
+        return this.serversSpec[this.serverId];
     }
 
 

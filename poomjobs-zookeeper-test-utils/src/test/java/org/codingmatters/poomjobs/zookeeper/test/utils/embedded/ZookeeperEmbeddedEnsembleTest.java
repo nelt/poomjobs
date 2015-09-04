@@ -7,7 +7,6 @@ import org.apache.zookeeper.data.Stat;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZKUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +28,12 @@ public class ZookeeperEmbeddedEnsembleTest {
 
     @Before
     public void setUp() throws Exception {
+        System.setProperty("zookeeper.jmx.log4j.disable", "true");
+
         this.ensemble = new ZookeeperEmbeddedEnsemble(3);
+        for(int i = 0 ; i < 3 ; i++) {
+            log.debug("server {} : {} - {}", i, this.ensemble.getSpec(i), this.ensemble.getUrl(i));
+        }
         this.ensemble.startEnsemble();
         this.ensemble.waitEnsembleStartup();
 
@@ -37,6 +41,7 @@ public class ZookeeperEmbeddedEnsembleTest {
 
     @After
     public void tearDown() throws Exception {
+        log.debug("tearing down ensemble...");
         this.ensemble.stopEnsemble();
         this.ensemble.cleanEnsemble();
     }
@@ -49,34 +54,48 @@ public class ZookeeperEmbeddedEnsembleTest {
         zookeeper.close();
     }
 
-    @Ignore
     @Test
     public void testStartEnsembleStopOneServer() throws Exception {
-        ZooKeeper zookeeper0 = ZKUtils.connectedClient(this.ensemble.getUrl(0));
-        String path = "/" + UUID.randomUUID().toString();
-        zookeeper0.create(path, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        log.info("created node");
+        ZooKeeper zookeeper0 = null;
+        ZooKeeper zookeeper2 = null;
+        Stat stat = null;
+        try {
+            zookeeper0 = ZKUtils.connectedClient(this.ensemble.getUrl(0));
+            String path = "/" + UUID.randomUUID().toString();
+            zookeeper0.create(path, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+            log.info("created node");
+            zookeeper0.close();
 
-        ensemble.stopServer(1);
+            ensemble.stopServer(2);
 
-        Stat stat = zookeeper0.exists(path, false);
-        assertThat(stat, is(notNullValue()));
-        log.info("stated from 0: {}", stat);
-
-        zookeeper0.create(path + "/yop", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
-        log.info("created child");
-
-        stat = zookeeper0.exists(path + "/yop", false);
-        assertThat(stat, is(notNullValue()));
-        log.info("stated from 0: {}", stat);
-
-        log.info("connecting to server 2 : {}", this.ensemble.getUrl(2));
-        ZooKeeper zookeeper2 = ZKUtils.connectedClient(this.ensemble.getUrl(2));
-        stat = zookeeper2.exists(path, false);
-        assertThat(stat, is(notNullValue()));
-        log.info("stated from 2 : {}", stat);
-
-        zookeeper0.close();
-        zookeeper2.close();
+//            log.info("client 0 state : {}", zookeeper0.getState());
+//
+//            stat = zookeeper0.exists(path, false);
+//            assertThat(stat, is(notNullValue()));
+//            log.info("stated from 0: {}", stat);
+//
+//            zookeeper0.create(path + "/yop", new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
+//            log.info("created child");
+//
+//            stat = zookeeper0.exists(path + "/yop", false);
+//            assertThat(stat, is(notNullValue()));
+//            log.info("stated from 0: {}", stat);
+//
+            log.info("connecting to server 1 : {}", this.ensemble.getUrl(1));
+            zookeeper2 = ZKUtils.connectedClient(this.ensemble.getUrl(1));
+            stat = zookeeper2.exists(path, false);
+            assertThat(stat, is(notNullValue()));
+            log.info("stated from 1 : {}", stat);
+        } catch (Exception e) {
+            log.error("unexpected" , e);
+            throw e;
+        } finally {
+            if(zookeeper0 != null ) {
+                zookeeper0.close();
+            }
+            if(zookeeper2 != null) {
+                zookeeper2.close();
+            }
+        }
     }
 }

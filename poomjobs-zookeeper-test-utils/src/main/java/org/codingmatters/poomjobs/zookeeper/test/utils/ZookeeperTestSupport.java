@@ -6,14 +6,10 @@ import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
-import org.apache.zookeeper.server.ServerCnxnFactory;
-import org.apache.zookeeper.server.ZooKeeperServer;
 import org.codingmatters.poomjobs.zookeeper.test.utils.embedded.ZookeeperEmbeddedServer;
 import org.junit.rules.ExternalResource;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.UUID;
 
 /**
  * Created by nel on 22/07/15.
@@ -25,6 +21,8 @@ public class ZookeeperTestSupport extends ExternalResource {
 
     @Override
     protected void before() throws Throwable {
+        System.setProperty("zookeeper.jmx.log4j.disable", "true");
+
         this.embeddedServer = new ZookeeperEmbeddedServer();
         this.embeddedServer.start();
 
