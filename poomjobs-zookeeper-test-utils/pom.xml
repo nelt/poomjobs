@@ -31,6 +31,11 @@
             <artifactId>javassist</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.codingmatters.poomjobs</groupId>
+            <artifactId>poomjobs-zookeeper-client</artifactId>
+        </dependency>
+
     </dependencies>
     
 </project>

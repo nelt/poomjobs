@@ -16,6 +16,7 @@ import java.util.ArrayList;
  */
 public class ZookeeperTestSupport extends ExternalResource {
 
+
     private ZookeeperEmbeddedServer embeddedServer;
     private ZooKeeper client;
 
