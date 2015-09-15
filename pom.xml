@@ -18,10 +18,9 @@
         <module>poomjobs-apis-tests</module>
         <module>poomjobs-engine-commons</module>
         <module>poomjobs-engine-in-memory</module>
-        <module>poomjobs-zookeeper-client</module>
-
         <module>poomjobs-test-utils</module>
-        <module>poomjobs-zookeeper-test-utils</module>
+
+        <module>poomjobs-zookeeper-support</module>
     </modules>
 
 

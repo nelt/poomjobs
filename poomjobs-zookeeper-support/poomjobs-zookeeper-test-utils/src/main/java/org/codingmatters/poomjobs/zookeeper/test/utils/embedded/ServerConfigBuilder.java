@@ -1,6 +1,5 @@
 package org.codingmatters.poomjobs.zookeeper.test.utils.embedded;
 
-import com.sun.corba.se.spi.activation.Server;
 import org.apache.zookeeper.server.ServerConfig;
 import org.apache.zookeeper.server.quorum.QuorumPeerConfig;
 import org.slf4j.Logger;

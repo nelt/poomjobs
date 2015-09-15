@@ -1,11 +1,9 @@
-package org.codingmatters.poomjobs.zookeeper.test.utils.embedded;
+package org.codingmatters.poomjobs.zookeeper.test.utils;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
 import org.codingmatters.poomjobs.test.utils.CloseableResources;
-import org.codingmatters.poomjobs.zookeeper.test.utils.ZooKlient;
-import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperEnsembleTestSupport;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
