@@ -59,7 +59,7 @@ public class ZookeeperEmbeddedEnsemble {
         this.servers[i].waitStartup();
     }
 
-    public String getUrl(int i) {
+    public String getClientUrl(int i) {
         return servers[i].getUrl();
     }
 

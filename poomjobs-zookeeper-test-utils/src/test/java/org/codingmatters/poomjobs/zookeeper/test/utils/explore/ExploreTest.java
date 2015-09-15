@@ -5,8 +5,11 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.ZooKeeper;
 import org.apache.zookeeper.data.Stat;
-import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperTestSupport;
-import org.junit.*;
+import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperSingleServerTestSupport;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +28,7 @@ public class ExploreTest {
     public static final String PATH = "/tests";
     static private final Logger log = LoggerFactory.getLogger(ExploreTest.class);
     @Rule
-    public ZookeeperTestSupport zookeeperTestSupport = new ZookeeperTestSupport();
+    public ZookeeperSingleServerTestSupport zookeeperTestSupport = new ZookeeperSingleServerTestSupport();
 
     private ZooKeeper zookeeper;
 
