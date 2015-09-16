@@ -42,9 +42,13 @@ public class ZookeeperSingleServerTestSupport extends ExternalResource {
         return new ZooKeeper(this.getUrl(), sessionTimeout, watcher);
     }
 
-    public void createPath(String path, ArrayList<ACL> openAclUnsafe) throws Exception {
+    public ZookeeperSingleServerTestSupport createPath(String path) throws Exception {
+        return this.createPath(path, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+    }
+    public ZookeeperSingleServerTestSupport createPath(String path, ArrayList<ACL> openAclUnsafe) throws Exception {
         if(this.client.exists(path, false) == null) {
             this.client.create(path, new byte[0], ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.PERSISTENT);
         }
+        return this;
     }
 }

@@ -18,5 +18,6 @@
     <modules>
         <module>poomjobs-zookeeper-client</module>
         <module>poomjobs-zookeeper-test-utils</module>
+        <module>poomjobs-zookeeper-algorithms</module>
     </modules>
 </project>
