@@ -90,8 +90,7 @@ public class WaiterQueue {
                     if(this.waiting.containsKey(nextInLine)) {
                         Waiter waiter = this.waiting.remove(nextInLine);
                         log.trace("waiting waiter for {}", nextInLine);
-                        this.execute(waiter);
-                        this.klient.operate(keeper -> {keeper.delete(this.root + "/" + nextInLine, -1); return null;});
+                        this.service.execute(() -> this.execute(waiter, this.root + "/" + nextInLine));
                     } else {
                         log.trace("no waiters registered here for {}", nextInLine);
                     }
@@ -105,8 +104,18 @@ public class WaiterQueue {
         }
     }
 
-    private void execute(Waiter waiter) {
-        this.service.execute(() -> waiter.nextInLine());
+    private void execute(Waiter waiter, String waiterNode) {
+        waiter.nextInLine();
+        try {
+            this.klient.operate(keeper -> {
+                keeper.delete(waiterNode, -1);
+                return null;
+            });
+        } catch (KeeperException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     interface Waiter {
