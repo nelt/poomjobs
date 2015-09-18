@@ -5,6 +5,7 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
+import org.codingmatters.poomjobs.zookeeper.algo.exception.WaiterQueueException;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZooKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -31,14 +33,14 @@ public class WaiterQueue {
 
     private final HashMap<String, Waiter> waiting = new HashMap<>();
 
-    public WaiterQueue(ZooKlient klient, String root, List<ACL> acl, ExecutorService service) {
+    public WaiterQueue(ZooKlient klient, String root, List<ACL> acl) {
         this.klient = klient;
         this.root = root;
         this.acl = acl;
-        this.service = service;
+        this.service = Executors.newSingleThreadExecutor(r -> new Thread(r, "waiter-queue-executor-" + this.root));
     }
 
-    public void waitMyTurn(Waiter waiter) {
+    public void waitMyTurn(Waiter waiter) throws WaiterQueueException {
         this.initialize();
         try {
             String waiterPath = this.klient.operate(keeper -> keeper.create(this.root + "/waiting-", new byte[0], this.acl, CreateMode.EPHEMERAL_SEQUENTIAL));
@@ -47,10 +49,8 @@ public class WaiterQueue {
                 this.waiting.put(waiterPath, waiter);
                 log.trace("waiter created for path {}", waiterPath);
             }
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (KeeperException | InterruptedException e) {
+            throw new WaiterQueueException("failed registering waiter", e);
         }
 
     }
@@ -68,9 +68,7 @@ public class WaiterQueue {
     private void registerQueueWatcher() {
         try {
             this.klient.operate(keeper -> keeper.getChildren(this.root, this::queueChanged));
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (KeeperException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -80,26 +78,24 @@ public class WaiterQueue {
             this.registerQueueWatcher();
 
             log.trace("node children changed for {}", event.getPath());
+            List<String> children;
             try {
-                List<String> children = this.klient.operate(keeper -> keeper.getChildren(event.getPath(), false));
-                Collections.sort(children);
+                children = this.klient.operate(keeper -> keeper.getChildren(event.getPath(), false));
+            } catch (KeeperException | InterruptedException e) {
+                log.error("error retrieving waiter queue content, cannot operate, as skipping an event, queue may be blocked", e);
+                return;
+            }
+            Collections.sort(children);
 
-                log.trace("sorted children : {}", children);
-                synchronized (this.waiting) {
-                    String nextInLine = children.get(0);
-                    if(this.waiting.containsKey(nextInLine)) {
-                        Waiter waiter = this.waiting.remove(nextInLine);
-                        log.trace("waiting waiter for {}", nextInLine);
-                        this.service.execute(() -> this.execute(waiter, this.root + "/" + nextInLine));
-                    } else {
-                        log.trace("no waiters registered here for {}", nextInLine);
-                    }
+            synchronized (this.waiting) {
+                String nextInLine = children.get(0);
+                if(this.waiting.containsKey(nextInLine)) {
+                    Waiter waiter = this.waiting.remove(nextInLine);
+                    log.debug("executing waiter for {}", nextInLine);
+                    this.service.execute(() -> this.execute(waiter, this.root + "/" + nextInLine));
+                } else {
+                    log.trace("no waiters registered here for {}", nextInLine);
                 }
-
-            } catch (KeeperException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }
@@ -111,10 +107,8 @@ public class WaiterQueue {
                 keeper.delete(waiterNode, -1);
                 return null;
             });
-        } catch (KeeperException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        } catch (KeeperException | InterruptedException e) {
+            log.error("error while deleting waiter node, queue state may be inconsistent", e);
         }
     }
 

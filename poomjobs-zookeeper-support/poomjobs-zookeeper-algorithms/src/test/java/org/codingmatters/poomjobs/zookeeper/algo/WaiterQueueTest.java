@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.UUID;
-import java.util.concurrent.Executors;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -39,7 +38,7 @@ public class WaiterQueueTest {
         this.zooSupport.createPath(root).createPath(this.queuePath);
 
         this.zooKlient = ZooKlient.zoo(this.zooSupport.getUrl()).klient();
-        this.waiterQueue = new WaiterQueue(this.zooKlient, this.queuePath, ZooDefs.Ids.OPEN_ACL_UNSAFE, Executors.newCachedThreadPool());
+        this.waiterQueue = new WaiterQueue(this.zooKlient, this.queuePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
     }
 
     @Test
