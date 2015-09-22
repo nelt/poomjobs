@@ -1,4 +1,4 @@
-package org.codingmatters.poomjobs.zookeeper.test.utils;
+package org.codingmatters.poomjobs.zookeeper.client;
 
 import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;

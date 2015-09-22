@@ -4,6 +4,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.apache.zookeeper.data.Stat;
 import org.codingmatters.poomjobs.test.utils.CloseableResources;
+import org.codingmatters.poomjobs.zookeeper.client.ZooKlient;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -12,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static org.codingmatters.poomjobs.zookeeper.test.utils.ZooKlient.zoo;
+import static org.codingmatters.poomjobs.zookeeper.client.ZooKlient.zoo;
 import static org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperEnsembleTestSupport.ensemble;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

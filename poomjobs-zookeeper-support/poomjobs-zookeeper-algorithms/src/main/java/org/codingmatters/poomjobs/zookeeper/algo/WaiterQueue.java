@@ -6,7 +6,7 @@ import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.data.ACL;
 import org.codingmatters.poomjobs.zookeeper.algo.exception.WaiterQueueException;
-import org.codingmatters.poomjobs.zookeeper.test.utils.ZooKlient;
+import org.codingmatters.poomjobs.zookeeper.client.ZooKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

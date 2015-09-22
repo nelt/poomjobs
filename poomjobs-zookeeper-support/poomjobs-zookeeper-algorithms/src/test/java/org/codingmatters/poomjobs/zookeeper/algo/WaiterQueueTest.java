@@ -3,7 +3,7 @@ package org.codingmatters.poomjobs.zookeeper.algo;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.codingmatters.poomjobs.test.utils.ValueChangeSemaphore;
-import org.codingmatters.poomjobs.zookeeper.test.utils.ZooKlient;
+import org.codingmatters.poomjobs.zookeeper.client.ZooKlient;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperSingleServerTestSupport;
 import org.junit.Before;
 import org.junit.Rule;
