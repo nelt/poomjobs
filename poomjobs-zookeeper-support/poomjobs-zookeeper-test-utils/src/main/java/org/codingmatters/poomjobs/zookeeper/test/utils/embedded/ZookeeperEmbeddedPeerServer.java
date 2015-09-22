@@ -114,6 +114,10 @@ public class ZookeeperEmbeddedPeerServer {
         return "localhost:" + this.clientPort;
     }
 
+    public int getClientPort() {
+        return clientPort;
+    }
+
     public String getSpec() {
         return this.serversSpec[this.serverId];
     }

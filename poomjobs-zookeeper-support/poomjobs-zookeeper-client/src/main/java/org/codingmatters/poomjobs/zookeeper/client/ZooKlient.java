@@ -8,17 +8,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static org.apache.zookeeper.ZooKeeper.States.CONNECTED;
 
 
 /**
+ * ZooClient is tested in poomjobs-zookeeper-algorithms as it needs poomjobs-zookeeper-test-utils
  * Created by nel on 11/09/15.
  */
 public class ZooKlient implements AutoCloseable {
+    public static final Pattern CONNECTED_URL_PATTERN = Pattern.compile("remoteserver:\\w+/([^:]+:\\d+)");
     static private Logger log = LoggerFactory.getLogger(ZooKlient.class);
 
     static public ZooKlientBuilder zoo(String connectString) {
         return new ZooKlientBuilder(connectString);
     }
+
 
     static public class ZooKlientBuilder {
         private final String connectString;
@@ -134,5 +141,21 @@ public class ZooKlient implements AutoCloseable {
 
     public interface SyncOperation<T> {
         T operate(ZooKeeper keeper) throws KeeperException, InterruptedException;
+    }
+
+    public String getConnectedUrl() {
+        if(!CONNECTED.equals(this.keeper.getState())) {
+            return null;
+        }
+        try {
+            Matcher matcher = CONNECTED_URL_PATTERN
+                    .matcher(this.keeper.toString());
+            if(matcher.find()) {
+                return matcher.group(1);
+            }
+        } catch(IllegalStateException e) {
+        }
+        log.error("cannot find connected url, ZooKeeper.toString() doesn't correspond to what's awaited : {}", this.keeper.toString());
+        return null;
     }
 }

@@ -86,4 +86,14 @@ public class ZookeeperEmbeddedEnsemble {
     public String getSpec(int i) {
         return this.servers[i].getSpec();
     }
+
+    public int getServerByConnectionUrl(String clientUrl) throws Exception {
+        int clientPort = Integer.parseInt(clientUrl.substring(clientUrl.indexOf(':') + 1));
+        for(int i = 0 ; i < this.servers.length ; i++) {
+            if(this.servers[i].getClientPort() == clientPort) {
+                return i;
+            }
+        }
+        throw new Exception("no server with such client url " + clientUrl);
+    }
 }

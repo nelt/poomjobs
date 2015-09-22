@@ -16,6 +16,7 @@ public class ZookeeperEnsembleTestSupport extends ExternalResource {
         return new Builder(3);
     }
 
+
     static public class Builder {
         private int serverCount;
         private Builder(int serverCount) {
@@ -78,6 +79,17 @@ public class ZookeeperEnsembleTestSupport extends ExternalResource {
         return this.ensemble.getClientUrl(i);
     }
 
+    public String getClientFullUrl() {
+        String url = "";
+        for(int i = 0 ; i < this.getServerCount() ; i++) {
+            if(i > 0) {
+                url += ",";
+            }
+            url += this.ensemble.getClientUrl(i);
+        }
+        return url;
+    }
+
     public void stopServer(int i) throws Exception {
         this.ensemble.stopServer(i);
     }
@@ -88,5 +100,9 @@ public class ZookeeperEnsembleTestSupport extends ExternalResource {
 
     public int getServerCount() {
         return serverCount;
+    }
+
+    public int getServerByConnectionUrl(String connectedUrl) throws Exception {
+        return this.ensemble.getServerByConnectionUrl(connectedUrl);
     }
 }
