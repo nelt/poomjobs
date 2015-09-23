@@ -147,6 +147,7 @@ public class ZooKlient implements AutoCloseable {
         if(!CONNECTED.equals(this.keeper.getState())) {
             return null;
         }
+        log.debug("keeper string : {}", this.keeper.toString());
         try {
             Matcher matcher = CONNECTED_URL_PATTERN
                     .matcher(this.keeper.toString());
