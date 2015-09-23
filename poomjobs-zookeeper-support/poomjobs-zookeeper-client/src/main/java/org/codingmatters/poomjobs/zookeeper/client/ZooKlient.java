@@ -19,8 +19,15 @@ import static org.apache.zookeeper.ZooKeeper.States.CONNECTED;
  * Created by nel on 11/09/15.
  */
 public class ZooKlient implements AutoCloseable {
-    public static final Pattern CONNECTED_URL_PATTERN = Pattern.compile("remoteserver:\\w+/([^:]+:\\d+)");
     static private Logger log = LoggerFactory.getLogger(ZooKlient.class);
+
+    /*
+    remoteserver:localhost/127.0.0.1:47912
+    remoteserver:localhost/0:0:0:0:0:0:0:1:34620
+
+    do not match : remoteserver:localhost/127.0.0.1:36548 lastZxid:4294967303
+     */
+    public static final Pattern CONNECTED_URL_PATTERN = Pattern.compile("remoteserver:(\\w+)/[^\\s]+:(\\d+)(\\s+|$)");
 
     static public ZooKlientBuilder zoo(String connectString) {
         return new ZooKlientBuilder(connectString);
@@ -152,7 +159,13 @@ public class ZooKlient implements AutoCloseable {
             Matcher matcher = CONNECTED_URL_PATTERN
                     .matcher(this.keeper.toString());
             if(matcher.find()) {
-                return matcher.group(1);
+                log.debug("group count: {}, matching: {}, group 1: {}, group 2: {}",
+                        matcher.groupCount(),
+                        matcher.group(),
+                        matcher.group(1),
+                        matcher.group(2)
+                );
+                return matcher.group(1) + ":" + matcher.group(2);
             }
         } catch(IllegalStateException e) {
         }

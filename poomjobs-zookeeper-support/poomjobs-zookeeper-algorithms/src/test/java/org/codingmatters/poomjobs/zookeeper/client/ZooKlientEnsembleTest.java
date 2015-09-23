@@ -2,7 +2,6 @@ package org.codingmatters.poomjobs.zookeeper.client;
 
 import org.codingmatters.poomjobs.test.utils.CloseableResources;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperEnsembleTestSupport;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -10,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import static org.codingmatters.poomjobs.zookeeper.client.ZooKlient.zoo;
 import static org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperEnsembleTestSupport.ensemble;
+import static org.hamcrest.Matchers.isOneOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Created by nel on 22/09/15.
@@ -33,7 +32,10 @@ public class ZooKlientEnsembleTest {
         // force connection
         klient.operate(keeper -> keeper.getChildren("/", false));
 
-        assertThat(klient.getConnectedUrl(), startsWith("127.0.0.1:"));
+        String[] urls = this.ensemble.getClientFullUrl().split(",");
+
+        assertThat(klient.getConnectedUrl(), startsWith("localhost:"));
+        assertThat(klient.getConnectedUrl(), isOneOf(urls));
     }
 
     @Test
@@ -53,11 +55,5 @@ public class ZooKlientEnsembleTest {
 
         server = this.ensemble.getServerByConnectionUrl(klient.getConnectedUrl());
         log.info("reconnected to server {} with url {}", server, klient.getConnectedUrl());
-    }
-
-    @Ignore
-    @Test
-    public void testSessionExpired() throws Exception {
-        fail();
     }
 }
