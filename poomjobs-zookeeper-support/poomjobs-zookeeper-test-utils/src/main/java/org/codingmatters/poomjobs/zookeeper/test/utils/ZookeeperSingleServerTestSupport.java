@@ -34,6 +34,13 @@ public class ZookeeperSingleServerTestSupport extends ExternalResource {
         this.embeddedServer.cleanUp();
     }
 
+    public void start() throws Exception {
+        this.embeddedServer.start();
+    }
+    public void stop() {
+        this.embeddedServer.stop();
+    }
+
     public String getUrl() {
         return this.embeddedServer.getUrl();
     }

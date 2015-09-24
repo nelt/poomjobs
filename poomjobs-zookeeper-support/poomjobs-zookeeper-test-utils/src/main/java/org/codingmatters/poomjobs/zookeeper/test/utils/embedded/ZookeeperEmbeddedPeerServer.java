@@ -74,7 +74,7 @@ public class ZookeeperEmbeddedPeerServer {
                 .withProperty("clientPort", "" + this.clientPort)
                 .withProperty("initLimit", "10")
                 .withProperty("syncLimit", "5")
-//                .withProperty("tickTime", "-1")
+                .withProperty("tickTime", "500")
                 ;
         for(int x = 0 ; x < this.serversSpec.length ; x++) {
             configBuilder.withProperty("server." + x, this.serversSpec[x]);

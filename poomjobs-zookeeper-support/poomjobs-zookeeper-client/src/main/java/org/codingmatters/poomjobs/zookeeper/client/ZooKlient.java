@@ -28,6 +28,7 @@ public class ZooKlient implements AutoCloseable {
     do not match : remoteserver:localhost/127.0.0.1:36548 lastZxid:4294967303
      */
     public static final Pattern CONNECTED_URL_PATTERN = Pattern.compile("remoteserver:(\\w+)/[^\\s]+:(\\d+)(\\s+|$)");
+    private final boolean recoverOnSessionExpired;
 
     static public ZooKlientBuilder zoo(String connectString) {
         return new ZooKlientBuilder(connectString);
@@ -39,6 +40,11 @@ public class ZooKlient implements AutoCloseable {
         private int sessionTimeout = 3000;
         private boolean canBeReadOnly = false;
         private Watcher watcher;
+
+        private Long sessionId = null;
+        private byte[] sessionPasswd = null;
+
+        private boolean recoverOnSessionExpiry = false;
 
         private ZooKlientBuilder(String connectString) {
             this.connectString = connectString;
@@ -59,36 +65,67 @@ public class ZooKlient implements AutoCloseable {
             return this;
         }
 
+        public ZooKlientBuilder withSessionExpiryRecovery(boolean recover) {
+            this.recoverOnSessionExpiry = recover;
+            return this;
+        }
+
+        public ZooKlientBuilder reconnects(long sessionId, byte[] sessionPassword) {
+            this.sessionId = sessionId;
+            this.sessionPasswd = sessionPassword;
+            return this;
+        }
+
         public ZooKlient klient() throws Exception {
-            return new ZooKlient(() -> new ZooKeeper(
-                    this.connectString,
-                    this.sessionTimeout,
-                    null,
-                    this.canBeReadOnly), this.watcher);
+            if(this.sessionId == null) {
+                return new ZooKlient(() -> new ZooKeeper(
+                        this.connectString,
+                        this.sessionTimeout,
+                        null,
+                        this.canBeReadOnly), this.watcher, this.recoverOnSessionExpiry);
+            } else {
+                return new ZooKlient(() -> new ZooKeeper(
+                        this.connectString,
+                        this.sessionTimeout,
+                        null,
+                        this.sessionId,
+                        this.sessionPasswd,
+                        this.canBeReadOnly), this.watcher, this.recoverOnSessionExpiry);
+            }
         }
     }
 
     private final ZooKeeperCreator keeperCreator;
     private final Watcher internalWatcher = this::process;
+    private final Watcher registeredWatcher;
+
 
     private ZooKeeper keeper;
     private final AtomicBoolean connected = new AtomicBoolean(false);
 
-    private ZooKlient(ZooKeeperCreator keeperCreator, Watcher watcher) throws Exception {
+    private ZooKlient(ZooKeeperCreator keeperCreator, Watcher watcher, boolean recoverOnSessionExpired) throws Exception {
         this.keeperCreator = keeperCreator;
+        this.registeredWatcher = watcher;
+        this.createKeeper();
+        this.recoverOnSessionExpired = recoverOnSessionExpired;
+    }
+
+    private void createKeeper() throws Exception {
         this.keeper = this.keeperCreator.create();
-        this.keeper.register(new WatcherChain().watches(this.internalWatcher, watcher));
+        this.keeper.register(new WatcherChain().watches(this.internalWatcher, this.registeredWatcher));
     }
 
     public <T> T operate(SyncOperation<T> operation) throws KeeperException, InterruptedException {
         while(true) {
             try {
                 return operation.operate(this.keeper);
-            } catch (KeeperException e) {
-                if(e.code().equals(KeeperException.Code.CONNECTIONLOSS)) {
-                    log.debug("recoverable keeper exception, will retry when connection recovered", e);
-                    this.waitConnected();
-                    log.debug("connection recovered");
+            } catch (KeeperException.ConnectionLossException e) {
+                log.debug("recoverable keeper exception, will retry when connection recovered", e);
+                this.waitConnected();
+                log.debug("connection recovered");
+            } catch (KeeperException.SessionExpiredException e) {
+                if(this.recoverOnSessionExpired) {
+                    log.debug("session expired, trying recovering", e);
                 } else {
                     throw e;
                 }
@@ -97,11 +134,13 @@ public class ZooKlient implements AutoCloseable {
     }
 
     public ZooKlient waitConnected() throws InterruptedException {
+        log.debug("waiting connection {}", this.connected.get());
         synchronized (this.connected) {
             if(! this.connected.get()) {
                 this.connected.wait();
             }
         }
+        log.debug("connected");
         return this;
     }
 
@@ -120,21 +159,38 @@ public class ZooKlient implements AutoCloseable {
             case SaslAuthenticated:
                 break;
             case Expired:
+                this.processSessionExpired();
                 break;
+        }
+    }
+
+    private void processSessionExpired() {
+        log.debug("session expired");
+        this.connected.set(false);
+        if(this.recoverOnSessionExpired) {
+            log.debug("policy is to recover on expired session...");
+            try {
+                this.createKeeper();
+                log.debug("recovered from session expiry");
+            } catch (Exception e) {
+                log.error("error recovering from session expiry", e);
+            }
         }
     }
 
     private void processSyncConnected(WatchedEvent event) {
         log.debug("session {} connected", this.keeper.getSessionId());
-        this.connected.set(true);
         synchronized (this.connected) {
+            this.connected.set(true);
             this.connected.notifyAll();
         }
     }
 
     private void processDisconnected(WatchedEvent event) {
         log.debug("session {} disconnected", this.keeper.getSessionId());
-        this.connected.set(false);
+        synchronized (this.connected) {
+            this.connected.set(false);
+        }
     }
 
     @Override
@@ -171,5 +227,24 @@ public class ZooKlient implements AutoCloseable {
         }
         log.error("cannot find connected url, ZooKeeper.toString() doesn't correspond to what's awaited : {}", this.keeper.toString());
         return null;
+    }
+
+    public int getSessionTimeout() {
+        return this.keeper.getSessionTimeout();
+    }
+
+    public long getSessionId() {
+        return keeper.getSessionId();
+    }
+
+    public byte[] getSessionPasswd() {
+        return keeper.getSessionPasswd();
+    }
+
+    @Override
+    public String toString() {
+        return "ZooKlient{" +
+                "keeper=" + keeper +
+                '}';
     }
 }
