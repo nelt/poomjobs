@@ -73,6 +73,4 @@ public class ZooKlientErrorHandlingTest {
 
         klient.operate(keeper -> keeper.getChildren("/", false));
     }
-
-
 }

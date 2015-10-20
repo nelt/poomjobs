@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.zookeeper.algo;
 
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
+import org.codingmatters.poomjobs.test.utils.CloseableResources;
 import org.codingmatters.poomjobs.test.utils.ValueChangeSemaphore;
 import org.codingmatters.poomjobs.zookeeper.client.ZooKlient;
 import org.codingmatters.poomjobs.zookeeper.test.utils.ZookeeperSingleServerTestSupport;
@@ -26,6 +27,8 @@ public class WaiterQueueTest {
 
     @Rule
     public ZookeeperSingleServerTestSupport zooSupport = new ZookeeperSingleServerTestSupport();
+    @Rule
+    public CloseableResources resources = new CloseableResources();
 
     private String queuePath;
     private ZooKlient zooKlient;
@@ -37,8 +40,10 @@ public class WaiterQueueTest {
         this.queuePath = root + "/waiterQueue";
         this.zooSupport.createPath(root).createPath(this.queuePath);
 
-        this.zooKlient = ZooKlient.zoo(this.zooSupport.getUrl()).klient();
-        this.waiterQueue = new WaiterQueue(this.zooKlient, this.queuePath, ZooDefs.Ids.OPEN_ACL_UNSAFE);
+        this.zooKlient = this.resources.add(ZooKlient.zoo(this.zooSupport.getUrl()).klient()).waitConnected();
+        this.waiterQueue = this.resources.add(new WaiterQueue(this.zooKlient, this.queuePath, ZooDefs.Ids.OPEN_ACL_UNSAFE));
+
+        log.info("klient session timeout : {}", zooKlient.getSessionTimeout());
     }
 
     @Test

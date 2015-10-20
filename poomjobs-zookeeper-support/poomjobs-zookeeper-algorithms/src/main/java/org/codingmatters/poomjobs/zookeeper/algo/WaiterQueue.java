@@ -10,17 +10,19 @@ import org.codingmatters.poomjobs.zookeeper.client.ZooKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by nel on 15/09/15.
  */
-public class WaiterQueue {
+public class WaiterQueue implements AutoCloseable {
 
     static private final Logger log = LoggerFactory.getLogger(WaiterQueue.class);
 
@@ -44,11 +46,11 @@ public class WaiterQueue {
         this.initialize();
         try {
             String waiterPath = this.klient.operate(keeper -> keeper.create(this.root + "/waiting-", new byte[0], this.acl, CreateMode.EPHEMERAL_SEQUENTIAL));
+            waiterPath = waiterPath.substring(this.root.length() + 1);
             synchronized (this.waiting) {
-                waiterPath = waiterPath.substring(this.root.length() + 1);
                 this.waiting.put(waiterPath, waiter);
-                log.trace("waiter created for path {}", waiterPath);
             }
+            log.trace("waiter created for path {}", waiterPath);
         } catch (KeeperException | InterruptedException e) {
             throw new WaiterQueueException("failed registering waiter", e);
         }
@@ -109,6 +111,16 @@ public class WaiterQueue {
             });
         } catch (KeeperException | InterruptedException e) {
             log.error("error while deleting waiter node, queue state may be inconsistent", e);
+        }
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.service.shutdown();
+        try {
+            this.service.awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new IOException("failed closing waiter queue", e);
         }
     }
 
