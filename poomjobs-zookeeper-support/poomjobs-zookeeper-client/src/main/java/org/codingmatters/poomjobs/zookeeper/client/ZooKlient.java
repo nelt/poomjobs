@@ -4,10 +4,10 @@ import org.apache.zookeeper.KeeperException;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.ZooKeeper;
+import org.codingmatters.poomjobs.zookeeper.client.internal.ConnectionStateMonitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,7 +41,7 @@ public class ZooKlient implements AutoCloseable {
 
 
     private ZooKeeper keeper;
-    private final AtomicBoolean connected = new AtomicBoolean(false);
+    private final ConnectionStateMonitor connectionMonitor = new ConnectionStateMonitor();
 
     protected ZooKlient(ZooKeeperCreator keeperCreator, Watcher watcher, boolean recoverOnSessionExpired) throws Exception {
         this.keeperCreator = keeperCreator;
@@ -74,12 +74,8 @@ public class ZooKlient implements AutoCloseable {
     }
 
     public ZooKlient waitConnected() throws InterruptedException {
-        log.debug("waiting connection {}", this.connected.get());
-        synchronized (this.connected) {
-            if(! this.connected.get()) {
-                this.connected.wait();
-            }
-        }
+        log.debug("waiting connection {}", this.connectionMonitor.isConnected());
+        this.connectionMonitor.waitConnected();
         log.debug("connected");
         return this;
     }
@@ -106,7 +102,7 @@ public class ZooKlient implements AutoCloseable {
 
     private void processSessionExpired() {
         log.debug("session expired");
-        this.connected.set(false);
+        this.connectionMonitor.disconnect();
         if(this.recoverOnSessionExpired) {
             log.debug("policy is to recover on expired session...");
             try {
@@ -120,17 +116,12 @@ public class ZooKlient implements AutoCloseable {
 
     private void processSyncConnected(WatchedEvent event) {
         log.debug("session {} connected", this.keeper.getSessionId());
-        synchronized (this.connected) {
-            this.connected.set(true);
-            this.connected.notifyAll();
-        }
+        this.connectionMonitor.connect();
     }
 
     private void processDisconnected(WatchedEvent event) {
         log.debug("session {} disconnected", this.keeper.getSessionId());
-        synchronized (this.connected) {
-            this.connected.set(false);
-        }
+        this.connectionMonitor.disconnect();
     }
 
     @Override
