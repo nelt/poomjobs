@@ -60,17 +60,21 @@ public class ZooKlient implements AutoCloseable {
             try {
                 return operation.operate(this.keeper);
             } catch (KeeperException.ConnectionLossException e) {
-                log.debug("recoverable keeper exception, will retry when connection recovered", e);
-                this.waitConnected();
-                log.debug("connection recovered");
+                this.waitRecovery(e);
             } catch (KeeperException.SessionExpiredException e) {
                 if(this.recoverOnSessionExpired) {
-                    log.debug("session expired, trying recovering", e);
+                    this.waitRecovery(e);
                 } else {
                     throw e;
                 }
             }
         }
+    }
+
+    protected void waitRecovery(KeeperException e) throws InterruptedException {
+        log.debug("recoverable keeper exception, will retry when connection recovered", e);
+        this.waitConnected();
+        log.debug("connection recovered");
     }
 
     public ZooKlient waitConnected() throws InterruptedException {
