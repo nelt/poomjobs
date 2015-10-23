@@ -22,10 +22,10 @@ public class ZooKlient implements AutoCloseable {
     static private Logger log = LoggerFactory.getLogger(ZooKlient.class);
 
     /*
-    remoteserver:localhost/127.0.0.1:47912
-    remoteserver:localhost/0:0:0:0:0:0:0:1:34620
+    matches remoteserver:localhost/127.0.0.1:47912
+    matches remoteserver:localhost/0:0:0:0:0:0:0:1:34620
 
-    do not match : remoteserver:localhost/127.0.0.1:36548 lastZxid:4294967303
+    doesn't match : remoteserver:localhost/127.0.0.1:36548 lastZxid:4294967303
      */
     public static final Pattern CONNECTED_URL_PATTERN = Pattern.compile("remoteserver:(\\w+)/[^\\s]+:(\\d+)(\\s+|$)");
     private final boolean recoverOnSessionExpired;
@@ -119,13 +119,13 @@ public class ZooKlient implements AutoCloseable {
     }
 
     private void processSyncConnected(WatchedEvent event) {
-        log.debug("session {} connected", this.keeper.getSessionId());
         this.connectionMonitor.connect();
+        log.debug("session {} connected", this.keeper.getSessionId());
     }
 
     private void processDisconnected(WatchedEvent event) {
-        log.debug("session {} disconnected", this.keeper.getSessionId());
         this.connectionMonitor.disconnect();
+        log.debug("session {} disconnected", this.keeper.getSessionId());
     }
 
     @Override
@@ -150,16 +150,10 @@ public class ZooKlient implements AutoCloseable {
             Matcher matcher = CONNECTED_URL_PATTERN
                     .matcher(this.keeper.toString());
             if(matcher.find()) {
-                log.debug("group count: {}, matching: {}, group 1: {}, group 2: {}",
-                        matcher.groupCount(),
-                        matcher.group(),
-                        matcher.group(1),
-                        matcher.group(2)
-                );
                 return matcher.group(1) + ":" + matcher.group(2);
             }
-        } catch(IllegalStateException e) {
-        }
+        } catch(IllegalStateException ignored) {}
+
         log.error("cannot find connected url, ZooKeeper.toString() doesn't correspond to what's awaited : {}", this.keeper.toString());
         return null;
     }
