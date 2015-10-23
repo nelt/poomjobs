@@ -45,8 +45,7 @@ public class WaiterQueue implements AutoCloseable {
     public void waitMyTurn(Waiter waiter) throws WaiterQueueException {
         this.initialize();
         try {
-            String waiterPath = this.klient.operate(keeper -> keeper.create(this.root + "/waiting-", new byte[0], this.acl, CreateMode.EPHEMERAL_SEQUENTIAL));
-            waiterPath = waiterPath.substring(this.root.length() + 1);
+            String waiterPath = this.createWaiterPath();
             synchronized (this.waiting) {
                 this.waiting.put(waiterPath, waiter);
             }
@@ -55,6 +54,14 @@ public class WaiterQueue implements AutoCloseable {
             throw new WaiterQueueException("failed registering waiter", e);
         }
 
+    }
+
+    protected String createWaiterPath() throws KeeperException, InterruptedException {
+        String waiterPath = this.klient.operate(keeper ->
+                keeper.create(this.root + "/waiting-", new byte[0], this.acl, CreateMode.EPHEMERAL_SEQUENTIAL)
+        );
+        waiterPath = waiterPath.substring(this.root.length() + 1);
+        return waiterPath;
     }
 
     protected void initialize() {
@@ -80,17 +87,11 @@ public class WaiterQueue implements AutoCloseable {
             this.registerQueueWatcher();
 
             log.trace("node children changed for {}", event.getPath());
-            List<String> children;
-            try {
-                children = this.klient.operate(keeper -> keeper.getChildren(event.getPath(), false));
-            } catch (KeeperException | InterruptedException e) {
-                log.error("error retrieving waiter queue content, cannot operate, as skipping an event, queue may be blocked", e);
-                return;
-            }
-            Collections.sort(children);
+
+            String nextInLine = this.getFirstWaiterNode(event);
+            if(nextInLine == null) return;
 
             synchronized (this.waiting) {
-                String nextInLine = children.get(0);
                 if(this.waiting.containsKey(nextInLine)) {
                     Waiter waiter = this.waiting.remove(nextInLine);
                     log.debug("executing waiter for {}", nextInLine);
@@ -100,6 +101,18 @@ public class WaiterQueue implements AutoCloseable {
                 }
             }
         }
+    }
+
+    private String getFirstWaiterNode(WatchedEvent event) {
+        List<String> children;
+        try {
+            children = this.klient.operate(keeper -> keeper.getChildren(event.getPath(), false));
+        } catch (KeeperException | InterruptedException e) {
+            log.error("error retrieving waiter queue content, cannot operate, as skipping an event, queue may be blocked", e);
+            return null;
+        }
+        Collections.sort(children);
+        return children.get(0);
     }
 
     private void execute(Waiter waiter, String waiterNode) {
