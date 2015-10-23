@@ -68,7 +68,7 @@ public class WaiterQueue implements AutoCloseable {
         synchronized (this.initialized) {
             if(! this.initialized.get()) {
                 this.registerQueueWatcher();
-                this.initialized.set(false);
+                this.initialized.set(true);
                 log.trace("queue initialized");
             }
         }
