@@ -1,6 +1,5 @@
 package org.codingmatters.poomjobs.test.utils;
 
-import com.sun.org.apache.xerces.internal.impl.xpath.regex.Match;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -8,7 +7,6 @@ import org.hamcrest.Matchers;
 import org.hamcrest.core.CombinableMatcher;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.chrono.ChronoLocalDateTime;
 
 /**
