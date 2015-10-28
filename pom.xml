@@ -20,7 +20,7 @@
         <module>poomjobs-engine-in-memory</module>
         <module>poomjobs-test-utils</module>
 
-        <module>poomjobs-zookeeper-support</module>
+        <!--<module>poomjobs-zookeeper-support</module>-->
     </modules>
 
 
