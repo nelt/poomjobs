@@ -72,6 +72,12 @@
                 <artifactId>poomjobs-zookeeper-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.codingmatters.poomjobs</groupId>
+                <artifactId>poomjobs-http-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     
