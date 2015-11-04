@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.http;
 
+import io.undertow.Handlers;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.junit.Before;
@@ -32,7 +33,7 @@ public class RestServiceTest {
     public void testServiceNotFound() throws Exception {
         this.server.setHandler(RestServiceHandler.from(RestService.root("/service")));
 
-        ContentResponse response = this.httpClient.GET(this.server.url() + "/no/service");
+        ContentResponse response = this.httpClient.GET(this.server.url("/no/service"));
         assertThat(response.getStatus(), is(404));
         assertThat(response.getContentAsString(), is("Service Not Found"));
         assertThat(response.getMediaType(), is("text/plain"));
@@ -50,7 +51,7 @@ public class RestServiceTest {
                                 )
                 )));
 
-        ContentResponse response = this.httpClient.GET(this.server.url() + "/service/named");
+        ContentResponse response = this.httpClient.GET(this.server.url("/service/named"));
         assertThat(response.getStatus(), is(200));
         assertThat(response.getContentAsString(), is("Hello World"));
         assertThat(response.getMediaType(), is("text/plain"));
@@ -66,10 +67,10 @@ public class RestServiceTest {
                                 .DELETE(io -> io.content("DELETE"))
                 )));
 
-        assertThat(this.httpClient.GET(this.server.url() + "/service/named").getContentAsString(), is("GET"));
-        assertThat(this.httpClient.POST(this.server.url() + "/service/named").send().getContentAsString(), is("POST"));
-        assertThat(this.httpClient.newRequest(this.server.url() + "/service/named").method("PUT").send().getContentAsString(), is("PUT"));
-        assertThat(this.httpClient.newRequest(this.server.url() + "/service/named").method("DELETE").send().getContentAsString(), is("DELETE"));
+        assertThat(this.httpClient.GET(this.server.url("/service/named")).getContentAsString(), is("GET"));
+        assertThat(this.httpClient.POST(this.server.url("/service/named")).send().getContentAsString(), is("POST"));
+        assertThat(this.httpClient.newRequest(this.server.url("/service/named")).method("PUT").send().getContentAsString(), is("PUT"));
+        assertThat(this.httpClient.newRequest(this.server.url("/service/named")).method("DELETE").send().getContentAsString(), is("DELETE"));
     }
 
     @Test
@@ -84,7 +85,7 @@ public class RestServiceTest {
                                 )
                 )));
 
-        ContentResponse response = this.httpClient.POST(this.server.url() + "/service/named").send();
+        ContentResponse response = this.httpClient.POST(this.server.url("/service/named")).send();
         assertThat(response.getStatus(), is(405));
         assertThat(response.getContentAsString(), is("Method Not Allowed for Resource"));
         assertThat(response.getMediaType(), is("text/plain"));
@@ -102,7 +103,7 @@ public class RestServiceTest {
                                 )
                 )));
 
-        ContentResponse response = this.httpClient.newRequest(this.server.url() + "/service/named").method("OPTIONS").send();
+        ContentResponse response = this.httpClient.newRequest(this.server.url("/service/named")).method("OPTIONS").send();
         assertThat(response.getStatus(), is(405));
         assertThat(response.getContentAsString(), is("Method Not Allowed for Resource"));
         assertThat(response.getMediaType(), is("text/plain"));
@@ -120,9 +121,35 @@ public class RestServiceTest {
                                 )
                 )));
 
-        ContentResponse response = this.httpClient.newRequest(this.server.url() + "/service/named").method("HEAD").send();
+        ContentResponse response = this.httpClient.newRequest(this.server.url("/service/named")).method("HEAD").send();
         assertThat(response.getStatus(), is(405));
         assertThat(response.getContentAsString(), is(""));
         assertThat(response.getMediaType(), is("text/plain"));
     }
+
+    @Test
+    public void testSubpathGet() throws Exception {
+        this.server.setHandler(Handlers.path()
+                .addPrefixPath("/root",
+                    RestServiceHandler.from(RestService.root("/service")
+                        .resource("/named", RestService
+                                        .resource().GET(io ->
+                                                        io.status(RestStatus.OK)
+                                                                .contentType("text/plain")
+                                                                .encoding("UTF-8")
+                                                                .content("Hello World")
+                                        )
+                        )
+                    )
+                )
+        );
+
+        ContentResponse response = this.httpClient.GET(this.server.url("/root/service/named"));
+        assertThat(response.getStatus(), is(200));
+        assertThat(response.getContentAsString(), is("Hello World"));
+        assertThat(response.getMediaType(), is("text/plain"));
+    }
+
+
+
 }

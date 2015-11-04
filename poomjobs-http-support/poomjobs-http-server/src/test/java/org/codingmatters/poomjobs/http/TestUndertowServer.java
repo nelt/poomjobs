@@ -37,7 +37,8 @@ public class TestUndertowServer extends ExternalResource {
         this.handler = handler;
     }
 
-    public String url() {
-        return "http://localhost:" + this.port;
+    public String url(String path) {
+        path = path.startsWith("/") ? path : "/" + path;
+        return "http://localhost:" + this.port + path;
     }
 }
