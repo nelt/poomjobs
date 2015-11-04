@@ -17,7 +17,7 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by nel on 04/11/15.
  */
-public class RestParametersTest {
+public class RestServiceHandlerParametersTest {
 
     static private Logger log = LoggerFactory.getLogger(HttpServerTest.class);
 
@@ -45,7 +45,7 @@ public class RestParametersTest {
     }
 
     @Test
-    public void testGetPath() throws Exception {
+    public void testGetParametrizedPath() throws Exception {
         this.server.setHandler(from(root("/service")
                 .resource("/{level1}/{level2}/{level1}", RestService
                                 .resource().GET(io -> {

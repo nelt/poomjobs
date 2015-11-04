@@ -49,13 +49,13 @@ public class RestServiceHandler implements HttpHandler {
             log.error("requested service does not exist : {}", exchange.getRequestPath());
             io.status(RestStatus.SERVICE_NOT_FOUND);
         } else {
-            RestResource resource = this.descriptor.getMatchingResource(path.substring(this.descriptor.getRootPath().length()));
+            RestResourceInvocation resourceInvocation = this.descriptor.getMatchingResource(path.substring(this.descriptor.getRootPath().length()));
             try {
                 RestResource.Method method = this.method(exchange);
-                resource
+                resourceInvocation.getResource()
                         .handler(method)
-                        .handle(io);
-                log.info("successfully handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
+                        .handle(io.withPathParameters(resourceInvocation.getPathParameters()));
+                log.info("handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
             } catch (RestException e) {
                 log.error("error handling rest request " + exchange.getRequestMethod() + " for " + exchange.getRequestPath(), e);
                 io.status(e.getStatus());
@@ -79,7 +79,7 @@ public class RestServiceHandler implements HttpHandler {
         private String encoding = "UTF-8";
         private String content;
         private Map<String, List<String>> parameters;
-        private Map<String, List<String>> pathParameters;
+        private Map<String, List<String>> pathParameters = new HashMap<>();
 
         public UndertowRestIO(HttpServerExchange exchange) {
             this.parameters = new HashMap<>();
@@ -109,6 +109,11 @@ public class RestServiceHandler implements HttpHandler {
         @Override
         public RestIO content(String content) {
             this.content = content;
+            return this;
+        }
+
+        public UndertowRestIO withPathParameters(Map<String, List<String>> pathParameters) {
+            this.pathParameters.putAll(pathParameters);
             return this;
         }
 
