@@ -79,6 +79,7 @@ public class RestServiceHandler implements HttpHandler {
         private String encoding = "UTF-8";
         private String content;
         private Map<String, List<String>> parameters;
+        private Map<String, List<String>> pathParameters;
 
         public UndertowRestIO(HttpServerExchange exchange) {
             this.parameters = new HashMap<>();
@@ -114,6 +115,11 @@ public class RestServiceHandler implements HttpHandler {
         @Override
         public Map<String, List<String>> parameters() {
             return this.parameters;
+        }
+
+        @Override
+        public Map<String, List<String>> pathParameters() {
+            return this.pathParameters;
         }
 
         public void send(HttpServerExchange exchange) {

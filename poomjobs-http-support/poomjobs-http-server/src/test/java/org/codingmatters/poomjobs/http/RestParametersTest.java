@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static java.util.Arrays.asList;
 import static org.codingmatters.poomjobs.http.RestService.root;
 import static org.codingmatters.poomjobs.http.RestServiceHandler.from;
 import static org.hamcrest.Matchers.is;
@@ -35,11 +36,25 @@ public class RestParametersTest {
         this.server.setHandler(from(root("/service")
                 .resource("/named", RestService
                                 .resource().GET(io -> {
-                                    assertThat(io.parameters().get("name").get(0), is("value"));
+                                    assertThat(io.parameters().get("name"), is(asList("value")));
                                 })
                 )));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/service/named?name=value"));
+        assertThat(response.getStatus(), is(200));
+    }
+
+    @Test
+    public void testGetPath() throws Exception {
+        this.server.setHandler(from(root("/service")
+                .resource("/{level1}/{level2}/{level1}", RestService
+                                .resource().GET(io -> {
+                                    assertThat(io.pathParameters().get("level1"), is(asList("v1", "v3")));
+                                    assertThat(io.pathParameters().get("level2"), is(asList("v2")));
+                                })
+                )));
+
+        ContentResponse response = this.httpClient.GET(this.server.url("/service/v1/v2/v3"));
         assertThat(response.getStatus(), is(200));
     }
 }

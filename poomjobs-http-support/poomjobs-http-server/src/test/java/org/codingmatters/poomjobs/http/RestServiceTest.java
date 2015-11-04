@@ -40,6 +40,16 @@ public class RestServiceTest {
     }
 
     @Test
+    public void testResourceNotFound() throws Exception {
+        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")));
+
+        ContentResponse response = this.httpClient.GET(this.server.url("/service/resource"));
+        assertThat(response.getStatus(), is(404));
+        assertThat(response.getContentAsString(), is("Resource Not Found"));
+        assertThat(response.getMediaType(), is("text/plain"));
+    }
+
+    @Test
     public void testGet() throws Exception {
         this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
                 .resource("/named", RestService

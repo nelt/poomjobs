@@ -6,6 +6,7 @@ import java.util.EnumMap;
  * Created by nel on 02/11/15.
  */
 public class RestResource {
+
     public static RestResource resource() {
         return new RestResource();
     }
@@ -40,7 +41,15 @@ public class RestResource {
         GET, POST, PUT, DELETE
     }
 
+
+    static private final RestResource RESOURCE_NOT_FOUND = new RestResource()
+            .GET(RestMethodHandler.RESOURCE_NOT_FOUND)
+            .POST(RestMethodHandler.RESOURCE_NOT_FOUND)
+            .PUT(RestMethodHandler.RESOURCE_NOT_FOUND)
+            .DELETE(RestMethodHandler.RESOURCE_NOT_FOUND)
+            ;
+
     public static RestResource notFound() {
-        return null;
+        return RESOURCE_NOT_FOUND;
     }
 }

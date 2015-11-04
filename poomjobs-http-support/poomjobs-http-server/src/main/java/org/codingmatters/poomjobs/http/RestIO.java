@@ -13,4 +13,5 @@ public interface RestIO {
     RestIO content(String content);
 
     Map<String, List<String>> parameters();
+    Map<String, List<String>> pathParameters();
 }

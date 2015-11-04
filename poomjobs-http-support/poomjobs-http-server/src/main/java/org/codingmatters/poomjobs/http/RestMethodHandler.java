@@ -5,6 +5,7 @@ package org.codingmatters.poomjobs.http;
  */
 public interface RestMethodHandler {
     RestMethodHandler METHOD_NOT_ALLOWED = io -> io.status(RestStatus.METHOD_NOT_ALLOWED);
+    RestMethodHandler RESOURCE_NOT_FOUND = io -> io.status(RestStatus.RESOURCE_NOT_FOUND);
 
     void handle(RestIO io) throws RestException;
 }
