@@ -8,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by nel on 02/11/15.
@@ -40,7 +44,7 @@ public class RestServiceHandler implements HttpHandler {
         log.info("relative path : {}", exchange.getRelativePath());
 
         String path = exchange.getRelativePath();
-        UndertowRestIO io = new UndertowRestIO();
+        UndertowRestIO io = new UndertowRestIO(exchange);
         if(! path.startsWith(this.descriptor.getRootPath())) {
             log.error("requested service does not exist : {}", exchange.getRequestPath());
             io.status(RestStatus.SERVICE_NOT_FOUND);
@@ -74,8 +78,13 @@ public class RestServiceHandler implements HttpHandler {
         private String contentType = "text/plain";
         private String encoding = "UTF-8";
         private String content;
+        private Map<String, List<String>> parameters;
 
-        public UndertowRestIO() {
+        public UndertowRestIO(HttpServerExchange exchange) {
+            this.parameters = new HashMap<>();
+            exchange.getQueryParameters().forEach((key, values) -> {
+                this.parameters.put(key, new ArrayList<>(values));
+            });
         }
 
         @Override
@@ -100,6 +109,11 @@ public class RestServiceHandler implements HttpHandler {
         public RestIO content(String content) {
             this.content = content;
             return this;
+        }
+
+        @Override
+        public Map<String, List<String>> parameters() {
+            return this.parameters;
         }
 
         public void send(HttpServerExchange exchange) {

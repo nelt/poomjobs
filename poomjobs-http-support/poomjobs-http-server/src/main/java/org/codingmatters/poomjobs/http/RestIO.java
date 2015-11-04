@@ -1,5 +1,8 @@
 package org.codingmatters.poomjobs.http;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by nel on 02/11/15.
  */
@@ -8,4 +11,6 @@ public interface RestIO {
     RestIO contentType(String type);
     RestIO encoding(String enc);
     RestIO content(String content);
+
+    Map<String, List<String>> parameters();
 }
