@@ -16,9 +16,7 @@ public class JobBuilders {
     }
 
     static public Builder build(String job) {
-        Builder result = new Builder();
-
-        return result;
+        return new Builder().withJob(job);
     }
 
     static public Builder from(JobSubmission jobSubmission) {
