@@ -2,11 +2,12 @@ package org.codingmatters.poomjobs.http;
 
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.util.StringContentProvider;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import java.nio.charset.Charset;
 
 import static java.util.Arrays.asList;
 import static org.codingmatters.poomjobs.http.RestService.root;
@@ -18,8 +19,6 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 04/11/15.
  */
 public class RestServiceHandlerParametersTest {
-
-    static private Logger log = LoggerFactory.getLogger(HttpServerTest.class);
 
     @Rule
     public TestUndertowServer server = new TestUndertowServer();
@@ -55,6 +54,21 @@ public class RestServiceHandlerParametersTest {
                 )));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/service/v1/v2/v3"));
+        assertThat(response.getStatus(), is(200));
+    }
+
+    @Test
+    public void testRequestBody() throws Exception {
+        this.server.setHandler(from(root("/service")
+                .resource("/named", RestService
+                        .resource().POST(io -> {
+                            assertThat(new String(io.requestContent(), Charset.forName("UTF-8")), is("Hello"));
+                        })
+                )));
+
+        ContentResponse response = this.httpClient.POST(this.server.url("/service/named"))
+                .content(new StringContentProvider("text/plain", "Hello", Charset.forName("UTF-8")))
+                .send();
         assertThat(response.getStatus(), is(200));
     }
 }

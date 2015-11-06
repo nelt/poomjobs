@@ -83,7 +83,7 @@ public class JobBuilders {
             return this;
         }
 
-        public Builder withArguments(String[] arguments) {
+        public Builder withArguments(String ... arguments) {
             this.arguments = arguments;
             return this;
         }
@@ -126,6 +126,46 @@ public class JobBuilders {
         private <T> T[] copy(T[] original) {
             if(original == null) return null;
             return Arrays.copyOf(original, original.length);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Builder builder = (Builder) o;
+
+            if (uuid != null ? !uuid.equals(builder.uuid) : builder.uuid != null) return false;
+            if (job != null ? !job.equals(builder.job) : builder.job != null) return false;
+            // Probably incorrect - comparing Object[] arrays with Arrays.equals
+            if (!Arrays.equals(arguments, builder.arguments)) return false;
+            if (retentionDelay != null ? !retentionDelay.equals(builder.retentionDelay) : builder.retentionDelay != null)
+                return false;
+            if (submissionTime != null ? !submissionTime.equals(builder.submissionTime) : builder.submissionTime != null)
+                return false;
+            if (startTime != null ? !startTime.equals(builder.startTime) : builder.startTime != null) return false;
+            if (endTime != null ? !endTime.equals(builder.endTime) : builder.endTime != null) return false;
+            if (status != builder.status) return false;
+            // Probably incorrect - comparing Object[] arrays with Arrays.equals
+            if (!Arrays.equals(results, builder.results)) return false;
+            // Probably incorrect - comparing Object[] arrays with Arrays.equals
+            return Arrays.equals(errors, builder.errors);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = uuid != null ? uuid.hashCode() : 0;
+            result = 31 * result + (job != null ? job.hashCode() : 0);
+            result = 31 * result + Arrays.hashCode(arguments);
+            result = 31 * result + (retentionDelay != null ? retentionDelay.hashCode() : 0);
+            result = 31 * result + (submissionTime != null ? submissionTime.hashCode() : 0);
+            result = 31 * result + (startTime != null ? startTime.hashCode() : 0);
+            result = 31 * result + (endTime != null ? endTime.hashCode() : 0);
+            result = 31 * result + (status != null ? status.hashCode() : 0);
+            result = 31 * result + Arrays.hashCode(results);
+            result = 31 * result + Arrays.hashCode(errors);
+            return result;
         }
     }
 }

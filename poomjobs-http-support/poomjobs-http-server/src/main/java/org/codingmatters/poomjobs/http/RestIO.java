@@ -14,4 +14,8 @@ public interface RestIO {
 
     Map<String, List<String>> parameters();
     Map<String, List<String>> pathParameters();
+
+    byte[] requestContent();
+
+    void header(String name, String value);
 }

@@ -17,5 +17,6 @@
 
     <modules>
         <module>poomjobs-http-server</module>
+        <module>poomjobs-http-test-utils</module>
     </modules>
 </project>

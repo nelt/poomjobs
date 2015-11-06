@@ -4,9 +4,13 @@ package org.codingmatters.poomjobs.http;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.Headers;
+import io.undertow.util.HttpString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,12 +43,22 @@ public class RestServiceHandler implements HttpHandler {
         this.handleRestRequest(exchange);
     }
 
-    protected void handleRestRequest(HttpServerExchange exchange) {
+    protected void handleRestRequest(HttpServerExchange exchange) throws IOException {
         log.info("request path :  {}", exchange.getRequestPath());
         log.info("relative path : {}", exchange.getRelativePath());
 
+        exchange.startBlocking();
+
         String path = exchange.getRelativePath();
-        UndertowRestIO io = new UndertowRestIO(exchange);
+
+        UndertowRestIO io = null;
+        try {
+            io = new UndertowRestIO(exchange);
+        } catch (IOException e) {
+            log.error("error creating RestIO from exchange", e);
+            throw e;
+        }
+
         if(! path.startsWith(this.descriptor.getRootPath())) {
             log.error("requested service does not exist : {}", exchange.getRequestPath());
             io.status(RestStatus.SERVICE_NOT_FOUND);
@@ -78,14 +92,26 @@ public class RestServiceHandler implements HttpHandler {
         private String contentType = "text/plain";
         private String encoding = "UTF-8";
         private String content;
+        private final HashMap<String, String> headers = new HashMap<>();
+
+
         private Map<String, List<String>> parameters;
         private Map<String, List<String>> pathParameters = new HashMap<>();
+        private byte[] requestBytes;
 
-        public UndertowRestIO(HttpServerExchange exchange) {
+        public UndertowRestIO(HttpServerExchange exchange) throws IOException {
             this.parameters = new HashMap<>();
             exchange.getQueryParameters().forEach((key, values) -> {
                 this.parameters.put(key, new ArrayList<>(values));
             });
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            try(InputStream in = exchange.getInputStream()) {
+                byte[] buffer = new byte[1024];
+                for (int read = in.read(buffer); read != -1; read = in.read(buffer)) {
+                    out.write(buffer, 0, read);
+                }
+            }
+            this.requestBytes = out.toByteArray();
         }
 
         @Override
@@ -127,8 +153,21 @@ public class RestServiceHandler implements HttpHandler {
             return this.pathParameters;
         }
 
+        @Override
+        public byte[] requestContent() {
+            return this.requestBytes;
+        }
+
+        @Override
+        public void header(String name, String value) {
+            this.headers.put(name, value);
+        }
+
         public void send(HttpServerExchange exchange) {
             exchange.setStatusCode(this.status.getHttpStatus());
+
+            this.headers.forEach((name, value) -> exchange.getResponseHeaders().add(new HttpString(name), value));
+
             if(this.status.getMessage() != null) {
                 this.contentType("text/plain").content(this.status.getMessage());
             }

@@ -60,6 +60,11 @@
                 <artifactId>poomjobs-engine-in-memory</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.codingmatters.poomjobs</groupId>
+                <artifactId>poomjobs-engine-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
 
 
             <dependency>
@@ -76,6 +81,11 @@
             <dependency>
                 <groupId>org.codingmatters.poomjobs</groupId>
                 <artifactId>poomjobs-http-server</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.codingmatters.poomjobs</groupId>
+                <artifactId>poomjobs-http-test-utils</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>

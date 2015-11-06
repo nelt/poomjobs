@@ -6,16 +6,17 @@ package org.codingmatters.poomjobs.apis.services.queue;
 public class JobSubmission {
 
     static public Builder job(String job) {
-        return new Builder(job);
+        return new Builder().withJob(job);
     }
 
     static public class Builder {
-        private final String job;
+        private String job;
         private String [] arguments;
         private Long retentionDelay;
 
-        private Builder(String job) {
+        public Builder withJob(String job) {
             this.job = job;
+            return this;
         }
 
         public Builder withArguments(String ... arguments) {
