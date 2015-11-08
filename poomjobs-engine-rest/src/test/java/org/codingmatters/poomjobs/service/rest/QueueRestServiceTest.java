@@ -39,7 +39,9 @@ public class QueueRestServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        this.delegate = InMemoryEngine.getEngine(defaults(UUID.randomUUID().toString()).config()).getJobQueueService();
+        this.delegate = InMemoryEngine.getEngine(
+                defaults(UUID.randomUUID().toString()).config())
+                .getJobQueueService();
         this.httpClient = new HttpClient();
         this.httpClient.start();
         this.server.setHandler(RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.delegate)));
@@ -77,19 +79,6 @@ public class QueueRestServiceTest {
         assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
     }
 
-    /*
-
-
-    void start(UUID uuid) throws ServiceException;
-
-    void done(UUID uuid, String ... results) throws ServiceException;
-
-    void cancel(UUID uuid) throws ServiceException;
-
-    void fail(UUID uuid, String ... errors) throws ServiceException;
-
-     */
-
     @Test
     public void testStart() throws Exception {
         Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
@@ -103,4 +92,68 @@ public class QueueRestServiceTest {
         assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.RUNNING));
     }
+
+    @Test
+    public void testDone() throws Exception {
+        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.delegate.start(job.getUuid());
+
+        Job got = this.codec.readJob(this.httpClient.POST(
+                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/done"))
+                .send()
+                .getContentAsString()
+        );
+
+        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(got.getStatus(), is(JobStatus.DONE));
+    }
+
+    /*
+    void fail(UUID uuid, String ... errors) throws ServiceException;
+     */
+
+    @Test
+    public void testCancel() throws Exception {
+        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.delegate.start(job.getUuid());
+
+        Job got = this.codec.readJob(this.httpClient.POST(
+                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/cancel"))
+                .send()
+                .getContentAsString()
+        );
+
+        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(got.getStatus(), is(JobStatus.CANCELED));
+    }
+
+    /*
+    void fail(UUID uuid, String ... errors) throws ServiceException;
+     */
+
+    @Test
+    public void testFail() throws Exception {
+        StringContentProvider content = new StringContentProvider(
+                "application/json",
+                "[\"error1\", \"error2\"]",
+                Charset.forName("UTF-8"));
+        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.delegate.start(job.getUuid());
+
+        Job got = this.codec.readJob(this.httpClient.POST(
+                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/fail"))
+                .content(content)
+                .send()
+                .getContentAsString()
+        );
+
+        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(got.getStatus(), is(JobStatus.FAILED));
+        assertThat(got.getErrors(), is(array("error1", "error2")));
+    }
+
+    static private <T> T[] array(T... elements) {
+        return elements;
+    }
+
 }

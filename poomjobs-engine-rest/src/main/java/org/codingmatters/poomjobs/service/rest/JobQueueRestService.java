@@ -64,9 +64,33 @@ public class JobQueueRestService {
     }
 
     public void start(RestIO io) throws RestException {
+        this.jobAction(io, uuid -> this.deleguate.start(uuid));
+    }
+
+    public void done(RestIO io) throws RestException {
+        this.jobAction(io, uuid -> this.deleguate.done(uuid));
+    }
+
+    public void cancel(RestIO io) throws RestException {
+        this.jobAction(io, uuid -> this.deleguate.cancel(uuid));
+    }
+
+    public void fail(RestIO io) throws RestException {
+        String json = new String(io.requestContent(), Charset.forName("UTF-8"));
+        String [] errors;
+        try {
+            errors = this.codec.readArray(json);
+        } catch (JsonCodecException e) {
+            log.error("unable to parse JSON : " + json, e);
+            throw new RestException(RestStatus.BAD_REQUEST, e);
+        }
+        this.jobAction(io, uuid -> this.deleguate.fail(uuid, errors));
+    }
+
+    protected void jobAction(RestIO io, JobActor actor) throws RestException {
         UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
         try {
-            this.deleguate.start(uuid);
+            this.doWithJob(uuid, actor);
         } catch (NoSuchJobException e) {
             log.error("no such job : " + uuid, e);
             throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e);
@@ -78,5 +102,13 @@ public class JobQueueRestService {
             throw new RestException(RestStatus.INTERNAL_ERROR, e);
         }
         io.status(RestStatus.SEE_OTHER).header("Location", "../" + uuid.toString());
+    }
+
+    private void doWithJob(UUID uuid, JobActor actor) throws ServiceException {
+        actor.act(uuid);
+    }
+
+    private interface JobActor {
+        void act(UUID uuid) throws ServiceException;
     }
 }

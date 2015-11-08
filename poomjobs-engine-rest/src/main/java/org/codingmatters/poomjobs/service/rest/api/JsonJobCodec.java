@@ -52,8 +52,15 @@ public class JsonJobCodec {
             JobSubmission.Builder builder = this.mapper.readValue(json, JobSubmission.Builder.class);
             return builder.submission();
         } catch (IOException e) {
-            throw new JsonCodecException("couldn't parse as job : " + json, e);
+            throw new JsonCodecException("couldn't parse as job submission : " + json, e);
         }
     }
 
+    public String[] readArray(String json) throws JsonCodecException {
+        try {
+            return this.mapper.readValue(json, String[].class);
+        } catch (IOException e) {
+            throw new JsonCodecException("couldn't parse as array : " + json, e);
+        }
+    }
 }
