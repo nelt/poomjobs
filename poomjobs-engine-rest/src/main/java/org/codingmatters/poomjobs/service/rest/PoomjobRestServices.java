@@ -12,7 +12,9 @@ public class PoomjobRestServices {
     static public RestService queueService(String forPath, JobQueueService jobQueueService) {
         JobQueueRestService service = new JobQueueRestService(jobQueueService);
         return RestService.root(forPath)
-                .resource("/jobs/{uuid}", resource()
+                .resource("/jobs/{uuid}/start", resource()
+                        .POST(io -> service.start(io))
+                ).resource("/jobs/{uuid}", resource()
                         .GET(io -> service.get(io))
                 )
                 .resource("/jobs", resource()

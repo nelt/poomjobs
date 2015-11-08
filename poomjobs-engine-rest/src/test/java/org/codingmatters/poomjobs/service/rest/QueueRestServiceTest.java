@@ -1,6 +1,7 @@
 package org.codingmatters.poomjobs.service.rest;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.engine.inmemory.InMemoryEngine;
@@ -56,7 +57,7 @@ public class QueueRestServiceTest {
     }
 
     @Test
-    public void testPostJob() throws Exception {
+    public void testSubmitJob() throws Exception {
         StringContentProvider content = new StringContentProvider(
                 "application/json",
                 this.codec.write(
@@ -74,5 +75,32 @@ public class QueueRestServiceTest {
         );
 
         assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
+    }
+
+    /*
+
+
+    void start(UUID uuid) throws ServiceException;
+
+    void done(UUID uuid, String ... results) throws ServiceException;
+
+    void cancel(UUID uuid) throws ServiceException;
+
+    void fail(UUID uuid, String ... errors) throws ServiceException;
+
+     */
+
+    @Test
+    public void testStart() throws Exception {
+        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+
+        Job got = this.codec.readJob(this.httpClient.POST(
+                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/start"))
+                    .send()
+                    .getContentAsString()
+        );
+
+        assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
+        assertThat(got.getStatus(), is(JobStatus.RUNNING));
     }
 }

@@ -1,5 +1,7 @@
 package org.codingmatters.poomjobs.service.rest;
 
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -56,7 +58,25 @@ public class JobQueueRestService {
             log.error("unable to parse JSON : " + json, e);
             throw new RestException(RestStatus.BAD_REQUEST, e);
         } catch (ServiceException e) {
-            e.printStackTrace();
+            log.error("unexpected error submitting from json : " + json, e);
+            throw new RestException(RestStatus.INTERNAL_ERROR, e);
         }
+    }
+
+    public void start(RestIO io) throws RestException {
+        UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
+        try {
+            this.deleguate.start(uuid);
+        } catch (NoSuchJobException e) {
+            log.error("no such job : " + uuid, e);
+            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e);
+        } catch (InconsistentJobStatusException e) {
+            log.error("unexpected status for starting job : " + uuid, e);
+            throw new RestException(RestStatus.BAD_REQUEST, e);
+        } catch (ServiceException e) {
+            log.error("unexpected error starting job : " + uuid, e);
+            throw new RestException(RestStatus.INTERNAL_ERROR, e);
+        }
+        io.status(RestStatus.SEE_OTHER).header("Location", "../" + uuid.toString());
     }
 }
