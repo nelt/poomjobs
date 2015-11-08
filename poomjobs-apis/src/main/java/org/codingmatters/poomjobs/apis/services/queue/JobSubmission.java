@@ -1,5 +1,7 @@
 package org.codingmatters.poomjobs.apis.services.queue;
 
+import java.util.Arrays;
+
 /**
  * Created by nel on 06/07/15.
  */
@@ -54,5 +56,27 @@ public class JobSubmission {
 
     public Long getRetentionDelay() {
         return retentionDelay;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        JobSubmission that = (JobSubmission) o;
+
+        if (job != null ? !job.equals(that.job) : that.job != null) return false;
+        // Probably incorrect - comparing Object[] arrays with Arrays.equals
+        if (!Arrays.equals(arguments, that.arguments)) return false;
+        return !(retentionDelay != null ? !retentionDelay.equals(that.retentionDelay) : that.retentionDelay != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = job != null ? job.hashCode() : 0;
+        result = 31 * result + Arrays.hashCode(arguments);
+        result = 31 * result + (retentionDelay != null ? retentionDelay.hashCode() : 0);
+        return result;
     }
 }
