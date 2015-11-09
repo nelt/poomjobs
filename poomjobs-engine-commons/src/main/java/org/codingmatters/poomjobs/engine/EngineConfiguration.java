@@ -7,7 +7,7 @@ import java.time.Duration;
  * Created by nel on 07/07/15.
  */
 public class EngineConfiguration {
-    static public final Long DEFAULT_DEFAULT_RETENTION_DELAY = Duration.ofHours(2).toMinutes();
+    static public final Long DEFAULT_DEFAULT_RETENTION_DELAY = Duration.ofHours(2).toMillis();
     private final Long defaultRetentionDelay;
 
     public EngineConfiguration(Long defaultRetentionDelay) {

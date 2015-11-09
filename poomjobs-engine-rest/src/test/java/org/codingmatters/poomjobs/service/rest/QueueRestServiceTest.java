@@ -1,10 +1,10 @@
 package org.codingmatters.poomjobs.service.rest;
 
+import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
-import org.codingmatters.poomjobs.engine.inmemory.InMemoryEngine;
 import org.codingmatters.poomjobs.http.RestServiceHandler;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
 import org.codingmatters.poomjobs.service.rest.api.JsonJobCodec;
@@ -39,9 +39,7 @@ public class QueueRestServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        this.delegate = InMemoryEngine.getEngine(
-                defaults(UUID.randomUUID().toString()).config())
-                .getJobQueueService();
+        this.delegate = PoorMansJob.queue(defaults(UUID.randomUUID().toString()).config());
         this.httpClient = new HttpClient();
         this.httpClient.start();
         this.server.setHandler(RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.delegate)));
@@ -111,6 +109,9 @@ public class QueueRestServiceTest {
     @Test
     public void testCancel() throws Exception {
         Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+
+        System.out.println("-----RETENTION DELAY: " + job.getRetentionDelay());
+
         this.delegate.start(job.getUuid());
 
         Job got = this.codec.readJob(this.httpClient.POST(
