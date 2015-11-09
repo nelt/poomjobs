@@ -47,11 +47,9 @@ public abstract class JobQueueServiceRetentionDelayAcceptanceTest {
         Thread.sleep(500);
         this.queue.get(uuid);
 
-        Thread.sleep(500);
-        this.queue.get(uuid);
-
-        Thread.sleep(500);
+        Thread.sleep(700);
         thrown.expect(NoSuchJobException.class);
+        thrown.expectMessage("no such job with uuid=" + uuid.toString());
         this.queue.get(uuid);
     }
 }
