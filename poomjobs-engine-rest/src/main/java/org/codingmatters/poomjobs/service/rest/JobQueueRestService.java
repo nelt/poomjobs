@@ -64,15 +64,15 @@ public class JobQueueRestService {
     }
 
     public void start(RestIO io) throws RestException {
-        this.jobAction(io, uuid -> this.deleguate.start(uuid));
+        this.jobAction(io, this.deleguate::start);
     }
 
     public void done(RestIO io) throws RestException {
-        this.jobAction(io, uuid -> this.deleguate.done(uuid));
+        this.jobAction(io, this.deleguate::done);
     }
 
     public void cancel(RestIO io) throws RestException {
-        this.jobAction(io, uuid -> this.deleguate.cancel(uuid));
+        this.jobAction(io, this.deleguate::cancel);
     }
 
     public void fail(RestIO io) throws RestException {
