@@ -68,7 +68,8 @@ public class JobQueueRestService {
     }
 
     public void done(RestIO io) throws RestException {
-        this.jobAction(io, this.deleguate::done);
+        String[] stringArray = this.parseStringArrayFromContent(io);
+        this.jobAction(io, uuid -> this.deleguate.done(uuid, stringArray));
     }
 
     public void cancel(RestIO io) throws RestException {
@@ -76,15 +77,20 @@ public class JobQueueRestService {
     }
 
     public void fail(RestIO io) throws RestException {
+        String[] stringArray = this.parseStringArrayFromContent(io);
+        this.jobAction(io, uuid -> this.deleguate.fail(uuid, stringArray));
+    }
+
+    protected String[] parseStringArrayFromContent(RestIO io) throws RestException {
         String json = new String(io.requestContent(), Charset.forName("UTF-8"));
-        String [] errors;
+        String [] stringArray;
         try {
-            errors = this.codec.readArray(json);
+            stringArray = this.codec.readArray(json);
         } catch (JsonCodecException e) {
             log.error("unable to parse JSON : " + json, e);
             throw new RestException(RestStatus.BAD_REQUEST, e);
         }
-        this.jobAction(io, uuid -> this.deleguate.fail(uuid, errors));
+        return stringArray;
     }
 
     protected void jobAction(RestIO io, JobActor actor) throws RestException {

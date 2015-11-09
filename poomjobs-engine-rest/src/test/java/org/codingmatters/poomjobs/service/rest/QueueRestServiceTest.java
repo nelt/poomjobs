@@ -10,6 +10,7 @@ import org.codingmatters.poomjobs.http.TestUndertowServer;
 import org.codingmatters.poomjobs.service.rest.api.JsonJobCodec;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.util.StringContentProvider;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,6 +44,11 @@ public class QueueRestServiceTest {
         this.httpClient = new HttpClient();
         this.httpClient.start();
         this.server.setHandler(RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.delegate)));
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        this.httpClient.stop();
     }
 
     @Test
@@ -92,21 +98,6 @@ public class QueueRestServiceTest {
     }
 
     @Test
-    public void testDone() throws Exception {
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
-        this.delegate.start(job.getUuid());
-
-        Job got = this.codec.readJob(this.httpClient.POST(
-                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/done"))
-                .send()
-                .getContentAsString()
-        );
-
-        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
-        assertThat(got.getStatus(), is(JobStatus.DONE));
-    }
-
-    @Test
     public void testCancel() throws Exception {
         Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
         this.delegate.start(job.getUuid());
@@ -119,6 +110,27 @@ public class QueueRestServiceTest {
 
         assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.CANCELED));
+    }
+
+    @Test
+    public void testDone() throws Exception {
+        StringContentProvider content = new StringContentProvider(
+                "application/json",
+                "[\"result1\", \"result2\"]",
+                Charset.forName("UTF-8"));
+        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.delegate.start(job.getUuid());
+
+        Job got = this.codec.readJob(this.httpClient.POST(
+                this.server.url("/queue/jobs/" + job.getUuid().toString() + "/done"))
+                .content(content)
+                .send()
+                .getContentAsString()
+        );
+
+        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(got.getStatus(), is(JobStatus.DONE));
+        assertThat(got.getResults(), is(array("result1", "result2")));
     }
 
     @Test

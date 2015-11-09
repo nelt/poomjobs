@@ -30,11 +30,11 @@ public class JsonJobCodec {
         this(new ObjectMapper());
     }
 
-    public <T> String write(T job) throws JsonCodecException {
+    public <T> String write(T element) throws JsonCodecException {
         try {
-            return this.mapper.writeValueAsString(job);
+            return this.mapper.writeValueAsString(element);
         } catch (JsonProcessingException e) {
-            throw new JsonCodecException("cannot generate JSON representation for job : " + job, e);
+            throw new JsonCodecException("cannot generate JSON representation for job : " + element, e);
         }
     }
 

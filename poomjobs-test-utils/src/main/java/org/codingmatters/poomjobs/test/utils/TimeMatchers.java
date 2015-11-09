@@ -76,7 +76,7 @@ public class TimeMatchers {
     }
 
     static public <T extends  ChronoLocalDateTime> Matcher<T> near(final T to) {
-        return near(to, Duration.ofMillis(100L));
+        return near(to, Duration.ofMillis(200L));
     }
 
     static private abstract class LocalDateTimeMatcher<T extends  ChronoLocalDateTime> extends BaseMatcher<T> {
