@@ -108,10 +108,6 @@ public class QueueRestServiceTest {
         assertThat(got.getStatus(), is(JobStatus.DONE));
     }
 
-    /*
-    void fail(UUID uuid, String ... errors) throws ServiceException;
-     */
-
     @Test
     public void testCancel() throws Exception {
         Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
@@ -126,10 +122,6 @@ public class QueueRestServiceTest {
         assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.CANCELED));
     }
-
-    /*
-    void fail(UUID uuid, String ... errors) throws ServiceException;
-     */
 
     @Test
     public void testFail() throws Exception {
