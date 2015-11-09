@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.rest;
 
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -42,6 +43,9 @@ public class RestEngine implements JobQueueService {
     @Override
     public Job get(UUID uuid) throws ServiceException {
         ContentResponse response = this.GET("/jobs/" + uuid.toString());
+        if(response.getStatus() == 404) {
+            throw new NoSuchJobException("no such job : " + uuid.toString());
+        }
         return this.parseResponseAsJos(response);
     }
 

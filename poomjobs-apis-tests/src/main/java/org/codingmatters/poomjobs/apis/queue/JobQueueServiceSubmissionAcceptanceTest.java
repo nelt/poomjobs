@@ -2,12 +2,15 @@ package org.codingmatters.poomjobs.apis.queue;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
 import static org.codingmatters.poomjobs.test.utils.Helpers.array;
@@ -35,9 +38,9 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
     @Test
     public void testSubmit() throws Exception {
         Job job = this.queue.submit(JobSubmission.job("job")
-                        .withArguments("arg1", "arg2")
-                        .withRetentionDelay(12L)
-                        .submission()
+                .withArguments("arg1", "arg2")
+                .withRetentionDelay(12L)
+                .submission()
         );
 
         assertThat(job.getJob(), is("job"));
@@ -47,5 +50,29 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
         assertThat(job.getStatus(), is(JobStatus.PENDING));
         assertThat(job.getStartTime(), is(nullValue()));
         assertThat(job.getEndTime(), is(nullValue()));
+    }
+
+    @Test
+    public void testGetSubmitted() throws Exception {
+        Job job = this.queue.submit(JobSubmission.job("job")
+                .withArguments("arg1", "arg2")
+                .withRetentionDelay(12L)
+                .submission()
+        );
+
+        job = this.queue.get(job.getUuid());
+
+        assertThat(job.getJob(), is("job"));
+        assertThat(job.getArguments(), is(array("arg1", "arg2")));
+        assertThat(job.getRetentionDelay(), is(12L));
+        assertThat(job.getSubmissionTime(), near(now()));
+        assertThat(job.getStatus(), is(JobStatus.PENDING));
+        assertThat(job.getStartTime(), is(nullValue()));
+        assertThat(job.getEndTime(), is(nullValue()));
+    }
+
+    @Test(expected = NoSuchJobException.class)
+    public void testGetNotSubmitted() throws Exception {
+        this.queue.get(UUID.randomUUID());
     }
 }
