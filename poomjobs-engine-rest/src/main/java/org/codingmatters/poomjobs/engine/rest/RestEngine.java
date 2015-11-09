@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.rest;
 
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
@@ -61,7 +62,12 @@ public class RestEngine implements JobQueueService {
 
     @Override
     public void done(UUID uuid, String... results) throws ServiceException {
-        this.POST(this.prepareContent(results), "/jobs/" + uuid.toString() + "/done");
+        ContentResponse response = this.POST(this.prepareContent(results), "/jobs/" + uuid.toString() + "/done");
+        if (response.getStatus() == 404) {
+            throw new NoSuchJobException("no such job : " + uuid.toString());
+        } else if (response.getStatus() == 400) {
+            throw new InconsistentJobStatusException("inconsistent state for marking job done : " + uuid.toString());
+        }
     }
 
     @Override

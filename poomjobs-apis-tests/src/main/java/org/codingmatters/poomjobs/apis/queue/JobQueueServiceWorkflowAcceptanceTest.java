@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.apis.queue;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
+import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
@@ -74,4 +75,12 @@ public abstract class JobQueueServiceWorkflowAcceptanceTest {
         this.queue.cancel(uuid);
         assertThat(this.queue.get(uuid).getStatus(), is(JobStatus.CANCELED));
     }
+
+
+    @Test(expected = InconsistentJobStatusException.class)
+    public void testFailureOnSubmitDoneWorkflow() throws Exception {
+        this.queue.done(this.uuid);
+    }
+
+
 }
