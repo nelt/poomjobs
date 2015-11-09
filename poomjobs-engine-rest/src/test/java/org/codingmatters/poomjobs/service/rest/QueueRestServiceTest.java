@@ -109,9 +109,6 @@ public class QueueRestServiceTest {
     @Test
     public void testCancel() throws Exception {
         Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
-
-        System.out.println("-----RETENTION DELAY: " + job.getRetentionDelay());
-
         this.delegate.start(job.getUuid());
 
         Job got = this.codec.readJob(this.httpClient.POST(
