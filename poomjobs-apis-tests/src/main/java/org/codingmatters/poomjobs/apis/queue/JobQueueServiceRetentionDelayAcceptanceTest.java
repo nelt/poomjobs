@@ -18,7 +18,6 @@ import java.util.UUID;
 public abstract class JobQueueServiceRetentionDelayAcceptanceTest {
 
     private JobQueueService queue;
-    private UUID uuid;
 
     protected abstract TestConfigurationProvider getConfigurationProvider();
 
@@ -30,7 +29,6 @@ public abstract class JobQueueServiceRetentionDelayAcceptanceTest {
         TestConfigurationProvider config = this.getConfigurationProvider();
 
         this.queue = PoorMansJob.queue(config.getQueueConfig());
-        this.uuid = this.queue.submit(JobSubmission.job("job").submission()).getUuid();
     }
 
     @Test

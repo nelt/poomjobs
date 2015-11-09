@@ -45,7 +45,7 @@ public class RestEngine implements JobQueueService {
     public Job get(UUID uuid) throws ServiceException {
         ContentResponse response = this.GET("/jobs/" + uuid.toString());
         if(response.getStatus() == 404) {
-            throw new NoSuchJobException("no such job : " + uuid.toString());
+            throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
         }
         return this.parseResponseAsJos(response);
     }

@@ -8,7 +8,9 @@ import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.util.UUID;
 
@@ -23,6 +25,9 @@ import static org.junit.Assert.assertThat;
  * Created by nel on 15/07/15.
  */
 public abstract class JobQueueServiceSubmissionAcceptanceTest {
+
+    @Rule
+    public ExpectedException thrown = ExpectedException.none();
 
     private JobQueueService queue;
 
@@ -71,8 +76,15 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
         assertThat(job.getEndTime(), is(nullValue()));
     }
 
-    @Test(expected = NoSuchJobException.class)
+
+
+    @Test
     public void testGetNotSubmitted() throws Exception {
-        this.queue.get(UUID.randomUUID());
+        UUID uuid = UUID.randomUUID();
+
+        thrown.expect(NoSuchJobException.class);
+        thrown.expectMessage("no such job with uuid=" + uuid.toString());
+
+        this.queue.get(uuid);
     }
 }
