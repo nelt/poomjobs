@@ -76,10 +76,8 @@ public abstract class JobQueueServiceSubmissionAcceptanceTest {
         assertThat(job.getEndTime(), is(nullValue()));
     }
 
-
-
     @Test
-    public void testGetNotSubmitted() throws Exception {
+    public void testGetOnNotSubmitted() throws Exception {
         UUID uuid = UUID.randomUUID();
 
         thrown.expect(NoSuchJobException.class);

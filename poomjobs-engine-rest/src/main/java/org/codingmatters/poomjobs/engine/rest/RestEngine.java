@@ -57,22 +57,36 @@ public class RestEngine implements JobQueueService {
 
     @Override
     public void cancel(UUID uuid) throws ServiceException {
-        this.POST("/jobs/" + uuid.toString() + "/cancel");
+        ContentResponse response = this.POST("/jobs/" + uuid.toString() + "/cancel");
+        if (response.getStatus() == 404) {
+            this.throwNoSuchJob(uuid);
+        } else if (response.getStatus() == 400) {
+            throw new InconsistentJobStatusException("cannot cancel job " + uuid + " with status DONE (should be one of [RUNNING, PENDING])");
+        }
     }
 
     @Override
     public void done(UUID uuid, String... results) throws ServiceException {
         ContentResponse response = this.POST(this.prepareContent(results), "/jobs/" + uuid.toString() + "/done");
         if (response.getStatus() == 404) {
-            throw new NoSuchJobException("no such job : " + uuid.toString());
+            this.throwNoSuchJob(uuid);
         } else if (response.getStatus() == 400) {
-            throw new InconsistentJobStatusException("inconsistent state for marking job done : " + uuid.toString());
+            throw new InconsistentJobStatusException("cannot stop job " + uuid + " with status PENDING (should be one of [RUNNING])");
         }
+    }
+
+    protected void throwNoSuchJob(UUID uuid) throws NoSuchJobException {
+        throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
     }
 
     @Override
     public void fail(UUID uuid, String... errors) throws ServiceException {
-        this.POST(this.prepareContent(errors), "/jobs/" + uuid.toString() + "/fail");
+        ContentResponse response = this.POST(this.prepareContent(errors), "/jobs/" + uuid.toString() + "/fail");
+        if (response.getStatus() == 404) {
+            this.throwNoSuchJob(uuid);
+        } else if (response.getStatus() == 400) {
+            throw new InconsistentJobStatusException("cannot fail job " + uuid + " with status PENDING (should be one of [RUNNING])");
+        }
     }
 
     private ContentProvider prepareContent(Object contentObject) throws ServiceException {
