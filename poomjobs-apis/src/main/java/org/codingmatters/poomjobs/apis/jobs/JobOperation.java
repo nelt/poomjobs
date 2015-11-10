@@ -3,7 +3,7 @@ package org.codingmatters.poomjobs.apis.jobs;
 import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 import static java.time.LocalDateTime.now;
 import static org.codingmatters.poomjobs.apis.jobs.JobBuilders.from;
@@ -45,11 +45,11 @@ public enum JobOperation {
     ;
 
     private JobMutation jobMutation;
-    private HashSet<JobStatus> consistentStatuses;
+    private LinkedHashSet<JobStatus> consistentStatuses;
 
     JobOperation(JobMutation jobMutation, JobStatus ... consistentStatuses) {
         this.jobMutation = jobMutation;
-        this.consistentStatuses = new HashSet<>(Arrays.asList(consistentStatuses));
+        this.consistentStatuses = new LinkedHashSet<>(Arrays.asList(consistentStatuses));
     }
 
     public Job operate(Job job) throws InconsistentJobStatusException {

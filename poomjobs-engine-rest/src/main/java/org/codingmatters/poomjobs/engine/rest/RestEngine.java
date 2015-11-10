@@ -61,7 +61,7 @@ public class RestEngine implements JobQueueService {
         if (response.getStatus() == 404) {
             this.throwNoSuchJob(uuid);
         } else if (response.getStatus() == 400) {
-            throw new InconsistentJobStatusException("cannot cancel job " + uuid + " with status DONE (should be one of [RUNNING, PENDING])");
+            throw new InconsistentJobStatusException("cannot cancel job " + uuid + " with status DONE (should be one of [PENDING, RUNNING])");
         }
     }
 

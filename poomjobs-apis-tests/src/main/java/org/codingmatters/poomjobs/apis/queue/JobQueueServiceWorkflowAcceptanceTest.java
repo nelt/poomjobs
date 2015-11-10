@@ -118,7 +118,7 @@ public abstract class JobQueueServiceWorkflowAcceptanceTest {
         this.queue.done(uuid);
 
         thrown.expect(InconsistentJobStatusException.class);
-        thrown.expectMessage("cannot cancel job " + uuid + " with status DONE (should be one of [RUNNING, PENDING])");
+        thrown.expectMessage("cannot cancel job " + uuid + " with status DONE (should be one of [PENDING, RUNNING])");
 
         this.queue.cancel(uuid);
     }
