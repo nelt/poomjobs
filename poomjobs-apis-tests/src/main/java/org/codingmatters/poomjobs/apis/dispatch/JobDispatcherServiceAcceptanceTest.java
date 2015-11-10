@@ -48,7 +48,7 @@ public abstract class JobDispatcherServiceAcceptanceTest {
 
         this.dispatcher.register(this.jobRunner("runner"), "job");
 
-        Thread.sleep(200);
+        Thread.sleep(400);
         assertThat(this.executed, is(list("runner/" + uuid.toString())));
     }
 
