@@ -67,6 +67,10 @@ public enum JobOperation {
         }
     }
 
+    public JobStatus[] getConsistentStatuses() {
+        return this.consistentStatuses.toArray(new JobStatus[this.consistentStatuses.size()]);
+    }
+
     /**
      * Created by nel on 07/07/15.
      */

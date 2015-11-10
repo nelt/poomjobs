@@ -38,54 +38,46 @@ public class RestEngine implements JobQueueService {
     public Job submit(JobSubmission jobSubmission) throws ServiceException {
         ContentProvider content = this.prepareContent(jobSubmission);
         ContentResponse response = this.POST(content, "/jobs");
+        this.processesErrors(response);
         return this.parseResponseAsJos(response);
     }
 
     @Override
     public Job get(UUID uuid) throws ServiceException {
         ContentResponse response = this.GET("/jobs/" + uuid.toString());
-        if(response.getStatus() == 404) {
-            throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
-        }
+        this.processesErrors(response);
         return this.parseResponseAsJos(response);
     }
 
     @Override
     public void start(UUID uuid) throws ServiceException {
-        this.POST("/jobs/" + uuid.toString() + "/start");
+        ContentResponse response = this.POST("/jobs/" + uuid.toString() + "/start");
+        this.processesErrors(response);
     }
 
     @Override
     public void cancel(UUID uuid) throws ServiceException {
         ContentResponse response = this.POST("/jobs/" + uuid.toString() + "/cancel");
-        if (response.getStatus() == 404) {
-            this.throwNoSuchJob(uuid);
-        } else if (response.getStatus() == 400) {
-            throw new InconsistentJobStatusException("cannot cancel job " + uuid + " with status DONE (should be one of [PENDING, RUNNING])");
-        }
+        this.processesErrors(response);
     }
 
     @Override
     public void done(UUID uuid, String... results) throws ServiceException {
         ContentResponse response = this.POST(this.prepareContent(results), "/jobs/" + uuid.toString() + "/done");
-        if (response.getStatus() == 404) {
-            this.throwNoSuchJob(uuid);
-        } else if (response.getStatus() == 400) {
-            throw new InconsistentJobStatusException("cannot stop job " + uuid + " with status PENDING (should be one of [RUNNING])");
-        }
-    }
-
-    protected void throwNoSuchJob(UUID uuid) throws NoSuchJobException {
-        throw new NoSuchJobException("no such job with uuid=" + uuid.toString());
+        this.processesErrors(response);
     }
 
     @Override
     public void fail(UUID uuid, String... errors) throws ServiceException {
         ContentResponse response = this.POST(this.prepareContent(errors), "/jobs/" + uuid.toString() + "/fail");
+        this.processesErrors(response);
+    }
+
+    protected void processesErrors(ContentResponse response) throws NoSuchJobException, InconsistentJobStatusException {
         if (response.getStatus() == 404) {
-            this.throwNoSuchJob(uuid);
+            throw new NoSuchJobException(response.getContentAsString());
         } else if (response.getStatus() == 400) {
-            throw new InconsistentJobStatusException("cannot fail job " + uuid + " with status PENDING (should be one of [RUNNING])");
+            throw new InconsistentJobStatusException(response.getContentAsString());
         }
     }
 

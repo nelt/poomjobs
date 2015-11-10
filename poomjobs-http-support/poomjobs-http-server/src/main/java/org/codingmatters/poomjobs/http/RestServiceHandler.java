@@ -72,7 +72,7 @@ public class RestServiceHandler implements HttpHandler {
                 log.info("handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
             } catch (RestException e) {
                 log.error("error handling rest request " + exchange.getRequestMethod() + " for " + exchange.getRequestPath(), e);
-                io.status(e.getStatus());
+                io.status(e.getStatus()).content(e.getContent());
             }
         }
         io.send(exchange);
@@ -168,7 +168,7 @@ public class RestServiceHandler implements HttpHandler {
 
             this.headers.forEach((name, value) -> exchange.getResponseHeaders().add(new HttpString(name), value));
 
-            if(this.status.getMessage() != null) {
+            if(this.status.getMessage() != null && this.content == null) {
                 this.contentType("text/plain").content(this.status.getMessage());
             }
 

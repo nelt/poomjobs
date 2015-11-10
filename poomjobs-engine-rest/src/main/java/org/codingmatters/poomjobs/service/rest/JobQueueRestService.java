@@ -30,23 +30,6 @@ public class JobQueueRestService {
         this.deleguate = deleguate;
     }
 
-    public void get(RestIO io) throws RestException {
-        UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
-        try {
-            Job job = this.deleguate.get(uuid);
-            io.status(RestStatus.OK)
-                    .contentType("application/json")
-                    .encoding("UTF-8")
-                    .content(this.codec.write(job));
-        } catch (ServiceException e) {
-            log.error("job not found : " + uuid.toString(), e);
-            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e);
-        } catch (JsonCodecException e) {
-            log.error("failed writing job as JSON : " + uuid.toString(), e);
-            throw new RestException(RestStatus.INTERNAL_ERROR, e);
-        }
-    }
-
     public void submit(RestIO io) throws RestException {
         String json = new String(io.requestContent(), Charset.forName("UTF-8"));
         try {
@@ -60,6 +43,23 @@ public class JobQueueRestService {
         } catch (ServiceException e) {
             log.error("unexpected error submitting from json : " + json, e);
             throw new RestException(RestStatus.INTERNAL_ERROR, e);
+        }
+    }
+
+    public void get(RestIO io) throws RestException {
+        UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
+        try {
+            Job job = this.deleguate.get(uuid);
+            io.status(RestStatus.OK)
+                    .contentType("application/json")
+                    .encoding("UTF-8")
+                    .content(this.codec.write(job));
+        } catch (ServiceException e) {
+            log.error("job not found : " + uuid.toString(), e);
+            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e.getMessage(), e);
+        } catch (JsonCodecException e) {
+            log.error("failed writing job as JSON : " + uuid.toString(), e);
+            throw new RestException(RestStatus.INTERNAL_ERROR, e.getMessage(), e);
         }
     }
 
@@ -81,28 +81,16 @@ public class JobQueueRestService {
         this.jobAction(io, uuid -> this.deleguate.fail(uuid, stringArray));
     }
 
-    protected String[] parseStringArrayFromContent(RestIO io) throws RestException {
-        String json = new String(io.requestContent(), Charset.forName("UTF-8"));
-        String [] stringArray;
-        try {
-            stringArray = this.codec.readArray(json);
-        } catch (JsonCodecException e) {
-            log.error("unable to parse JSON : " + json, e);
-            throw new RestException(RestStatus.BAD_REQUEST, e);
-        }
-        return stringArray;
-    }
-
     protected void jobAction(RestIO io, JobActor actor) throws RestException {
         UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
         try {
             this.doWithJob(uuid, actor);
         } catch (NoSuchJobException e) {
             log.error("no such job : " + uuid, e);
-            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e);
+            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e.getMessage(), e);
         } catch (InconsistentJobStatusException e) {
             log.error("unexpected status for starting job : " + uuid, e);
-            throw new RestException(RestStatus.BAD_REQUEST, e);
+            throw new RestException(RestStatus.BAD_REQUEST, e.getMessage(), e);
         } catch (ServiceException e) {
             log.error("unexpected error starting job : " + uuid, e);
             throw new RestException(RestStatus.INTERNAL_ERROR, e);
@@ -116,5 +104,17 @@ public class JobQueueRestService {
 
     private interface JobActor {
         void act(UUID uuid) throws ServiceException;
+    }
+
+    protected String[] parseStringArrayFromContent(RestIO io) throws RestException {
+        String json = new String(io.requestContent(), Charset.forName("UTF-8"));
+        String [] stringArray;
+        try {
+            stringArray = this.codec.readArray(json);
+        } catch (JsonCodecException e) {
+            log.error("unable to parse JSON : " + json, e);
+            throw new RestException(RestStatus.BAD_REQUEST, e);
+        }
+        return stringArray;
     }
 }
