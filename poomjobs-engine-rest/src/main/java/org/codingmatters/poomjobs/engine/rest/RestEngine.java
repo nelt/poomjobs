@@ -4,6 +4,9 @@ import org.codingmatters.poomjobs.apis.exception.InconsistentJobStatusException;
 import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.Job;
+import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.service.rest.api.JsonCodecException;
@@ -22,7 +25,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by nel on 05/11/15.
  */
-public class RestEngine implements JobQueueService {
+public class RestEngine implements JobQueueService, JobListService {
 
     private final HttpClient httpClient;
     private final String baseUrl;
@@ -39,14 +42,14 @@ public class RestEngine implements JobQueueService {
         ContentProvider content = this.prepareContent(jobSubmission);
         ContentResponse response = this.POST(content, "/jobs");
         this.processesErrors(response);
-        return this.parseResponseAsJos(response);
+        return this.parseResponseAsJob(response);
     }
 
     @Override
     public Job get(UUID uuid) throws ServiceException {
         ContentResponse response = this.GET("/jobs/" + uuid.toString());
         this.processesErrors(response);
-        return this.parseResponseAsJos(response);
+        return this.parseResponseAsJob(response);
     }
 
     @Override
@@ -73,6 +76,14 @@ public class RestEngine implements JobQueueService {
         this.processesErrors(response);
     }
 
+    @Override
+    public JobList list(ListQuery query) throws ServiceException {
+        ContentResponse response = this.POST(this.prepareContent(query), "/jobs/list");
+        this.processesErrors(response);
+
+        return this.parseResponseAsJobList(response);
+    }
+
     protected void processesErrors(ContentResponse response) throws NoSuchJobException, InconsistentJobStatusException {
         if (response.getStatus() == 404) {
             throw new NoSuchJobException(response.getContentAsString());
@@ -93,7 +104,6 @@ public class RestEngine implements JobQueueService {
         }
         return content;
     }
-
 
     private String url(String path) {
         return this.baseUrl + path;
@@ -123,11 +133,20 @@ public class RestEngine implements JobQueueService {
         }
     }
 
-    protected Job parseResponseAsJos(ContentResponse response) throws ServiceException {
+    protected Job parseResponseAsJob(ContentResponse response) throws ServiceException {
         try {
             return this.codec.readJob(response.getContentAsString());
         } catch (JsonCodecException e) {
             throw new ServiceException("failed unmarshalling response as job : " + response.getContentAsString(), e);
         }
     }
+
+    protected JobList parseResponseAsJobList(ContentResponse response) throws ServiceException {
+        try {
+            return this.codec.readJobList(response.getContentAsString());
+        } catch (JsonCodecException e) {
+            throw new ServiceException("failed unmarshalling response as job : " + response.getContentAsString(), e);
+        }
+    }
+
 }

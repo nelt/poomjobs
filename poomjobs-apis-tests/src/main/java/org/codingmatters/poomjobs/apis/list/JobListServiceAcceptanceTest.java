@@ -48,7 +48,6 @@ public abstract class JobListServiceAcceptanceTest {
         assertThat(this.list.list(FIRST_100).size(), is(1));
     }
 
-
     @Test
     public void testRetentionDelay() throws Exception {
         UUID uuid = this.queue.submit(JobSubmission.job("job")

@@ -24,6 +24,10 @@ public class RestEngineFactory implements ServiceFactory {
 
     @Override
     public JobQueueService queueService(Configuration config) {
+        return this.createRestEngine(config);
+    }
+
+    protected RestEngine createRestEngine(Configuration config) {
         HttpClient httpClient = (HttpClient) config.getOption(HTTP_CLIENT);
         String url = (String) config.getOption(URL);
         return new RestEngine(httpClient, url);
@@ -31,7 +35,7 @@ public class RestEngineFactory implements ServiceFactory {
 
     @Override
     public JobListService listService(Configuration config) {
-        return null;
+        return this.createRestEngine(config);
     }
 
     @Override

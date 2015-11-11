@@ -1,8 +1,11 @@
 package org.codingmatters.poomjobs.service.rest;
 
+import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.jobs.Job;
+import org.codingmatters.poomjobs.apis.jobs.JobList;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
+import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.http.RestServiceHandler;
@@ -28,22 +31,29 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by nel on 05/11/15.
  */
-public class QueueRestServiceTest {
+public class RestEngineTest {
 
-    static private Logger log = LoggerFactory.getLogger(QueueRestServiceTest.class);
+    static private Logger log = LoggerFactory.getLogger(RestEngineTest.class);
 
     @Rule
     public TestUndertowServer server = new TestUndertowServer();
+
     private HttpClient httpClient;
-    private JobQueueService delegate;
+    private JobQueueService queueDeleguate;
     private JsonJobCodec codec = new JsonJobCodec();
+    private JobListService listDeleguate;
 
     @Before
     public void setUp() throws Exception {
-        this.delegate = PoorMansJob.queue(defaults(UUID.randomUUID().toString()).config());
+        Configuration config = defaults(UUID.randomUUID().toString()).config();
+        this.queueDeleguate = PoorMansJob.queue(config);
+        this.listDeleguate = PoorMansJob.list(config);
+
         this.httpClient = new HttpClient();
         this.httpClient.start();
-        this.server.setHandler(RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.delegate)));
+        this.server.setHandler(
+                RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.queueDeleguate, this.listDeleguate))
+        );
     }
 
     @After
@@ -53,7 +63,7 @@ public class QueueRestServiceTest {
 
     @Test
     public void testGetJob() throws Exception {
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        Job job = this.queueDeleguate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
         Job got = this.codec.readJob(
                 this.httpClient.GET(this.server.url("/queue/jobs/" + job.getUuid().toString()))
                         .getContentAsString()
@@ -80,12 +90,12 @@ public class QueueRestServiceTest {
                         .getContentAsString()
         );
 
-        assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
+        assertThat(from(got), is(from(this.queueDeleguate.get(got.getUuid()))));
     }
 
     @Test
     public void testStart() throws Exception {
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        Job job = this.queueDeleguate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
 
         Job got = this.codec.readJob(this.httpClient.POST(
                 this.server.url("/queue/jobs/" + job.getUuid().toString() + "/start"))
@@ -93,14 +103,14 @@ public class QueueRestServiceTest {
                     .getContentAsString()
         );
 
-        assertThat(from(got), is(from(this.delegate.get(got.getUuid()))));
+        assertThat(from(got), is(from(this.queueDeleguate.get(got.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.RUNNING));
     }
 
     @Test
     public void testCancel() throws Exception {
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
-        this.delegate.start(job.getUuid());
+        Job job = this.queueDeleguate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.queueDeleguate.start(job.getUuid());
 
         Job got = this.codec.readJob(this.httpClient.POST(
                 this.server.url("/queue/jobs/" + job.getUuid().toString() + "/cancel"))
@@ -108,7 +118,7 @@ public class QueueRestServiceTest {
                 .getContentAsString()
         );
 
-        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(from(got), is(from(this.queueDeleguate.get(job.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.CANCELED));
     }
 
@@ -118,8 +128,8 @@ public class QueueRestServiceTest {
                 "application/json",
                 "[\"result1\", \"result2\"]",
                 Charset.forName("UTF-8"));
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
-        this.delegate.start(job.getUuid());
+        Job job = this.queueDeleguate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.queueDeleguate.start(job.getUuid());
 
         Job got = this.codec.readJob(this.httpClient.POST(
                 this.server.url("/queue/jobs/" + job.getUuid().toString() + "/done"))
@@ -128,7 +138,7 @@ public class QueueRestServiceTest {
                 .getContentAsString()
         );
 
-        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(from(got), is(from(this.queueDeleguate.get(job.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.DONE));
         assertThat(got.getResults(), is(array("result1", "result2")));
     }
@@ -139,8 +149,8 @@ public class QueueRestServiceTest {
                 "application/json",
                 "[\"error1\", \"error2\"]",
                 Charset.forName("UTF-8"));
-        Job job = this.delegate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
-        this.delegate.start(job.getUuid());
+        Job job = this.queueDeleguate.submit(JobSubmission.job("j").withArguments("a", "b", "c").submission());
+        this.queueDeleguate.start(job.getUuid());
 
         Job got = this.codec.readJob(this.httpClient.POST(
                 this.server.url("/queue/jobs/" + job.getUuid().toString() + "/fail"))
@@ -149,9 +159,56 @@ public class QueueRestServiceTest {
                 .getContentAsString()
         );
 
-        assertThat(from(got), is(from(this.delegate.get(job.getUuid()))));
+        assertThat(from(got), is(from(this.queueDeleguate.get(job.getUuid()))));
         assertThat(got.getStatus(), is(JobStatus.FAILED));
         assertThat(got.getErrors(), is(array("error1", "error2")));
+    }
+
+    @Test
+    public void testListWithoutContent() throws Exception {
+        Job job = this.queueDeleguate.submit(JobSubmission.job("job").submission());
+
+        String json = this.httpClient.POST(
+                this.server.url("/queue/jobs/list"))
+                .send()
+                .getContentAsString();
+        System.out.println(json);
+        JobList got = this.codec.readJobList(json
+        );
+
+        assertThat(got.toArray(new Job[got.size()]), is(array(job)));
+    }
+
+    @Test
+    public void testListWithContent() throws Exception {
+        Job job = this.queueDeleguate.submit(JobSubmission.job("job").submission());
+
+        String json = this.httpClient.POST(
+                this.server.url("/queue/jobs/list"))
+                .content(new StringContentProvider("{\"limit\": 10}"), "application/json")
+                .send()
+                .getContentAsString();
+        System.out.println(json);
+        JobList got = this.codec.readJobList(json
+        );
+
+        assertThat(got.toArray(new Job[got.size()]), is(array(job)));
+    }
+
+    @Test
+    public void testListWithEmptyContent() throws Exception {
+        Job job = this.queueDeleguate.submit(JobSubmission.job("job").submission());
+
+        String json = this.httpClient.POST(
+                this.server.url("/queue/jobs/list"))
+                .content(new StringContentProvider("{}"), "application/json")
+                .send()
+                .getContentAsString();
+        System.out.println(json);
+        JobList got = this.codec.readJobList(json
+        );
+
+        assertThat(got.toArray(new Job[got.size()]), is(array(job)));
     }
 
     static private <T> T[] array(T... elements) {

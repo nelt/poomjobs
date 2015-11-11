@@ -7,6 +7,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
+import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 
 import java.io.IOException;
@@ -62,5 +64,23 @@ public class JsonJobCodec {
         } catch (IOException e) {
             throw new JsonCodecException("couldn't parse as array : " + json, e);
         }
+    }
+
+    public JobList readJobList(String json) throws JsonCodecException {
+        try {
+            JobBuilders.Builder[] builders = this.mapper.readValue(json, JobBuilders.Builder[].class);
+            RestJobList result = new RestJobList();
+            for (JobBuilders.Builder builder : builders) {
+                result.add(builder.job());
+            }
+
+            return result;
+        } catch (IOException e) {
+            throw new JsonCodecException("couldn't parse as job list : " + json, e);
+        }
+    }
+
+    public ListQuery readListQuery(String json) throws IOException {
+        return this.mapper.readValue(json, ListQuery.Builder.class).query();
     }
 }

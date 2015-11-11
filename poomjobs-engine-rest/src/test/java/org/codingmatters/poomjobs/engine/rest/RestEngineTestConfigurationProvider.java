@@ -4,6 +4,7 @@ import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
+import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.http.RestServiceHandler;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
@@ -24,7 +25,8 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
 
     private HttpClient httpClient;
     private Configuration configuration;
-    private JobQueueService delegate;
+    private JobQueueService queueDeleguate;
+    private JobListService listDeleguate;
 
     public RestEngineTestConfigurationProvider(TestUndertowServer server) {
         this.server = server;
@@ -35,8 +37,12 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
         this.httpClient = new HttpClient();
         this.httpClient.start();
 
-        this.delegate = PoorMansJob.queue(defaults(UUID.randomUUID().toString()).config());
-        this.server.setHandler(RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.delegate)));
+        Configuration config = defaults(UUID.randomUUID().toString()).config();
+        this.queueDeleguate = PoorMansJob.queue(config);
+        this.listDeleguate = PoorMansJob.list(config);
+        this.server.setHandler(RestServiceHandler.from(
+                PoomjobRestServices.queueService("/queue", this.queueDeleguate, this.listDeleguate))
+        );
 
         this.configuration = RestEngineFactory.forURL(this.server.url("/queue"), this.httpClient).config();
     }

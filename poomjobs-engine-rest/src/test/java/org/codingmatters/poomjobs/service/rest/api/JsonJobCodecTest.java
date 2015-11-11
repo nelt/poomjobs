@@ -2,6 +2,8 @@ package org.codingmatters.poomjobs.service.rest.api;
 
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
+import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +42,20 @@ public class JsonJobCodecTest {
                 .submission();
 
         assertThat(codec.readJobSubmission(codec.write(submission)), is(submission));
+    }
 
+    @Test
+    public void testJobList() throws Exception {
+        RestJobList list = new RestJobList();
+        list.add(JobBuilders.build("job1").job());
+        list.add(JobBuilders.build("job2").job());
+
+        assertThat(codec.readJobList(codec.write(list)), is(list));
+    }
+
+    @Test
+    public void testListQuery() throws Exception {
+        ListQuery query = ListQuery.limit(10).withOffset(12).status(JobStatus.CANCELED).query();
+        assertThat(codec.readListQuery(codec.write(query)), is(query));
     }
 }

@@ -23,7 +23,7 @@ public class ListQuery {
     }
 
     static public Builder limit(long limit) {
-        return new Builder(limit);
+        return new Builder().withLimit(limit);
     }
 
     public Long getLimit() {
@@ -47,13 +47,42 @@ public class ListQuery {
                 '}';
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ListQuery listQuery = (ListQuery) o;
+
+        if (limit != null ? !limit.equals(listQuery.limit) : listQuery.limit != null) return false;
+        if (offset != null ? !offset.equals(listQuery.offset) : listQuery.offset != null) return false;
+        return !(statuses != null ? !statuses.equals(listQuery.statuses) : listQuery.statuses != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = limit != null ? limit.hashCode() : 0;
+        result = 31 * result + (offset != null ? offset.hashCode() : 0);
+        result = 31 * result + (statuses != null ? statuses.hashCode() : 0);
+        return result;
+    }
+
+    public static ListQuery query() {
+        return new Builder().query();
+    }
+
     static public class Builder {
-        private final Long limit;
+        private Long limit = 100L;
         private Long offset = 0L;
         private HashSet<JobStatus> statuses = new HashSet<>();
 
-        private Builder(long limit) {
+        private Builder() {
+        }
+
+        public Builder withLimit(Long limit) {
             this.limit = limit;
+            return this;
         }
 
         public Builder withOffset(long offset) {
