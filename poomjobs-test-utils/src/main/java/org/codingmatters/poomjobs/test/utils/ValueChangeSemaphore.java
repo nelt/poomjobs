@@ -26,9 +26,7 @@ public class ValueChangeSemaphore<T> {
 
         if(! this.same(this.value, awaited)) {
             do {
-                long elapsed = System.currentTimeMillis() - start;
-                long nextTimeout = timeout - elapsed;
-                this.wait(nextTimeout);
+                this.wait(100);
             } while (!this.same(this.value, awaited) && System.currentTimeMillis() - start < timeout);
         }
         return this.value;
