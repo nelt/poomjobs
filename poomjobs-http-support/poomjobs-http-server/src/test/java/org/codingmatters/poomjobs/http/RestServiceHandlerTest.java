@@ -1,6 +1,7 @@
 package org.codingmatters.poomjobs.http;
 
 import io.undertow.Handlers;
+import org.codingmatters.poomjobs.http.undertow.RestServiceHandler;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.junit.Before;

@@ -7,7 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import static org.codingmatters.poomjobs.http.RestService.root;
-import static org.codingmatters.poomjobs.http.RestServiceHandler.from;
+import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 

@@ -34,6 +34,7 @@ public class SSETest {
     private ServerSentEventConnectionCallback callback;
     private ListAddedSemaphore<ServerSentEventConnection> connections;
     private ListAddedSemaphore<InboundEvent> events;
+    private Client httpClient;
 
     @Before
     public void setUp() throws Exception {
@@ -46,10 +47,13 @@ public class SSETest {
                 .setHandler(new ServerSentEventHandler(this.callback))
                 .build();
         this.server.start();
+
+        this.httpClient = ClientBuilder.newBuilder().register(SseFeature.class).build();
     }
 
     @After
     public void tearDown() throws Exception {
+        this.httpClient.close();
         this.server.stop();
     }
 
@@ -79,9 +83,8 @@ public class SSETest {
 
     @Test
     public void testOneGetClient() throws Exception {
-        Client client = ClientBuilder.newBuilder().register(SseFeature.class).build();
         this.collectEvents(
-                client.target("http://localhost:9999/"),
+                httpClient.target("http://localhost:9999/"),
                 target -> target.request().get(EventInput.class));
 
         this.connections.waitAdded(CONNECTION_TIMEOUT);
