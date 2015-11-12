@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+
 /**
  * Created by nel on 08/07/15.
  */
@@ -47,6 +50,13 @@ public class TestHelpers {
             waited += delay;
         }
     }
+
+    public static void assertOccuresBefore(Condition condition, long timeout) throws Exception {
+        waitUntil(condition, timeout);
+        assertThat(condition.is(), is(true));
+    }
+
+
 
     public static <T> T[] range(T[] all, int from, int to) {
         return Arrays.copyOfRange(all, from, to);
