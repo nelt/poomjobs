@@ -20,8 +20,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertOccuresBefore;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 
 /**
  * Created by nel on 12/11/15.
@@ -70,16 +70,13 @@ public class UndertowServerSentEventHandlerTest {
     public void testRegister() throws Exception {
         this.httpClient.target("http://localhost:9999/").request().get();
 
-        Thread.sleep(500);
-
-        assertThat(this.clients.size(), is(1));
+        assertOccuresBefore(() -> this.clients.size() == 1, 1000);
     }
 
     @Test
     public void testSend() throws Exception {
         EventInput eventInput = this.httpClient.target("http://localhost:9999/").request().get(EventInput.class);
-
-        Thread.sleep(500);
+        waitUntil(() -> this.clients.size() == 1, 1000);
 
         List<InboundEvent> events = Collections.synchronizedList(new LinkedList<>());
 
@@ -100,8 +97,6 @@ public class UndertowServerSentEventHandlerTest {
                 this.clients.get(0)
         );
 
-        Thread.sleep(500);
-
-        assertThat(events.size(), is(1));
+        assertOccuresBefore(() -> events.size() == 1, 1000);
     }
 }
