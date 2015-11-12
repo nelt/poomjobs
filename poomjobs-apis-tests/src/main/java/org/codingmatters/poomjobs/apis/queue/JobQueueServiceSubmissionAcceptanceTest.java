@@ -15,7 +15,7 @@ import org.junit.rules.ExpectedException;
 import java.util.UUID;
 
 import static java.time.LocalDateTime.now;
-import static org.codingmatters.poomjobs.test.utils.Helpers.array;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.array;
 import static org.codingmatters.poomjobs.test.utils.TimeMatchers.near;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;

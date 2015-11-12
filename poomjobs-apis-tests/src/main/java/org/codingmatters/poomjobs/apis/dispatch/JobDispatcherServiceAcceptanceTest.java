@@ -16,8 +16,8 @@ import java.util.UUID;
 import static org.codingmatters.poomjobs.apis.jobs.JobStatus.DONE;
 import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 import static org.codingmatters.poomjobs.apis.services.queue.JobSubmission.job;
-import static org.codingmatters.poomjobs.test.utils.Helpers.list;
-import static org.codingmatters.poomjobs.test.utils.Helpers.waitUntil;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.list;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 

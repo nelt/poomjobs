@@ -7,8 +7,8 @@ import org.junit.Test;
 import java.lang.ref.WeakReference;
 
 import static java.lang.Thread.State.TERMINATED;
-import static org.codingmatters.poomjobs.test.utils.Helpers.namedThreadState;
-import static org.codingmatters.poomjobs.test.utils.Helpers.waitUntil;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.namedThreadState;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 

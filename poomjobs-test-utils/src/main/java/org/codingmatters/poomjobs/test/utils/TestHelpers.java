@@ -6,12 +6,11 @@ import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
 
 /**
  * Created by nel on 08/07/15.
  */
-public class Helpers {
+public class TestHelpers {
     static public <T> T[] array(T ... elements) {
         return elements;
     }

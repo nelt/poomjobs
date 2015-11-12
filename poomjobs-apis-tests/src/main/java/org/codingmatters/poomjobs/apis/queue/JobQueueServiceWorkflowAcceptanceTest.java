@@ -14,7 +14,7 @@ import org.junit.rules.ExpectedException;
 
 import java.util.UUID;
 
-import static org.codingmatters.poomjobs.test.utils.Helpers.array;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.array;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 

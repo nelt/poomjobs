@@ -16,7 +16,7 @@ import java.util.UUID;
 import static org.codingmatters.poomjobs.apis.list.JobListMatchers.exactlyUUIDS;
 import static org.codingmatters.poomjobs.apis.services.list.ListQuery.limit;
 import static org.codingmatters.poomjobs.apis.services.queue.JobSubmission.job;
-import static org.codingmatters.poomjobs.test.utils.Helpers.range;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.range;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
