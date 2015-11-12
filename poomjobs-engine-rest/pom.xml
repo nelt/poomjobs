@@ -41,6 +41,15 @@
         </dependency>
 
         <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.media</groupId>
+            <artifactId>jersey-media-sse</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.codingmatters.poomjobs</groupId>
             <artifactId>poomjobs-apis-tests</artifactId>
             <scope>test</scope>

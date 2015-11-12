@@ -1,14 +1,14 @@
 package org.codingmatters.poomjobs.engine.rest;
 
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
-import org.codingmatters.poomjobs.apis.queue.JobQueueServiceSubmissionAcceptanceTest;
+import org.codingmatters.poomjobs.apis.list.JobListServiceAcceptanceTest;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
 import org.junit.Rule;
 
 /**
- * Created by nel on 09/11/15.
+ * Created by nel on 10/11/15.
  */
-public class RestEngineJobQueueServiceSubmissionAcceptanceTest extends JobQueueServiceSubmissionAcceptanceTest {
+public class JettyRestEngineJobListServiceAcceptanceTest extends JobListServiceAcceptanceTest {
     @Rule
     public TestUndertowServer server = new TestUndertowServer();
 

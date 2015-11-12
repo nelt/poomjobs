@@ -27,10 +27,10 @@ public class RestEngineFactory implements ServiceFactory {
         return this.createRestEngine(config);
     }
 
-    protected RestEngine createRestEngine(Configuration config) {
+    protected JettyRestEngine createRestEngine(Configuration config) {
         HttpClient httpClient = (HttpClient) config.getOption(HTTP_CLIENT);
         String url = (String) config.getOption(URL);
-        return new RestEngine(httpClient, url);
+        return new JettyRestEngine(httpClient, url);
     }
 
     @Override

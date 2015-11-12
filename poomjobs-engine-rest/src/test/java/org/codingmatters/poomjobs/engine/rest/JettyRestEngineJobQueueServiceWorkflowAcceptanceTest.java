@@ -8,7 +8,7 @@ import org.junit.Rule;
 /**
  * Created by nel on 09/11/15.
  */
-public class RestEngineJobQueueServiceWorkflowAcceptanceTest extends JobQueueServiceWorkflowAcceptanceTest {
+public class JettyRestEngineJobQueueServiceWorkflowAcceptanceTest extends JobQueueServiceWorkflowAcceptanceTest {
     @Rule
     public TestUndertowServer server = new TestUndertowServer();
 

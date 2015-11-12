@@ -31,9 +31,9 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by nel on 05/11/15.
  */
-public class RestEngineTest {
+public class JettyRestEngineTest {
 
-    static private Logger log = LoggerFactory.getLogger(RestEngineTest.class);
+    static private Logger log = LoggerFactory.getLogger(JettyRestEngineTest.class);
 
     @Rule
     public TestUndertowServer server = new TestUndertowServer();

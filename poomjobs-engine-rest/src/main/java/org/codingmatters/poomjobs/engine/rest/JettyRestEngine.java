@@ -25,14 +25,14 @@ import java.util.concurrent.TimeoutException;
 /**
  * Created by nel on 05/11/15.
  */
-public class RestEngine implements JobQueueService, JobListService {
+public class JettyRestEngine implements JobQueueService, JobListService {
 
     private final HttpClient httpClient;
     private final String baseUrl;
 
     private final JsonJobCodec codec = new JsonJobCodec();
 
-    public RestEngine(HttpClient httpClient, String baseUrl) {
+    public JettyRestEngine(HttpClient httpClient, String baseUrl) {
         this.httpClient = httpClient;
         this.baseUrl = baseUrl;
     }
