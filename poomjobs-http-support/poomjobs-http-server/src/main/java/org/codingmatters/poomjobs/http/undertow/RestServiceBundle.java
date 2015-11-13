@@ -4,12 +4,9 @@ import io.undertow.Handlers;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.handlers.PathHandler;
-import io.undertow.util.Headers;
 import org.codingmatters.poomjobs.http.RestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.charset.Charset;
 
 /**
  * Created by nel on 13/11/15.
@@ -21,12 +18,7 @@ public class RestServiceBundle implements HttpHandler {
         return new RestServiceBundle();
     }
 
-    private final PathHandler deleguate = Handlers.path(exchange -> {
-        log.error("requested service does not exist : {}", exchange.getRequestPath());
-        exchange.setStatusCode(RestStatus.SERVICE_NOT_FOUND.getHttpStatus());
-        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-        exchange.getResponseSender().send(RestStatus.SERVICE_NOT_FOUND.getMessage(), Charset.forName("UTF-8"));
-    });
+    private final PathHandler deleguate = Handlers.path(exchange -> RestServiceHandler.statusResponse(RestStatus.SERVICE_NOT_FOUND, exchange));
 
     private RestServiceBundle() {}
 

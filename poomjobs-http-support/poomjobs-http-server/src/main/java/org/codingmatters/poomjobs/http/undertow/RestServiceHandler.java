@@ -29,7 +29,7 @@ public class RestServiceHandler implements HttpHandler {
     }
 
     static public HttpHandler from(RestService serviceDescriptor) {
-        PathTemplateHandler result = new PathTemplateHandler(RestServiceHandler::resourceNotFound);
+        PathTemplateHandler result = new PathTemplateHandler(exchange -> statusResponse(RestStatus.RESOURCE_NOT_FOUND, exchange));
 
         serviceDescriptor.forEachResource((path, resource) ->
                 result.add(path, new RestServiceHandler(resource))
@@ -38,11 +38,11 @@ public class RestServiceHandler implements HttpHandler {
         return result;
     }
 
-    static private void resourceNotFound(HttpServerExchange exchange) {
+    static public void statusResponse(RestStatus restStatus, HttpServerExchange exchange) {
         log.error("requested resource does not exist : {}", exchange.getRequestPath());
-        exchange.setStatusCode(RestStatus.RESOURCE_NOT_FOUND.getHttpStatus());
+        exchange.setStatusCode(restStatus.getHttpStatus());
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-        exchange.getResponseSender().send(RestStatus.RESOURCE_NOT_FOUND.getMessage(), Charset.forName("UTF-8"));
+        exchange.getResponseSender().send(restStatus.getMessage(), Charset.forName("UTF-8"));
     }
 
     @Override
