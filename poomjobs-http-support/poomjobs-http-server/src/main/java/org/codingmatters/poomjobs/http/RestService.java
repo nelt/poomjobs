@@ -10,7 +10,6 @@ import java.util.function.BiConsumer;
  */
 public class RestService {
 
-
     public static RestService service() {
         return new RestService();
     }
@@ -19,8 +18,6 @@ public class RestService {
         return RestResource.resource();
     }
 
-
-//    private final ResourcesByName resources = new ResourcesByName();
     private final LinkedHashMap<String, RestResource> resources = new LinkedHashMap<>();
 
     private RestService() {}
@@ -36,11 +33,5 @@ public class RestService {
 
     public RestService serverSentEventChannel(String name, ServerSentEventChannel channel) {
         return this;
-    }
-
-
-    public RestResourceInvocation getMatchingResource(String name) {
-//        return this.resources.getMatchingResource(name);
-        return null;
     }
 }
