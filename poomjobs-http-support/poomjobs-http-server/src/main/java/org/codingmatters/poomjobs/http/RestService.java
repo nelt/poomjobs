@@ -9,8 +9,8 @@ import org.codingmatters.poomjobs.http.sse.ServerSentEventChannel;
 public class RestService {
 
 
-    public static RestService root(String rootPath) {
-        return new RestService(rootPath);
+    public static RestService service() {
+        return new RestService();
     }
 
     public static RestResource resource() {
@@ -18,13 +18,9 @@ public class RestService {
     }
 
 
-    private final String rootPath;
-
     private final ResourcesByName resources = new ResourcesByName();
 
-    private RestService(String rootPath) {
-        this.rootPath = rootPath;
-    }
+    private RestService() {}
 
     public RestService resource(String name, RestResource resource) {
         this.resources.add(name, resource);
@@ -35,9 +31,6 @@ public class RestService {
         return this;
     }
 
-    public String getRootPath() {
-        return rootPath;
-    }
 
     public RestResourceInvocation getMatchingResource(String name) {
         return this.resources.getMatchingResource(name);

@@ -36,13 +36,27 @@ public class RestServiceHandler implements HttpHandler {
     }
 
     protected void handleRestRequest(HttpServerExchange exchange) throws IOException {
-        log.info("request path :  {}", exchange.getRequestPath());
-        log.info("relative path : {}", exchange.getRelativePath());
-//        Handlers
         exchange.startBlocking();
 
         String path = exchange.getRelativePath();
 
+        UndertowRestIO io = buildRestIO(exchange);
+
+        RestResourceInvocation resourceInvocation = this.descriptor.getMatchingResource(path);
+        try {
+            RestResource.Method method = this.method(exchange);
+            resourceInvocation.getResource()
+                    .handler(method)
+                    .handle(io.withPathParameters(resourceInvocation.getPathParameters()));
+            log.info("handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
+        } catch (RestException e) {
+            log.error("error handling rest request " + exchange.getRequestMethod() + " for " + exchange.getRequestPath(), e);
+            io.status(e.getStatus()).content(e.getContent());
+        }
+        io.send(exchange);
+    }
+
+    static private UndertowRestIO buildRestIO(HttpServerExchange exchange) throws IOException {
         UndertowRestIO io = null;
         try {
             io = new UndertowRestIO(exchange);
@@ -50,24 +64,7 @@ public class RestServiceHandler implements HttpHandler {
             log.error("error creating RestIO from exchange", e);
             throw e;
         }
-
-        if(! path.startsWith(this.descriptor.getRootPath())) {
-            log.error("requested service does not exist : {}", exchange.getRequestPath());
-            io.status(RestStatus.SERVICE_NOT_FOUND);
-        } else {
-            RestResourceInvocation resourceInvocation = this.descriptor.getMatchingResource(path.substring(this.descriptor.getRootPath().length()));
-            try {
-                RestResource.Method method = this.method(exchange);
-                resourceInvocation.getResource()
-                        .handler(method)
-                        .handle(io.withPathParameters(resourceInvocation.getPathParameters()));
-                log.info("handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
-            } catch (RestException e) {
-                log.error("error handling rest request " + exchange.getRequestMethod() + " for " + exchange.getRequestPath(), e);
-                io.status(e.getStatus()).content(e.getContent());
-            }
-        }
-        io.send(exchange);
+        return io;
     }
 
     protected RestResource.Method method(HttpServerExchange exchange) throws RestException {

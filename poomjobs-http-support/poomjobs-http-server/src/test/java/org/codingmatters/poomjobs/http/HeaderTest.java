@@ -6,7 +6,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import static org.codingmatters.poomjobs.http.RestService.root;
+import static org.codingmatters.poomjobs.http.RestService.service;
+import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -28,12 +29,12 @@ public class HeaderTest {
 
     @Test
     public void testStringHeader() throws Exception {
-        this.server.setHandler(from(root("/service")
+        this.server.setHandler(services().service("/service", from(service()
                 .resource("/named", RestService
                         .resource().GET(io -> {
                             io.header("Bla", "blu");
                         })
-                )));
+                ))));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/service/named?name=value"));
         assertThat(response.getStatus(), is(200));

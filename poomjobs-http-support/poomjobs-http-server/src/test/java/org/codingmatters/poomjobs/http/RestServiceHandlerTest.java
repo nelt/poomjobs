@@ -1,7 +1,5 @@
 package org.codingmatters.poomjobs.http;
 
-import io.undertow.Handlers;
-import org.codingmatters.poomjobs.http.undertow.RestServiceHandler;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.junit.Before;
@@ -10,6 +8,8 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
+import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -32,7 +32,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testServiceNotFound() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")));
+        this.server.setHandler(services().service("/service", from(RestService.service())));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/no/service"));
         assertThat(response.getStatus(), is(404));
@@ -42,7 +42,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testResourceNotFound() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")));
+        this.server.setHandler(services().service("/service", from(RestService.service())));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/service/resource"));
         assertThat(response.getStatus(), is(404));
@@ -52,7 +52,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testGet() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service", from(RestService.service()
                 .resource("/named", RestService
                                 .resource().GET(io ->
                                                 io.status(RestStatus.OK)
@@ -60,7 +60,7 @@ public class RestServiceHandlerTest {
                                                         .encoding("UTF-8")
                                                         .content("Hello World")
                                 )
-                )));
+                ))));
 
         ContentResponse response = this.httpClient.GET(this.server.url("/service/named"));
         assertThat(response.getStatus(), is(200));
@@ -70,13 +70,13 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testAllMethods() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service", from(RestService.service()
                 .resource("/named", RestService.resource()
                                 .GET(io -> io.content("GET"))
                                 .POST(io -> io.content("POST"))
                                 .PUT(io -> io.content("PUT"))
                                 .DELETE(io -> io.content("DELETE"))
-                )));
+                ))));
 
         assertThat(this.httpClient.GET(this.server.url("/service/named")).getContentAsString(), is("GET"));
         assertThat(this.httpClient.POST(this.server.url("/service/named")).send().getContentAsString(), is("POST"));
@@ -86,7 +86,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testPostNotDefined() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service", from(RestService.service()
                 .resource("/named", RestService
                                 .resource().GET(io ->
                                                 io.status(RestStatus.OK)
@@ -94,7 +94,7 @@ public class RestServiceHandlerTest {
                                                         .encoding("UTF-8")
                                                         .content("Hello World")
                                 )
-                )));
+                ))));
 
         ContentResponse response = this.httpClient.POST(this.server.url("/service/named")).send();
         assertThat(response.getStatus(), is(405));
@@ -104,7 +104,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testOptionsNeverAllowed() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service", from(RestService.service()
                 .resource("/named", RestService
                                 .resource().GET(io ->
                                                 io.status(RestStatus.OK)
@@ -112,7 +112,7 @@ public class RestServiceHandlerTest {
                                                         .encoding("UTF-8")
                                                         .content("Hello World")
                                 )
-                )));
+                ))));
 
         ContentResponse response = this.httpClient.newRequest(this.server.url("/service/named")).method("OPTIONS").send();
         assertThat(response.getStatus(), is(405));
@@ -122,7 +122,7 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testHeadNeverAllowed() throws Exception {
-        this.server.setHandler(RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service", from(RestService.service()
                 .resource("/named", RestService
                                 .resource().GET(io ->
                                                 io.status(RestStatus.OK)
@@ -130,7 +130,7 @@ public class RestServiceHandlerTest {
                                                         .encoding("UTF-8")
                                                         .content("Hello World")
                                 )
-                )));
+                ))));
 
         ContentResponse response = this.httpClient.newRequest(this.server.url("/service/named")).method("HEAD").send();
         assertThat(response.getStatus(), is(405));
@@ -140,9 +140,8 @@ public class RestServiceHandlerTest {
 
     @Test
     public void testSubpathGet() throws Exception {
-        this.server.setHandler(Handlers.path()
-                .addPrefixPath("/root",
-                        RestServiceHandler.from(RestService.root("/service")
+        this.server.setHandler(services().service("/service/service",
+                        from(RestService.service()
                                         .resource("/named", RestService
                                                         .resource().GET(io ->
                                                                         io.status(RestStatus.OK)
@@ -155,7 +154,7 @@ public class RestServiceHandlerTest {
                 )
         );
 
-        ContentResponse response = this.httpClient.GET(this.server.url("/root/service/named"));
+        ContentResponse response = this.httpClient.GET(this.server.url("/service/service/named"));
         assertThat(response.getStatus(), is(200));
         assertThat(response.getContentAsString(), is("Hello World"));
         assertThat(response.getMediaType(), is("text/plain"));

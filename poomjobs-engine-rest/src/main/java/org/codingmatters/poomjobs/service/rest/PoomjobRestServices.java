@@ -10,11 +10,11 @@ import static org.codingmatters.poomjobs.http.RestService.resource;
  * Created by nel on 05/11/15.
  */
 public class PoomjobRestServices {
-    static public RestService queueService(String forPath, JobQueueService jobQueueService, JobListService jobListService) {
+    static public RestService queueService(JobQueueService jobQueueService, JobListService jobListService) {
         JobQueueRestService queueRestService = new JobQueueRestService(jobQueueService);
         JobListRestService listRestService = new JobListRestService(jobListService);
 
-        return RestService.root(forPath)
+        return RestService.service()
                 .resource("/jobs/{uuid}/start", resource()
                         .POST(io -> queueRestService.start(io))
                 )

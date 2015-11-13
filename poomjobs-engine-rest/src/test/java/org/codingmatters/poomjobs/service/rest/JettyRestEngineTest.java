@@ -9,7 +9,6 @@ import org.codingmatters.poomjobs.apis.services.list.JobListService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
-import org.codingmatters.poomjobs.http.undertow.RestServiceHandler;
 import org.codingmatters.poomjobs.service.rest.api.JsonJobCodec;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.util.StringContentProvider;
@@ -25,6 +24,9 @@ import java.util.UUID;
 
 import static org.codingmatters.poomjobs.apis.jobs.JobBuilders.from;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
+import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
+import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
+import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.queueService;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -52,7 +54,7 @@ public class JettyRestEngineTest {
         this.httpClient = new HttpClient();
         this.httpClient.start();
         this.server.setHandler(
-                RestServiceHandler.from(PoomjobRestServices.queueService("/queue", this.queueDeleguate, this.listDeleguate))
+                services().service("/queue", from(queueService(this.queueDeleguate, this.listDeleguate)))
         );
     }
 
