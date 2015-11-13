@@ -49,8 +49,8 @@ public class RestServiceHandlerParametersTest {
         this.server.setHandler(services().service("/service", from(service()
                 .resource("/{level1}/{level2}/{level1}", RestService
                                 .resource().GET(io -> {
-                                    assertThat(io.pathParameters().get("level1"), is(asList("v1", "v3")));
-                                    assertThat(io.pathParameters().get("level2"), is(asList("v2")));
+                                    assertThat(io.parameters().get("level1"), is(asList("v3")));
+                                    assertThat(io.parameters().get("level2"), is(asList("v2")));
                                 })
                 ))));
 

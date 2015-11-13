@@ -1,7 +1,9 @@
 package org.codingmatters.poomjobs.http;
 
-import org.codingmatters.poomjobs.http.internal.ResourcesByName;
 import org.codingmatters.poomjobs.http.sse.ServerSentEventChannel;
+
+import java.util.LinkedHashMap;
+import java.util.function.BiConsumer;
 
 /**
  * Created by nel on 02/11/15.
@@ -18,13 +20,18 @@ public class RestService {
     }
 
 
-    private final ResourcesByName resources = new ResourcesByName();
+//    private final ResourcesByName resources = new ResourcesByName();
+    private final LinkedHashMap<String, RestResource> resources = new LinkedHashMap<>();
 
     private RestService() {}
 
     public RestService resource(String name, RestResource resource) {
-        this.resources.add(name, resource);
+        this.resources.put(name, resource);
         return this;
+    }
+
+    public void forEachResource(BiConsumer<? super String, ? super RestResource> action) {
+        resources.forEach(action);
     }
 
     public RestService serverSentEventChannel(String name, ServerSentEventChannel channel) {
@@ -33,6 +40,7 @@ public class RestService {
 
 
     public RestResourceInvocation getMatchingResource(String name) {
-        return this.resources.getMatchingResource(name);
+//        return this.resources.getMatchingResource(name);
+        return null;
     }
 }

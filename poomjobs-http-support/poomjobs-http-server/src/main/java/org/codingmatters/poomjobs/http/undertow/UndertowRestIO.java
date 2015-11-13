@@ -35,6 +35,9 @@ public class UndertowRestIO implements RestIO {
         exchange.getQueryParameters().forEach((key, values) -> {
             this.parameters.put(key, new ArrayList<>(values));
         });
+        exchange.getPathParameters().forEach((key, values) -> {
+            this.pathParameters.put(key, new ArrayList<>(values));
+        });
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         try (InputStream in = exchange.getInputStream()) {
             byte[] buffer = new byte[1024];

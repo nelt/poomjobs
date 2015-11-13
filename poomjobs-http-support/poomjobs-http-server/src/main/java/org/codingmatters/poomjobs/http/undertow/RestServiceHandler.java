@@ -3,11 +3,17 @@ package org.codingmatters.poomjobs.http.undertow;
 
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import org.codingmatters.poomjobs.http.*;
+import io.undertow.server.handlers.PathTemplateHandler;
+import io.undertow.util.Headers;
+import org.codingmatters.poomjobs.http.RestException;
+import org.codingmatters.poomjobs.http.RestResource;
+import org.codingmatters.poomjobs.http.RestService;
+import org.codingmatters.poomjobs.http.RestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 /**
  * Created by nel on 02/11/15.
@@ -16,14 +22,27 @@ public class RestServiceHandler implements HttpHandler {
 
     static private final Logger log = LoggerFactory.getLogger(RestServiceHandler.class);
 
-    private final RestService descriptor;
+    private final RestResource resource;
 
-    public RestServiceHandler(RestService serviceDescriptor) {
-        descriptor = serviceDescriptor;
+    public RestServiceHandler(RestResource resource) {
+        this.resource = resource;
     }
 
     static public HttpHandler from(RestService serviceDescriptor) {
-        return new RestServiceHandler(serviceDescriptor);
+        PathTemplateHandler result = new PathTemplateHandler(RestServiceHandler::resourceNotFound);
+
+        serviceDescriptor.forEachResource((path, resource) ->
+                result.add(path, new RestServiceHandler(resource))
+        );
+
+        return result;
+    }
+
+    static private void resourceNotFound(HttpServerExchange exchange) {
+        log.error("requested resource does not exist : {}", exchange.getRequestPath());
+        exchange.setStatusCode(RestStatus.RESOURCE_NOT_FOUND.getHttpStatus());
+        exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+        exchange.getResponseSender().send(RestStatus.RESOURCE_NOT_FOUND.getMessage(), Charset.forName("UTF-8"));
     }
 
     @Override
@@ -38,16 +57,12 @@ public class RestServiceHandler implements HttpHandler {
     protected void handleRestRequest(HttpServerExchange exchange) throws IOException {
         exchange.startBlocking();
 
-        String path = exchange.getRelativePath();
-
         UndertowRestIO io = buildRestIO(exchange);
-
-        RestResourceInvocation resourceInvocation = this.descriptor.getMatchingResource(path);
         try {
             RestResource.Method method = this.method(exchange);
-            resourceInvocation.getResource()
+            this.resource
                     .handler(method)
-                    .handle(io.withPathParameters(resourceInvocation.getPathParameters()));
+                    .handle(io);
             log.info("handled rest request {} for {}", exchange.getRequestMethod(), exchange.getRequestPath());
         } catch (RestException e) {
             log.error("error handling rest request " + exchange.getRequestMethod() + " for " + exchange.getRequestPath(), e);

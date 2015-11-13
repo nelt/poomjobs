@@ -47,7 +47,7 @@ public class JobQueueRestService {
     }
 
     public void get(RestIO io) throws RestException {
-        UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
+        UUID uuid = UUID.fromString(io.parameters().get("uuid").get(0));
         try {
             Job job = this.deleguate.get(uuid);
             io.status(RestStatus.OK)
@@ -82,7 +82,7 @@ public class JobQueueRestService {
     }
 
     protected void jobAction(RestIO io, JobActor actor) throws RestException {
-        UUID uuid = UUID.fromString(io.pathParameters().get("uuid").get(0));
+        UUID uuid = UUID.fromString(io.parameters().get("uuid").get(0));
         try {
             this.doWithJob(uuid, actor);
         } catch (NoSuchJobException e) {

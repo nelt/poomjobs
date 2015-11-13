@@ -21,12 +21,12 @@ public class RestServiceBundle implements HttpHandler {
         return new RestServiceBundle();
     }
 
-    private final PathHandler deleguate = Handlers.path(Handlers.path(exchange -> {
+    private final PathHandler deleguate = Handlers.path(exchange -> {
         log.error("requested service does not exist : {}", exchange.getRequestPath());
         exchange.setStatusCode(RestStatus.SERVICE_NOT_FOUND.getHttpStatus());
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
         exchange.getResponseSender().send(RestStatus.SERVICE_NOT_FOUND.getMessage(), Charset.forName("UTF-8"));
-    }));
+    });
 
     private RestServiceBundle() {}
 
