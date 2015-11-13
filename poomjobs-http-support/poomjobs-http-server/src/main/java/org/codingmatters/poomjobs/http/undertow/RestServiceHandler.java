@@ -38,7 +38,7 @@ public class RestServiceHandler implements HttpHandler {
     protected void handleRestRequest(HttpServerExchange exchange) throws IOException {
         log.info("request path :  {}", exchange.getRequestPath());
         log.info("relative path : {}", exchange.getRelativePath());
-
+//        Handlers
         exchange.startBlocking();
 
         String path = exchange.getRelativePath();

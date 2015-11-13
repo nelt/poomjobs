@@ -1,9 +1,9 @@
 package org.codingmatters.poomjobs.http;
 
+import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.handlers.sse.ServerSentEventConnection;
 import io.undertow.server.handlers.sse.ServerSentEventConnectionCallback;
-import io.undertow.server.handlers.sse.ServerSentEventHandler;
 import org.codingmatters.poomjobs.test.utils.ListAddedSemaphore;
 import org.glassfish.jersey.media.sse.EventInput;
 import org.glassfish.jersey.media.sse.InboundEvent;
@@ -44,7 +44,7 @@ public class SSETest {
         this.callback = this::connected;
         this.server = Undertow.builder()
                 .addHttpListener(9999, "localhost")
-                .setHandler(new ServerSentEventHandler(this.callback))
+                .setHandler(Handlers.serverSentEvents(this.callback))
                 .build();
         this.server.start();
 

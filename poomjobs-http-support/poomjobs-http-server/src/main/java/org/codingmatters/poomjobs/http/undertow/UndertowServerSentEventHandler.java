@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.http.undertow;
 
+import io.undertow.Handlers;
 import io.undertow.server.handlers.sse.ServerSentEventConnection;
 import io.undertow.server.handlers.sse.ServerSentEventHandler;
 import org.codingmatters.poomjobs.http.sse.*;
@@ -21,7 +22,7 @@ public class UndertowServerSentEventHandler implements SendingHandler {
 
     public UndertowServerSentEventHandler() {
         this.clientConnections = Collections.synchronizedMap(new HashMap<>());
-        this.handler = new ServerSentEventHandler(this::connected);
+        this.handler = Handlers.serverSentEvents(this::connected);
     }
 
     public ServerSentEventHandler getHandler() {
