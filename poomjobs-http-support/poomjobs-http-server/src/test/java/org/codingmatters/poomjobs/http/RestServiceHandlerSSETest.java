@@ -108,7 +108,7 @@ public class RestServiceHandlerSSETest {
         eventSource.open();
 
         this.httpClient.close();
-        while(channel.send(data("closed ?").event()).get().getFailureCount() != 1);
+        while(channel.send(data("closed ?").event()).get().getFailureCount() != 1) {Thread.sleep(10);}
 
         assertOccuresBefore(() -> unregistered.get(), 100);
     }

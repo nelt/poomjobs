@@ -101,7 +101,7 @@ public class SSETest {
     }
 
 
-    @Test
+    @Test(timeout = 5000L)
     public void testClientClosed() throws Exception {
         this.collectEvents(httpClient.target(this.server.url("/")));
         this.connections.waitAdded(CONNECTION_TIMEOUT);
@@ -117,12 +117,10 @@ public class SSETest {
         assertTrue(this.send(connection, "open"));
         httpClient.close();
 
-        int sentBeforeClosed = 0;
-        while(this.send(connection, "closed") && sentBeforeClosed < 100) {
-            sentBeforeClosed++;
+        while(this.send(connection, "closed")) {
             assertThat(this.openConnectionCount.get(), is(1));
+            Thread.sleep(10);
         }
-        log.info("closed after " + sentBeforeClosed + " successful send");
         assertOccuresBefore(() -> (this.openConnectionCount.get() == 0), 100);
 
     }
