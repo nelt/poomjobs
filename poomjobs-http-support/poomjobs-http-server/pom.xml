@@ -8,6 +8,7 @@
         <groupId>org.codingmatters.poomjobs</groupId>
         <artifactId>poomjobs-http-support</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../</relativePath>
     </parent>
 
     <artifactId>poomjobs-http-server</artifactId>
@@ -17,6 +18,11 @@
             <groupId>io.undertow</groupId>
             <artifactId>undertow-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-examples</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.codingmatters.poomjobs</groupId>
             <artifactId>poomjobs-http-test-utils</artifactId>
@@ -30,10 +36,12 @@
         <dependency>
             <groupId>org.glassfish.jersey.core</groupId>
             <artifactId>jersey-client</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.glassfish.jersey.media</groupId>
             <artifactId>jersey-media-sse</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     

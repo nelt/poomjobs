@@ -18,12 +18,21 @@ public class RestService {
         return RestResource.resource();
     }
 
+    public static ServerSentEventChannel.Builder sseChannel() {
+        return ServerSentEventChannel.create();
+    }
+
     private final LinkedHashMap<String, RestResource> resources = new LinkedHashMap<>();
+    private final LinkedHashMap<String, ServerSentEventChannel> sseChannels = new LinkedHashMap<>();
 
     private RestService() {}
 
-    public RestService resource(String name, RestResource resource) {
-        this.resources.put(name, resource);
+    public RestService resource(String path, RestResource resource) {
+        this.resources.put(path, resource);
+        return this;
+    }
+    public RestService serverSentEventChannel(String path, ServerSentEventChannel channel) {
+        this.sseChannels.put(path, channel);
         return this;
     }
 
@@ -31,7 +40,8 @@ public class RestService {
         resources.forEach(action);
     }
 
-    public RestService serverSentEventChannel(String name, ServerSentEventChannel channel) {
-        return this;
+    public void forEachSSEChannel(BiConsumer<? super String, ? super ServerSentEventChannel> action) {
+        sseChannels.forEach(action);
     }
+
 }

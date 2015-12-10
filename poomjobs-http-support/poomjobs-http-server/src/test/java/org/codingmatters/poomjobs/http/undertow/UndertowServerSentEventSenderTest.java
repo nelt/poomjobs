@@ -26,12 +26,12 @@ import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 /**
  * Created by nel on 12/11/15.
  */
-public class UndertowServerSentEventHandlerTest {
+public class UndertowServerSentEventSenderTest {
 
-    static private Logger log = LoggerFactory.getLogger(UndertowServerSentEventHandlerTest.class);
+    static private Logger log = LoggerFactory.getLogger(UndertowServerSentEventSenderTest.class);
 
     private Undertow server;
-    private UndertowServerSentEventHandler sseHandler;
+    private UndertowServerSentEventSender sseHandler;
     private ServerSentEventChannel sseChannel;
 
     private List<ServerSentEventClient> clients;
@@ -42,13 +42,13 @@ public class UndertowServerSentEventHandlerTest {
     public void setUp() throws Exception {
         this.clients = Collections.synchronizedList(new LinkedList<>());
 
-        this.sseHandler = new UndertowServerSentEventHandler();
+        this.sseHandler = new UndertowServerSentEventSender();
         this.sseChannel = ServerSentEventChannel.create()
                 .onRegister(client -> this.clients.add(client))
                 .onUnregister(client -> this.clients.remove(client))
                 .channel();
 
-        this.sseChannel.setSendingHandler(this.sseHandler);
+        this.sseChannel.setServerSetEventSender(this.sseHandler);
         this.sseHandler.setClientManager(this.sseChannel);
 
         this.server = Undertow.builder()
@@ -93,7 +93,7 @@ public class UndertowServerSentEventHandlerTest {
         }).start();
 
         this.sseChannel.send(
-                new ServerSentEvent("hello world !", "hello-event", UUID.randomUUID().toString()),
+                ServerSentEvent.data("hello world !").withEvent("hello-event").withId(UUID.randomUUID().toString()).event(),
                 this.clients.get(0)
         );
 

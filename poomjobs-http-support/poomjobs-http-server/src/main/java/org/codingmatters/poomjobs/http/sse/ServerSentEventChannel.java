@@ -36,7 +36,7 @@ public class ServerSentEventChannel implements ServerSentEventClientManager {
 
     static private final Logger log = LoggerFactory.getLogger(ServerSocketChannel.class);
 
-    private SendingHandler sendingHandler = SendingHandler.NOOP;
+    private ServerSetEventSender serverSetEventSender = ServerSetEventSender.NOOP;
 
     private final ClientRegisterer clientRegisterer;
     private final ClientUnregisterer clientUnregisterer;
@@ -46,12 +46,12 @@ public class ServerSentEventChannel implements ServerSentEventClientManager {
         this.clientUnregisterer = clientUnregisterer;
     }
 
-    public void setSendingHandler(SendingHandler sendingHandler) {
-        this.sendingHandler = sendingHandler;
+    public void setServerSetEventSender(ServerSetEventSender serverSetEventSender) {
+        this.serverSetEventSender = serverSetEventSender;
     }
 
-    public void send(ServerSentEvent event, ServerSentEventClient ... to) {
-        this.sendingHandler.sendRequested(new ServerSentEventSender(event, to));
+    public ServerSentEventFuture send(ServerSentEvent event, ServerSentEventClient ... to) {
+        return this.serverSetEventSender.sendRequested(new ServerSentEventSender(event, to));
     }
 
     @Override

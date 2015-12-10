@@ -35,6 +35,13 @@ public class RestServiceHandler implements HttpHandler {
                 result.add(path, new RestServiceHandler(resource))
         );
 
+        serviceDescriptor.forEachSSEChannel((path, channel) -> {
+            UndertowServerSentEventSender sendingHandler = new UndertowServerSentEventSender();
+            channel.setServerSetEventSender(sendingHandler);
+            sendingHandler.setClientManager(channel);
+            result.add(path, sendingHandler.getHandler());
+        });
+
         return result;
     }
 

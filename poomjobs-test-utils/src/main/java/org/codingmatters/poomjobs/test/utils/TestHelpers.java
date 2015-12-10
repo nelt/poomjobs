@@ -63,6 +63,6 @@ public class TestHelpers {
     }
 
     public interface Condition {
-        boolean is();
+        boolean is() throws Exception;
     }
 }
