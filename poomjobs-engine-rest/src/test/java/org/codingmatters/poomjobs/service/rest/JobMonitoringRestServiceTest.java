@@ -1,14 +1,15 @@
 package org.codingmatters.poomjobs.service.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.codingmatters.poomjobs.apis.Configuration;
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.jobs.Job;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
-import org.codingmatters.poomjobs.test.utils.TestHelpers;
+import org.codingmatters.poomjobs.service.rest.api.JsonJobCodec;
+import org.codingmatters.poomjobs.service.rest.api.RestJobStatusChange;
 import org.glassfish.jersey.media.sse.EventSource;
 import org.glassfish.jersey.media.sse.SseFeature;
 import org.junit.After;
@@ -20,17 +21,21 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
+import static javax.ws.rs.client.Entity.entity;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
 import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoringService;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 /**
  * Created by nel on 14/12/15.
@@ -45,6 +50,7 @@ public class JobMonitoringRestServiceTest {
     private JobMonitoringService monitoringDeleguate;
     private Client httpClient;
     private WebTarget serviceTarget;
+    private JsonJobCodec codec = new JsonJobCodec();
 
     @Before
     public void setUp() throws Exception {
@@ -70,46 +76,53 @@ public class JobMonitoringRestServiceTest {
     @Test
     public void testRegisterThenSubmitThenMonitorThenChange() throws Exception {
         AtomicString uuid = new AtomicString(null);
-        ObjectMapper mapper = new ObjectMapper();
+        AtomicObjectHolder<RestJobStatusChange> eventJob = new AtomicObjectHolder<>(null);
+
         EventSource eventSource = EventSource.target(this.serviceTarget.path("/monitoring")).build();
         eventSource.register(
                 event -> {
-                    log.debug("received event: {}", event);
                     String data = null;
                     try {
                         data = new String(event.getRawData(), "UTF-8");
-                        log.debug("event decoded data {}", data);
                     } catch (UnsupportedEncodingException e) {
-                        log.error("error reading event data", e);
-                        return;
+                        throw new AssertionError(e);
                     }
 
                     if("uuid".equals(event.getName())) {
                         uuid.set(data);
                     } else if("job-status-changed".equals(event.getName())) {
-
+                        try {
+                            eventJob.set(this.codec.readStatusChange(data));
+                        } catch (IOException e) {
+                            throw new AssertionError(e);
+                        }
                     } else {
-                        log.error("unexpected event: {}", event);
+                        fail("unexpected event: " + event);
                     }
                 }
         );
         eventSource.open();
 
-        TestHelpers.waitUntil(() -> uuid.get() != null, 1000);
+        waitUntil(() -> uuid.get() != null, 1000);
 
         log.debug("client registered with uuid : {}", uuid.get());
 
         Job job = this.queueDeleguate.submit(JobSubmission.job("test").submission());
 
         Response response = this.serviceTarget.path(String.format("/%s/monitor/status", job.getUuid().toString()))
-                .request().accept(MediaType.APPLICATION_JSON_TYPE)
-                .post(Entity.entity(
-                        String.format("{\"clientUuid\": \"%s\"}", uuid.get()),
-                        "application/json"));
+                .request()
+                .post(entity("{\"clientUuid\": \"" + uuid.get() + "\"}", "application/json"));
 
-        log.debug("STATUS:   {}", response.getStatusInfo());
+        assertThat(response.getStatusInfo(), is(Response.Status.OK));
+        assertThat(this.codec.readJobStatus(response.readEntity(String.class)), is(JobStatus.PENDING));
 
-        log.debug("ENTITY:   {}", response.getEntity().toString());
-        log.debug("RESPONSE: {}", response.readEntity(String.class));
+        this.queueDeleguate.start(job.getUuid());
+
+        waitUntil(() -> eventJob.get() != null, 1000);
+
+        assertThat(eventJob.get(), is(new RestJobStatusChange(
+                job.getStatus(),
+                this.queueDeleguate.get(job.getUuid())))
+        );
     }
 }

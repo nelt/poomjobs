@@ -8,6 +8,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.codingmatters.poomjobs.apis.jobs.Job;
 import org.codingmatters.poomjobs.apis.jobs.JobBuilders;
 import org.codingmatters.poomjobs.apis.jobs.JobList;
+import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.list.ListQuery;
 import org.codingmatters.poomjobs.apis.services.queue.JobSubmission;
 
@@ -82,5 +83,14 @@ public class JsonJobCodec {
 
     public ListQuery readListQuery(String json) throws IOException {
         return this.mapper.readValue(json, ListQuery.Builder.class).query();
+    }
+
+    public RestJobStatusChange readStatusChange(String json) throws IOException {
+        RestJobStatusChange.Builder result = this.mapper.readValue(json, RestJobStatusChange.Builder.class);
+        return result.build();
+    }
+
+    public JobStatus readJobStatus(String json) throws IOException {
+        return this.mapper.readValue(json, JobStatus.class);
     }
 }

@@ -13,7 +13,7 @@ import org.codingmatters.poomjobs.http.sse.ServerSentEventChannel;
 import org.codingmatters.poomjobs.http.sse.ServerSentEventClient;
 import org.codingmatters.poomjobs.service.rest.api.JsonCodecException;
 import org.codingmatters.poomjobs.service.rest.api.JsonJobCodec;
-import org.codingmatters.poomjobs.service.rest.api.JsonStatusChange;
+import org.codingmatters.poomjobs.service.rest.api.RestJobStatusChange;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +104,7 @@ public class JobMonitoringRestService {
         return (job, old) -> {
             try {
                 this.channel.send(
-                        data(this.codec.write(new JsonStatusChange(old, job)))
+                        data(this.codec.write(new RestJobStatusChange(old, job)))
                                 .withEvent("job-status-changed")
                                 .event(),
                         client);

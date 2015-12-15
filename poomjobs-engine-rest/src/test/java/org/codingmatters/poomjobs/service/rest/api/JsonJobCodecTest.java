@@ -58,4 +58,16 @@ public class JsonJobCodecTest {
         ListQuery query = ListQuery.limit(10).withOffset(12).status(JobStatus.CANCELED).query();
         assertThat(codec.readListQuery(codec.write(query)), is(query));
     }
+
+    @Test
+    public void testJobStatusChange() throws Exception {
+        RestJobStatusChange change = new RestJobStatusChange(JobStatus.RUNNING, JobBuilders.build("j").withStatus(JobStatus.DONE).job());
+        assertThat(codec.readStatusChange(codec.write(change)), is(change));
+    }
+
+    @Test
+    public void testJobStatus() throws Exception {
+        JobStatus status = JobStatus.PENDING;
+        assertThat(codec.readJobStatus(codec.write(status)), is(status));
+    }
 }
