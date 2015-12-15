@@ -28,20 +28,21 @@ public class RestServiceHandler implements HttpHandler {
         this.resource = resource;
     }
 
-    static public HttpHandler from(RestService serviceDescriptor) {
+    static public HttpHandler from(RestService ... serviceDescriptors) {
         PathTemplateHandler result = new PathTemplateHandler(exchange -> statusResponse(RestStatus.RESOURCE_NOT_FOUND, exchange));
 
-        serviceDescriptor.forEachResource((path, resource) ->
-                result.add(path, new RestServiceHandler(resource))
-        );
+        for (RestService serviceDescriptor : serviceDescriptors) {
+            serviceDescriptor.forEachResource((path, resource) ->
+                    result.add(path, new RestServiceHandler(resource))
+            );
 
-        serviceDescriptor.forEachSSEChannel((path, channel) -> {
-            UndertowServerSentEventSender sendingHandler = new UndertowServerSentEventSender();
-            channel.setServerSetEventSender(sendingHandler);
-            sendingHandler.setClientManager(channel);
-            result.add(path, sendingHandler.getHandler());
-        });
-
+            serviceDescriptor.forEachSSEChannel((path, channel) -> {
+                UndertowServerSentEventSender sendingHandler = new UndertowServerSentEventSender();
+                channel.setServerSetEventSender(sendingHandler);
+                sendingHandler.setClientManager(channel);
+                result.add(path, sendingHandler.getHandler());
+            });
+        }
         return result;
     }
 

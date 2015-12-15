@@ -8,39 +8,50 @@ import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.eclipse.jetty.client.HttpClient;
 
+import javax.ws.rs.client.Client;
+
 /**
  * Created by nel on 05/11/15.
  */
 public class RestEngineFactory implements ServiceFactory {
 
-    private static final String URL = "rest.url";
-    private static final String HTTP_CLIENT = "rest.http.client";
+    public static final String URL = "rest.url";
+    public static final String JETTY_CLIENT = "jetty.http.client";
+    public static final String JERSEY_CLIENT = "jersey.http.client";
 
     static private RestEngineFactory instance = new RestEngineFactory();
 
-    static public Configuration.Builder forURL(String url, HttpClient httpClient) {
-        return Configuration.defaults(instance).withOption(URL, url).withOption(HTTP_CLIENT, httpClient);
+    static public Configuration.Builder forURL(String url) {
+        return Configuration.defaults(instance).withOption(URL, url);
     }
 
     @Override
     public JobQueueService queueService(Configuration config) {
-        return this.createRestEngine(config);
+        return this.createJettyEngine(config);
     }
 
-    protected JettyRestEngine createRestEngine(Configuration config) {
-        HttpClient httpClient = (HttpClient) config.getOption(HTTP_CLIENT);
+    protected JettyRestEngine createJettyEngine(Configuration config) {
+        HttpClient httpClient = (HttpClient) config.getOption(JETTY_CLIENT);
         String url = (String) config.getOption(URL);
         return new JettyRestEngine(httpClient, url);
     }
 
+    protected JerseyRestEngine createJerseyEngine(Configuration config) {
+        Client httpClient = (Client) config.getOption(JERSEY_CLIENT);
+        String url = (String) config.getOption(URL);
+        return new JerseyRestEngine(httpClient, url);
+    }
+
+
+
     @Override
     public JobListService listService(Configuration config) {
-        return this.createRestEngine(config);
+        return this.createJettyEngine(config);
     }
 
     @Override
     public JobMonitoringService monitoringService(Configuration config) {
-        return null;
+        return this.createJerseyEngine(config);
     }
 
     @Override

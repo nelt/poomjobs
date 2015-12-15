@@ -41,8 +41,8 @@ public class PoomjobRestServices {
                 );
     }
 
-    static public RestService monitoringService(JobMonitoringService jobQueueService) {
-        JobMonitoringRestService monitoringService = new JobMonitoringRestService(jobQueueService);
+    static public RestService monitoringService(JobMonitoringService jobMonitoringService) {
+        JobMonitoringRestService monitoringService = new JobMonitoringRestService(jobMonitoringService);
 
         ServerSentEventChannel sseChannel = sseChannel()
                 .onRegister((client, channel) -> monitoringService.newClient(client, channel))

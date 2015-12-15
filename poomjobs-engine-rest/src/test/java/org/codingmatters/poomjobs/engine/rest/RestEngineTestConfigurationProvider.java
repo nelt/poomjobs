@@ -5,16 +5,21 @@ import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
 import org.codingmatters.poomjobs.apis.factory.ServiceFactoryException;
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.http.TestUndertowServer;
 import org.eclipse.jetty.client.HttpClient;
+import org.glassfish.jersey.media.sse.SseFeature;
 import org.junit.rules.ExternalResource;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
 import java.util.UUID;
 
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
+import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoringService;
 import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.queueService;
 
 /**
@@ -24,10 +29,12 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
 
     private final TestUndertowServer server;
 
-    private HttpClient httpClient;
+    private HttpClient jettyClient;
     private Configuration configuration;
     private JobQueueService queueDeleguate;
     private JobListService listDeleguate;
+    private Client jerseyClient;
+    private JobMonitoringService monitoringDeleguate;
 
     public RestEngineTestConfigurationProvider(TestUndertowServer server) {
         this.server = server;
@@ -35,21 +42,36 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
 
     @Override
     protected void before() throws Throwable {
-        this.httpClient = new HttpClient();
-        this.httpClient.start();
+        this.jettyClient = new HttpClient();
+        this.jettyClient.start();
+
+        this.jerseyClient = ClientBuilder.newBuilder()
+                .register(SseFeature.class)
+                .build();
 
         Configuration config = defaults(UUID.randomUUID().toString()).config();
         this.queueDeleguate = PoorMansJob.queue(config);
         this.listDeleguate = PoorMansJob.list(config);
-        this.server.setHandler(services().service("/queue", from(queueService(this.queueDeleguate, this.listDeleguate))));
+        this.monitoringDeleguate = PoorMansJob.monitor(config);
 
-        this.configuration = RestEngineFactory.forURL(this.server.url("/queue"), this.httpClient).config();
+        this.server.setHandler(services().service("/queue",
+                from(
+                        queueService(this.queueDeleguate, this.listDeleguate),
+                        monitoringService(this.monitoringDeleguate)
+                )
+        ));
+
+
+        this.configuration = RestEngineFactory.forURL(this.server.url("/queue"))
+                .withOption(RestEngineFactory.JETTY_CLIENT, this.jettyClient)
+                .withOption(RestEngineFactory.JERSEY_CLIENT, this.jerseyClient)
+                .config();
     }
 
     @Override
     protected void after() {
         try {
-            this.httpClient.stop();
+            this.jettyClient.stop();
         } catch (Exception e) {
 
         }

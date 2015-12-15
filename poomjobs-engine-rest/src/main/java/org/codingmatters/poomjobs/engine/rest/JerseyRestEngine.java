@@ -44,7 +44,7 @@ public class JerseyRestEngine implements JobMonitoringService {
         this.httpClient = httpClient;
         this.baseUrl = baseUrl;
 
-        this.eventSource = EventSource.target(this.httpClient.target(this.baseUrl).path("/monitoring")).build();
+        this.eventSource = EventSource.target(this.httpClient.target(this.baseUrl).path("/jobs/monitoring")).build();
         this.eventSource.register(this::registered, "uuid");
         this.eventSource.register(this::statusChanged, "job-status-changed");
     }
@@ -52,12 +52,14 @@ public class JerseyRestEngine implements JobMonitoringService {
     @Override
     public JobStatus monitorStatus(UUID uuid, StatusChangedMonitor monitor) throws ServiceException {
         this.manageEventSource();
-        Response response = this.httpClient.target(this.baseUrl).path(String.format("/%s/monitor/status", uuid.toString()))
+        Response response = this.httpClient.target(this.baseUrl).path(String.format("/jobs/%s/monitor/status", uuid.toString()))
                 .request()
-                .post(entity("{\"clientUuid\": \"" + this.clientUuid + "\"}", "application/json"));
-        if(response.getStatusInfo() != Response.Status.OK) {
+                .post(entity("{\"clientUuid\": \"" + this.clientUuid.get() + "\"}", "application/json"));
+        if(! response.getStatusInfo().equals(Response.Status.OK)) {
+            log.error("while registering monitor for job {}, response status was {}", uuid, response.getStatusInfo());
             throw new ServiceException("error registering change monitor for job " + uuid + "( clientUuid=" + this.clientUuid.get() + ")");
         }
+        this.monitors.put(uuid, monitor);
         String json = response.readEntity(String.class);
         try {
             return this.codec.readJobStatus(json);
@@ -91,9 +93,12 @@ public class JerseyRestEngine implements JobMonitoringService {
             log.error("error reading status change from event: " + event, e);
             return;
         }
+        log.debug("job change : " + change);
         StatusChangedMonitor monitor = this.monitors.get(change.getJob().getUuid());
         if(monitor != null) {
             monitor.statusChanged(change.getJob(), change.getOldStatus());
+        } else {
+            log.error("no monitor found for {}, registered monitors for {}", change, this.monitors.values());
         }
     }
 
