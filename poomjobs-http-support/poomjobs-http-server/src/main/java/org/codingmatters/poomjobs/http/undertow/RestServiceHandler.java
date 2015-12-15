@@ -79,7 +79,7 @@ public class RestServiceHandler implements HttpHandler {
     }
 
     static private UndertowRestIO buildRestIO(HttpServerExchange exchange) throws IOException {
-        UndertowRestIO io = null;
+        UndertowRestIO io;
         try {
             io = new UndertowRestIO(exchange);
         } catch (IOException e) {

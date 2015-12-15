@@ -44,8 +44,8 @@ public class UndertowServerSentEventSenderTest {
 
         this.sseHandler = new UndertowServerSentEventSender();
         this.sseChannel = ServerSentEventChannel.create()
-                .onRegister(client -> this.clients.add(client))
-                .onUnregister(client -> this.clients.remove(client))
+                .onRegister((client, channel) -> this.clients.add(client))
+                .onUnregister((client, channel) -> this.clients.remove(client))
                 .channel();
 
         this.sseChannel.setServerSetEventSender(this.sseHandler);

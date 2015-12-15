@@ -6,19 +6,15 @@ import io.undertow.util.HttpString;
 import org.codingmatters.poomjobs.http.RestIO;
 import org.codingmatters.poomjobs.http.RestStatus;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by nel on 12/11/15.
  */
-public class UndertowRestIO implements RestIO {
+public class UndertowRestIO extends UndertowRestInput implements RestIO {
+
     private RestStatus status = RestStatus.OK;
     private String contentType = "text/plain";
     private String encoding = "UTF-8";
@@ -26,26 +22,8 @@ public class UndertowRestIO implements RestIO {
     private final HashMap<String, String> headers = new HashMap<>();
 
 
-    private Map<String, List<String>> parameters;
-    private Map<String, List<String>> pathParameters = new HashMap<>();
-    private byte[] requestBytes;
-
     public UndertowRestIO(HttpServerExchange exchange) throws IOException {
-        this.parameters = new HashMap<>();
-        exchange.getQueryParameters().forEach((key, values) -> {
-            this.parameters.put(key, new ArrayList<>(values));
-        });
-        exchange.getPathParameters().forEach((key, values) -> {
-            this.pathParameters.put(key, new ArrayList<>(values));
-        });
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        try (InputStream in = exchange.getInputStream()) {
-            byte[] buffer = new byte[1024];
-            for (int read = in.read(buffer); read != -1; read = in.read(buffer)) {
-                out.write(buffer, 0, read);
-            }
-        }
-        this.requestBytes = out.toByteArray();
+        super(exchange.getQueryParameters(), exchange.getPathParameters(), exchange.getInputStream());
     }
 
     @Override
@@ -71,30 +49,10 @@ public class UndertowRestIO implements RestIO {
         this.content = content;
         return this;
     }
-
-    public UndertowRestIO withPathParameters(Map<String, List<String>> pathParameters) {
-        this.pathParameters.putAll(pathParameters);
-        return this;
-    }
-
     @Override
-    public Map<String, List<String>> parameters() {
-        return this.parameters;
-    }
-
-    @Override
-    public Map<String, List<String>> pathParameters() {
-        return this.pathParameters;
-    }
-
-    @Override
-    public byte[] requestContent() {
-        return this.requestBytes;
-    }
-
-    @Override
-    public void header(String name, String value) {
+    public RestIO header(String name, String value) {
         this.headers.put(name, value);
+        return this;
     }
 
     public void send(HttpServerExchange exchange) {
@@ -106,7 +64,7 @@ public class UndertowRestIO implements RestIO {
             this.contentType("text/plain").content(this.status.getMessage());
         }
 
-        String contentTypeLine = String.format("%s; %s", this.contentType, this.encoding);
+        String contentTypeLine = String.format("%s; charset=%s", this.contentType, this.encoding);
         exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, contentTypeLine);
         if (content != null) {
             exchange.getResponseSender().send(content, Charset.forName(this.encoding));

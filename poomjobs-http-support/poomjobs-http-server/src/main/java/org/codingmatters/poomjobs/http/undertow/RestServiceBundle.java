@@ -8,6 +8,8 @@ import org.codingmatters.poomjobs.http.RestStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.statusResponse;
+
 /**
  * Created by nel on 13/11/15.
  */
@@ -18,7 +20,7 @@ public class RestServiceBundle implements HttpHandler {
         return new RestServiceBundle();
     }
 
-    private final PathHandler deleguate = Handlers.path(exchange -> RestServiceHandler.statusResponse(RestStatus.SERVICE_NOT_FOUND, exchange));
+    private final PathHandler deleguate = Handlers.path(exchange -> statusResponse(RestStatus.SERVICE_NOT_FOUND, exchange));
 
     private RestServiceBundle() {}
 

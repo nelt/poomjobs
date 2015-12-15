@@ -17,6 +17,11 @@ public class RestException extends Exception {
         this.status = status;
     }
 
+    public RestException(RestStatus status, String content) {
+        this.content = content;
+        this.status = status;
+    }
+
     public RestStatus getStatus() {
         return status;
     }

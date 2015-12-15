@@ -1,10 +1,13 @@
 package org.codingmatters.poomjobs.service.rest;
 
 import org.codingmatters.poomjobs.apis.services.list.JobListService;
+import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
 import org.codingmatters.poomjobs.http.RestService;
+import org.codingmatters.poomjobs.http.sse.ServerSentEventChannel;
 
 import static org.codingmatters.poomjobs.http.RestService.resource;
+import static org.codingmatters.poomjobs.http.RestService.sseChannel;
 
 /**
  * Created by nel on 05/11/15.
@@ -36,5 +39,23 @@ public class PoomjobRestServices {
                 .resource("/jobs/list", resource()
                         .POST(io -> listRestService.list(io))
                 );
+    }
+
+    static public RestService monitoringService(JobMonitoringService jobQueueService) {
+        JobMonitoringRestService monitoringService = new JobMonitoringRestService(jobQueueService);
+
+        ServerSentEventChannel sseChannel = sseChannel()
+                .onRegister((client, channel) -> monitoringService.newClient(client, channel))
+                .onUnregister((client, channel) -> monitoringService.clientGone(client, channel))
+                .channel();
+
+        monitoringService.setChannel(sseChannel);
+
+        return RestService.service()
+                .resource("/jobs/{uuid}/monitor/status", resource()
+                        .POST(io -> monitoringService.monitoringRequest(io))
+                )
+                .serverSentEventChannel("/jobs/monitoring", sseChannel)
+                ;
     }
 }

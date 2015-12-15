@@ -53,7 +53,7 @@ public class RestServiceHandlerSSETest {
         AtomicBoolean registered = new AtomicBoolean(false);
         List<String> events = Collections.synchronizedList(new LinkedList<>());
         ServerSentEventChannel channel = sseChannel()
-                .onRegister(client -> registered.set(true))
+                .onRegister((client, eventChannel) -> registered.set(true))
                 .channel();
 
         this.server.setHandler(services().service("/service", from(RestService.service()
@@ -77,7 +77,7 @@ public class RestServiceHandlerSSETest {
         AtomicBoolean registered = new AtomicBoolean(false);
 
         ServerSentEventChannel channel = sseChannel()
-                .onRegister(client -> registered.set(true))
+                .onRegister((client, eventChannel) -> registered.set(true))
                 .channel();
         this.server.setHandler(services().service("/service", from(RestService.service()
                 .serverSentEventChannel(
@@ -97,7 +97,7 @@ public class RestServiceHandlerSSETest {
     public void testUnregister() throws Exception {
         AtomicBoolean unregistered = new AtomicBoolean(false);
         ServerSentEventChannel channel = sseChannel()
-                .onUnregister(client -> unregistered.set(true))
+                .onUnregister((client, eventChannel) -> unregistered.set(true))
                 .channel();
 
         this.server.setHandler(services().service("/service", from(RestService.service()

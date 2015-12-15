@@ -16,8 +16,8 @@ public class ServerSentEventChannel implements ServerSentEventClientManager {
 
     static public class Builder {
 
-        private ClientRegisterer clientRegisterer = client -> {};
-        private ClientUnregisterer clientUnregisterer = client -> {};
+        private ClientRegisterer clientRegisterer = (client, channel) -> {};
+        private ClientUnregisterer clientUnregisterer = (client, channel) -> {};
 
         public Builder onRegister(ClientRegisterer clientRegisterer) {
             this.clientRegisterer = clientRegisterer;
@@ -56,19 +56,19 @@ public class ServerSentEventChannel implements ServerSentEventClientManager {
 
     @Override
     public void clientRegistered(ServerSentEventClient client) {
-        this.clientRegisterer.clientRegistered(client);
+        this.clientRegisterer.clientRegistered(client, this);
     }
 
     @Override
     public void clientUnregistered(ServerSentEventClient client) {
-        this.clientUnregisterer.clientUnregistered(client);
+        this.clientUnregisterer.clientUnregistered(client, this);
     }
 
     public interface ClientRegisterer {
-        void clientRegistered(ServerSentEventClient client);
+        void clientRegistered(ServerSentEventClient client, ServerSentEventChannel channel);
     }
 
     public interface ClientUnregisterer {
-        void clientUnregistered(ServerSentEventClient client);
+        void clientUnregistered(ServerSentEventClient client, ServerSentEventChannel channel);
     }
 }

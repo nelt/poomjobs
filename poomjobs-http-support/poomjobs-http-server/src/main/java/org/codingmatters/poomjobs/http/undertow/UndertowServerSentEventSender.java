@@ -43,14 +43,18 @@ public class UndertowServerSentEventSender implements ServerSetEventSender {
     }
 
     private void connected(ServerSentEventConnection connection, String lastEventId) {
-        ServerSentEventClient client = new UndertowServerSentEventClient(connection);
-        connection.addCloseTask(serverSentEventConnection -> this.clientConnections.remove(client));
+        try {
+            ServerSentEventClient client = new UndertowServerSentEventClient(connection);
+            connection.addCloseTask(serverSentEventConnection -> this.clientConnections.remove(client));
 
-        this.clientConnections.put(client, connection);
-        this.clientManager.clientRegistered(client);
+            this.clientConnections.put(client, connection);
+            this.clientManager.clientRegistered(client);
 
-        connection.addCloseTask(connectionChannelListener -> this.unregister(client, connectionChannelListener));
-        log.debug("registered connection {} for client {}", connection, client);
+            connection.addCloseTask(connectionChannelListener -> this.unregister(client, connectionChannelListener));
+            log.debug("registered connection {} for client {}", connection, client);
+        } catch(IOException e) {
+            log.error("error creating undertow server sent event client", e);
+        }
     }
 
     private void unregister(ServerSentEventClient client, ServerSentEventConnection connection) {
