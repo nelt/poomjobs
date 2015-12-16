@@ -55,9 +55,9 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
 
         this.server.setHandler(services().service("/queue",
                 from(
-                        queueService(this.queueDeleguate),
-                        listService(this.listDeleguate),
-                        monitoringService(this.monitoringDeleguate)
+                        queue(this.queueDeleguate),
+                        list(this.listDeleguate),
+                        monitoring(this.monitoringDeleguate)
                 )
         ));
 

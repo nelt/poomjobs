@@ -31,7 +31,7 @@ import static javax.ws.rs.client.Entity.entity;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
-import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoringService;
+import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoring;
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
@@ -63,7 +63,7 @@ public class JobMonitoringRestServiceTest {
                 .build();
 
         this.server.setHandler(
-                services().service("/queue", from(monitoringService(this.monitoringDeleguate)))
+                services().service("/queue", from(monitoring(this.monitoringDeleguate)))
         );
 
         this.serviceTarget = this.httpClient.target(this.server.url("/queue/jobs"));

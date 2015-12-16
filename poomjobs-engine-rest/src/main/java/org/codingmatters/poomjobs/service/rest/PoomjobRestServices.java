@@ -13,7 +13,7 @@ import static org.codingmatters.poomjobs.http.RestService.sseChannel;
  * Created by nel on 05/11/15.
  */
 public class PoomjobRestServices {
-    static public RestService queueService(JobQueueService jobQueueService) {
+    static public RestService queue(JobQueueService jobQueueService) {
         JobQueueRestService queueRestService = new JobQueueRestService(jobQueueService);
 
         return RestService.service()
@@ -37,7 +37,7 @@ public class PoomjobRestServices {
                 );
     }
 
-    static public RestService listService(JobListService jobListService) {
+    static public RestService list(JobListService jobListService) {
         JobListRestService listRestService = new JobListRestService(jobListService);
 
         return RestService.service()
@@ -46,7 +46,7 @@ public class PoomjobRestServices {
                 );
     }
 
-    static public RestService monitoringService(JobMonitoringService jobMonitoringService) {
+    static public RestService monitoring(JobMonitoringService jobMonitoringService) {
         JobMonitoringRestService monitoringService = new JobMonitoringRestService(jobMonitoringService);
 
         ServerSentEventChannel sseChannel = sseChannel()
