@@ -19,8 +19,7 @@ import java.util.UUID;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
-import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoringService;
-import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.queueService;
+import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.*;
 
 /**
  * Created by nel on 09/11/15.
@@ -56,7 +55,8 @@ public class RestEngineTestConfigurationProvider extends ExternalResource implem
 
         this.server.setHandler(services().service("/queue",
                 from(
-                        queueService(this.queueDeleguate, this.listDeleguate),
+                        queueService(this.queueDeleguate),
+                        listService(this.listDeleguate),
                         monitoringService(this.monitoringDeleguate)
                 )
         ));

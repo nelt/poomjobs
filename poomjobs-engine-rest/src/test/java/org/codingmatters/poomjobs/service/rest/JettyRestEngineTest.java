@@ -26,6 +26,7 @@ import static org.codingmatters.poomjobs.apis.jobs.JobBuilders.from;
 import static org.codingmatters.poomjobs.engine.inmemory.InMemoryServiceFactory.defaults;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
+import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.listService;
 import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.queueService;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -54,7 +55,10 @@ public class JettyRestEngineTest {
         this.httpClient = new HttpClient();
         this.httpClient.start();
         this.server.setHandler(
-                services().service("/queue", from(queueService(this.queueDeleguate, this.listDeleguate)))
+                services().service("/queue", from(
+                        queueService(this.queueDeleguate),
+                        listService(this.listDeleguate)
+                ))
         );
     }
 
