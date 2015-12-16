@@ -121,7 +121,7 @@ public class SSETest {
             assertThat(this.openConnectionCount.get(), is(1));
             Thread.sleep(10);
         }
-        assertBefore(() -> (this.openConnectionCount.get() == 0), 100);
+        assertBefore(() -> this.openConnectionCount.get(), is(0), 100);
 
     }
 

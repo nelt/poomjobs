@@ -34,6 +34,7 @@ import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
 import static org.codingmatters.poomjobs.service.rest.PoomjobRestServices.monitoringService;
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
@@ -103,7 +104,7 @@ public class JobMonitoringRestServiceTest {
         );
         eventSource.open();
 
-        waitUntil(() -> uuid.get() != null, 1000);
+        waitUntil(() -> uuid.get(), is(notNullValue()), 1000);
 
         log.debug("client registered with uuid : {}", uuid.get());
 
@@ -118,7 +119,7 @@ public class JobMonitoringRestServiceTest {
 
         this.queueDeleguate.start(job.getUuid());
 
-        waitUntil(() -> eventJob.get() != null, 1000);
+        waitUntil(() -> eventJob.get(), is(notNullValue()), 1000);
 
         assertThat(eventJob.get(), is(new RestJobStatusChange(
                 job.getStatus(),

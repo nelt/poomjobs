@@ -16,8 +16,7 @@ import java.util.UUID;
 import static org.codingmatters.poomjobs.apis.jobs.JobStatus.DONE;
 import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
 import static org.codingmatters.poomjobs.apis.services.queue.JobSubmission.job;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.list;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -80,8 +79,7 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         for(int i = 0 ; i < 20 ; i++) {
             this.queue.submit(job("job").submission()).getUuid();
         }
-        waitUntil(() -> this.executed.size() == 20, 10 * 1000L);
-        assertThat(this.executed, hasSize(20));
+        assertBefore(() -> this.executed.size(), is(20), 10 * 1000L);
     }
 
     @Test
@@ -89,7 +87,7 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         this.dispatcher.register(this.jobRunner("runner"), "job1");
 
         UUID uuid = this.queue.submit(job("job1").submission()).getUuid();
-        waitUntil(() -> this.executed.size() == 1, 500L);
+        waitUntil(() -> this.executed.size(), is(1), 500L);
         assertThat(this.queue.get(uuid).getStatus(), is(DONE));
 
         uuid = this.queue.submit(job("job3").submission()).getUuid();
@@ -103,11 +101,11 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         this.dispatcher.register(this.jobRunner("runner2"), "job");
 
         this.queue.submit(job("job").submission());
-        waitUntil(() -> this.executed.size() == 1, 500L);
+        waitUntil(() -> this.executed.size(), is(1), 500L);
         assertThat(this.executed.get(0), anyOf(startsWith("runner1/"), startsWith("runner2/")));
 
         this.queue.submit(job("job").submission());
-        waitUntil(() -> this.executed.size() == 2, 500L);
+        waitUntil(() -> this.executed.size(), is(2), 500L);
         assertThat(this.executed.get(1), anyOf(startsWith("runner1/"), startsWith("runner2/")));
         assertThat(this.executed.get(1), not(startsWith(this.executed.get(0).substring(0, "runnerX/".length()))));
     }
@@ -123,7 +121,7 @@ public abstract class JobDispatcherServiceAcceptanceTest {
         this.queue.submit(job("job").submission());
         this.queue.submit(job("job").submission());
 
-        waitUntil(() -> this.executed.size() == 5, 1000L);
+        waitUntil(() -> this.executed.size(), is(5), 1000L);
 
         assertThat(this.executedByRunner("runner1"), hasSize(1));
         assertThat(this.executedByRunner("runner2"), hasSize(4));

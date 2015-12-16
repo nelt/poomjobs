@@ -7,8 +7,7 @@ import org.junit.Test;
 import java.lang.ref.WeakReference;
 
 import static java.lang.Thread.State.TERMINATED;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.namedThreadState;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -40,8 +39,7 @@ public class InMemoryDispatcherTest {
         String threadName = "in-memory-dispatcher@" + dispatcher.hashCode();
         dispatcher.start();
 
-        waitUntil(() -> namedThreadState(threadName) != TERMINATED, 10 * 1000L);
-        assertThat(namedThreadState(threadName), is(not(TERMINATED)));
+        assertBefore(() -> namedThreadState(threadName), is(not(TERMINATED)), 10 * 1000L);
 
         dispatcher = null;
 
@@ -53,8 +51,7 @@ public class InMemoryDispatcherTest {
 
         assertThat("dispatcher not garbage collected", dispatcherRef.get(), is(nullValue()));
 
-        waitUntil(() -> namedThreadState(threadName).equals(TERMINATED), 10 * 1000L);
-        assertThat("dispatcher thread not stopped", namedThreadState(threadName), is(TERMINATED));
+        assertBefore("dispatcher thread not stopped", () -> namedThreadState(threadName), is(TERMINATED), 10 * 1000L);
     }
 
     @Test

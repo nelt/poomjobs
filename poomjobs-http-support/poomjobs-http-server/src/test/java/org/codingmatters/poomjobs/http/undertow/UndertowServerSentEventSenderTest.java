@@ -22,6 +22,7 @@ import java.util.UUID;
 
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertBefore;
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Created by nel on 12/11/15.
@@ -70,13 +71,13 @@ public class UndertowServerSentEventSenderTest {
     public void testRegister() throws Exception {
         this.httpClient.target("http://localhost:9999/").request().get();
 
-        assertBefore(() -> this.clients.size() == 1, 1000);
+        assertBefore(() -> this.clients.size(), is(1), 1000);
     }
 
     @Test
     public void testSend() throws Exception {
         EventInput eventInput = this.httpClient.target("http://localhost:9999/").request().get(EventInput.class);
-        waitUntil(() -> this.clients.size() == 1, 1000);
+        waitUntil(() -> this.clients.size(), is(1), 1000);
 
         List<InboundEvent> events = Collections.synchronizedList(new LinkedList<>());
 

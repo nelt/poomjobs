@@ -7,8 +7,7 @@ import java.lang.ref.WeakReference;
 
 import static java.lang.Thread.State.RUNNABLE;
 import static java.lang.Thread.State.TERMINATED;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.namedThreadState;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
@@ -23,8 +22,7 @@ public class InMemoryJobStoreTest {
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
 
-        waitUntil(() -> namedThreadState(threadName) != TERMINATED, 10 * 1000L);
-        assertThat(namedThreadState(threadName), is(not(TERMINATED)));
+        assertBefore(() -> namedThreadState(threadName), is(not(TERMINATED)), 10 * 1000L);
 
         store.stop();
         assertThat("cleaner thread not stopped", namedThreadState(threadName), is(TERMINATED));
@@ -38,8 +36,7 @@ public class InMemoryJobStoreTest {
         String threadName = "in-memory-job-store-cleaner@" + store.hashCode();
         store.start();
 
-        waitUntil(() -> namedThreadState(threadName) != TERMINATED, 10 * 1000L);
-        assertThat(namedThreadState(threadName), is(not(TERMINATED)));
+        assertBefore(() -> namedThreadState(threadName), is(not(TERMINATED)), 10 * 1000L);
 
         store = null;
 
@@ -51,8 +48,8 @@ public class InMemoryJobStoreTest {
 
         assertThat("store not garbage collected", storeRef.get(), is(nullValue()));
 
-        waitUntil(() -> namedThreadState(threadName).equals(TERMINATED), 10 * 1000L);
-        assertThat("cleaner thread not stopped", namedThreadState(threadName), isOneOf(TERMINATED, RUNNABLE));
+        assertBefore("cleaner thread not stopped",
+                () -> namedThreadState(threadName), isOneOf(TERMINATED, RUNNABLE), 10 * 1000L);
     }
 
     @Test

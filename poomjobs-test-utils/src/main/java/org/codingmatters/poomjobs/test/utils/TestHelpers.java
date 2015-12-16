@@ -44,6 +44,10 @@ public class TestHelpers {
         }
     }
 
+    public static <T> void waitUntil(Value<T> value, Matcher<T> matcher, long timeout) throws Exception {
+        waitUntil(() -> matcher.matches(value.get()), timeout);
+    }
+
     public static void waitUntil(Condition condition, long timeout) throws Exception {
         long delay = 10L;
         long waited = 0L;
@@ -54,8 +58,16 @@ public class TestHelpers {
     }
 
     public static <T> void assertBefore(Value<T> value, Matcher<T> matcher, long timeout) throws Exception {
+        assertBefore(null, value, matcher, timeout);
+    }
+
+    public static <T> void assertBefore(String reason, Value<T> value, Matcher<T> matcher, long timeout) throws Exception {
         waitUntil(() -> matcher.matches(value.get()), timeout);
-        assertThat(value.get(), matcher);
+        if(reason != null) {
+            assertThat(reason, value.get(), matcher);
+        } else {
+            assertThat(value.get(), matcher);
+        }
     }
 
     public static void assertBefore(Condition condition, long timeout) throws Exception {
