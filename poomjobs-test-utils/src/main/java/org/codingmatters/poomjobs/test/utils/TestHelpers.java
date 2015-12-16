@@ -71,8 +71,16 @@ public class TestHelpers {
     }
 
     public static void assertBefore(Condition condition, long timeout) throws Exception {
+        assertBefore(null, condition, timeout);
+    }
+
+    public static void assertBefore(String reason, Condition condition, long timeout) throws Exception {
         waitUntil(condition, timeout);
-        assertThat(condition.is(), is(true));
+        if(reason != null) {
+            assertThat(reason, condition.is(), is(true));
+        } else {
+            assertThat(condition.is(), is(true));
+        }
     }
 
     public static <T> T[] range(T[] all, int from, int to) {
