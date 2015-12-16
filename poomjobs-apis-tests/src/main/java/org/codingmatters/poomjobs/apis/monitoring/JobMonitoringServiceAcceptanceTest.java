@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.apis.monitoring;
 
 import org.codingmatters.poomjobs.apis.PoorMansJob;
 import org.codingmatters.poomjobs.apis.TestConfigurationProvider;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
 import org.codingmatters.poomjobs.apis.services.queue.JobQueueService;
@@ -45,7 +46,12 @@ public abstract class JobMonitoringServiceAcceptanceTest {
         assertThat(this.monitoring.monitorStatus(this.jobUuid, (job, old) -> {}), is(PENDING));
     }
 
-    @Test
+    @Test(expected = NoSuchJobException.class)
+    public void testMonitorUnexistentJob() throws Exception {
+        this.monitoring.monitorStatus(UUID.randomUUID(), (job, old) -> {});
+    }
+
+        @Test
     public void testMonitor() throws Exception {
         final HashMap<String, JobStatus> change = new HashMap<>();
 
@@ -62,4 +68,6 @@ public abstract class JobMonitoringServiceAcceptanceTest {
         assertBefore(() -> change.get("from"), is(PENDING), 1000);
         assertBefore(() -> change.get("to"), is(RUNNING), 1000);
     }
+
+
 }

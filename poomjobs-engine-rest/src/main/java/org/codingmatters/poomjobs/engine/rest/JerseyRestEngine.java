@@ -1,5 +1,6 @@
 package org.codingmatters.poomjobs.engine.rest;
 
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
@@ -55,6 +56,9 @@ public class JerseyRestEngine implements JobMonitoringService {
         Response response = this.httpClient.target(this.baseUrl).path(String.format("/jobs/%s/monitor/status", uuid.toString()))
                 .request()
                 .post(entity("{\"clientUuid\": \"" + this.clientUuid.get() + "\"}", "application/json"));
+        if(response.getStatusInfo().equals(Response.Status.NOT_FOUND)) {
+            throw new NoSuchJobException(response.readEntity(String.class));
+        }
         if(! response.getStatusInfo().equals(Response.Status.OK)) {
             log.error("while registering monitor for job {}, response status was {}", uuid, response.getStatusInfo());
             throw new ServiceException("error registering change monitor for job " + uuid + "( clientUuid=" + this.clientUuid.get() + ")");

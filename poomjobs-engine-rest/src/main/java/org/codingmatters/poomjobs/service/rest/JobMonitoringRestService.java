@@ -2,6 +2,7 @@ package org.codingmatters.poomjobs.service.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.codingmatters.poomjobs.apis.exception.NoSuchJobException;
 import org.codingmatters.poomjobs.apis.exception.ServiceException;
 import org.codingmatters.poomjobs.apis.jobs.JobStatus;
 import org.codingmatters.poomjobs.apis.services.monitoring.JobMonitoringService;
@@ -61,6 +62,8 @@ public class JobMonitoringRestService {
             io.status(RestStatus.OK)
                     .contentType("application/json")
                     .content(json);
+        } catch (NoSuchJobException e) {
+            throw new RestException(RestStatus.RESOURCE_NOT_FOUND, e.getMessage(), e);
         } catch (ServiceException | JsonProcessingException e) {
             throw new RestException(RestStatus.INTERNAL_ERROR, e.getMessage(), e);
         }
