@@ -22,7 +22,7 @@ import static org.codingmatters.poomjobs.http.RestService.sseChannel;
 import static org.codingmatters.poomjobs.http.sse.ServerSentEvent.data;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceBundle.services;
 import static org.codingmatters.poomjobs.http.undertow.RestServiceHandler.from;
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertOccuresBefore;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertBefore;
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 
 /**
@@ -69,7 +69,7 @@ public class RestServiceHandlerSSETest {
         waitUntil(() -> registered.get(), 1000);
 
         channel.send(data("yop").event()).get();
-        assertOccuresBefore(() -> events.contains("yop"), 1000);
+        assertBefore(() -> events.contains("yop"), 1000);
     }
 
     @Test
@@ -90,7 +90,7 @@ public class RestServiceHandlerSSETest {
         EventSource eventSource = EventSource.target(target).build();
         eventSource.open();
 
-        assertOccuresBefore(() -> registered.get(), 1000);
+        assertBefore(() -> registered.get(), 1000);
     }
 
     @Test(timeout = 5000)
@@ -110,7 +110,7 @@ public class RestServiceHandlerSSETest {
         this.httpClient.close();
         while(channel.send(data("closed ?").event()).get().getFailureCount() != 1) {Thread.sleep(10);}
 
-        assertOccuresBefore(() -> unregistered.get(), 100);
+        assertBefore(() -> unregistered.get(), 100);
     }
 
 }

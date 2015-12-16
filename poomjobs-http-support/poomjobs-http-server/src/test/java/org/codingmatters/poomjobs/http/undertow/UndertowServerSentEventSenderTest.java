@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertOccuresBefore;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertBefore;
 import static org.codingmatters.poomjobs.test.utils.TestHelpers.waitUntil;
 
 /**
@@ -70,7 +70,7 @@ public class UndertowServerSentEventSenderTest {
     public void testRegister() throws Exception {
         this.httpClient.target("http://localhost:9999/").request().get();
 
-        assertOccuresBefore(() -> this.clients.size() == 1, 1000);
+        assertBefore(() -> this.clients.size() == 1, 1000);
     }
 
     @Test
@@ -97,6 +97,6 @@ public class UndertowServerSentEventSenderTest {
                 this.clients.get(0)
         );
 
-        assertOccuresBefore(() -> events.size() == 1, 1000);
+        assertBefore(() -> events.size() == 1, 1000);
     }
 }

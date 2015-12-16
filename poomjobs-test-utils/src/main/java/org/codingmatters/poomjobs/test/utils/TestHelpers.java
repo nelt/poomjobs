@@ -1,5 +1,7 @@
 package org.codingmatters.poomjobs.test.utils;
 
+import org.hamcrest.Matcher;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
@@ -51,12 +53,15 @@ public class TestHelpers {
         }
     }
 
-    public static void assertOccuresBefore(Condition condition, long timeout) throws Exception {
+    public static <T> void assertBefore(Value<T> value, Matcher<T> matcher, long timeout) throws Exception {
+        waitUntil(() -> matcher.matches(value.get()), timeout);
+        assertThat(value.get(), matcher);
+    }
+
+    public static void assertBefore(Condition condition, long timeout) throws Exception {
         waitUntil(condition, timeout);
         assertThat(condition.is(), is(true));
     }
-
-
 
     public static <T> T[] range(T[] all, int from, int to) {
         return Arrays.copyOfRange(all, from, to);
@@ -64,5 +69,9 @@ public class TestHelpers {
 
     public interface Condition {
         boolean is() throws Exception;
+    }
+
+    public interface Value<T> {
+        T get();
     }
 }

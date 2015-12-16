@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertOccuresBefore;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertBefore;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -121,7 +121,7 @@ public class SSETest {
             assertThat(this.openConnectionCount.get(), is(1));
             Thread.sleep(10);
         }
-        assertOccuresBefore(() -> (this.openConnectionCount.get() == 0), 100);
+        assertBefore(() -> (this.openConnectionCount.get() == 0), 100);
 
     }
 

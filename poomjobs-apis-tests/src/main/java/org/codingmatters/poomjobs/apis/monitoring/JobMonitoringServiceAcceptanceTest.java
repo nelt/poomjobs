@@ -12,6 +12,9 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.UUID;
 
+import static org.codingmatters.poomjobs.apis.jobs.JobStatus.PENDING;
+import static org.codingmatters.poomjobs.apis.jobs.JobStatus.RUNNING;
+import static org.codingmatters.poomjobs.test.utils.TestHelpers.assertBefore;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -39,7 +42,7 @@ public abstract class JobMonitoringServiceAcceptanceTest {
 
     @Test
     public void testInitialStatus() throws Exception {
-        assertThat(this.monitoring.monitorStatus(this.jobUuid, (job, old) -> {}), is(JobStatus.PENDING));
+        assertThat(this.monitoring.monitorStatus(this.jobUuid, (job, old) -> {}), is(PENDING));
     }
 
     @Test
@@ -55,7 +58,8 @@ public abstract class JobMonitoringServiceAcceptanceTest {
         assertThat(change.get("to"), is(nullValue()));
 
         this.queue.start(this.jobUuid);
-        assertThat(change.get("from"), is(JobStatus.PENDING));
-        assertThat(change.get("to"), is(JobStatus.RUNNING));
+
+        assertBefore(() -> change.get("from"), is(PENDING), 1000);
+        assertBefore(() -> change.get("to"), is(RUNNING), 1000);
     }
 }
